@@ -4,7 +4,7 @@ import React from "react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Users, MoreHorizontal, Eye, Edit, Trash, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

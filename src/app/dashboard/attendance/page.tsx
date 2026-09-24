@@ -3,14 +3,12 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from '@/lib/dateUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +25,7 @@ import { HolidaysTab } from "./components/HolidaysTab";
 import { ShiftsTab } from "./components/ShiftsTab";
 import { AnalyticsTab } from "./components/AnalyticsTab";
 import { 
-  UserCheck, UserX, Clock, AlarmClock, Plus, 
+  UserCheck, UserX, Clock, AlarmClock, Plus, RefreshCw,
   CalendarDays, Download, ChevronRight, ChevronDown, MoreHorizontal, 
   AlertCircle, FileText, CheckCircle2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, ArrowUpDown, UploadCloud, Loader2
 } from "lucide-react";

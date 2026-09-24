@@ -1,4 +1,5 @@
-import { Metadata } from 'next';
+"use client";
+
 import { PayrollManagementClient } from '../payslips/components/PayrollManagementClient';
 
 import React, { useState, useMemo } from "react";
