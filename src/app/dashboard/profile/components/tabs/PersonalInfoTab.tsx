@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatDate } from '@/lib/dateUtils';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
@@ -65,7 +66,7 @@ export default function PersonalInfoTab({ data, refetch }: { data: any, refetch:
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium text-muted-foreground">{t("Date of Birth")}</label>
-          {isEditing ? <Input type="date" value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} /> : <p className="font-medium">{formData.dob ? new Date(formData.dob).toLocaleDateString() : "—"}</p>}
+          {isEditing ? <Input type="date" value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} /> : <p className="font-medium">{formData.dob ? formatDate(formData.dob) : "—"}</p>}
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium text-muted-foreground">{t("Blood Group")}</label>

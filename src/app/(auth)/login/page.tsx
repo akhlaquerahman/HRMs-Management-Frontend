@@ -9,6 +9,7 @@ import api from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -24,15 +25,17 @@ import {
   TrendingUp,
   Megaphone,
   Bot,
-  AlertCircle
+  AlertCircle,
+  RotateCcw,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required.").email("Please enter a valid work email address."),
-  password: z.string().min(1, "Password is required."),
+  email: z.string().min(5, "Email is required.").max(100, "Email cannot exceed 100 characters.").email("Please enter a valid email address containing an '@' and a domain (e.g., name@company.com)."),
+  password: z.string().min(8, "Password must be at least 8 characters.").max(72, "Password cannot exceed 72 characters."),
   rememberMe: z.boolean().optional(),
 });
 
@@ -54,11 +57,12 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'PASSWORD' | 'OTP'>('PASSWORD');
+  const { theme, setTheme } = useTheme();
   
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+  const [otpTimer, setOtpTimer] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Use onBlur for email validation to prevent aggressive inline errors while typing
@@ -93,22 +97,37 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (otpSent && otpTimer > 0) {
+      interval = setInterval(() => {
+        setOtpTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimer, otpSent]);
+
+  const formatErrorMsg = (msg: string) => {
+    if (!msg) return '';
+    return msg.endsWith('.') ? msg : `${msg}.`;
+  };
+
   const mutation = useMutation({
     mutationFn: (data: LoginFormData) => api.post('/auth/login', { email: data.email, password: data.password }),
     onSuccess: (response) => {
       const { token, user } = response.data.data;
       setAuth(user, token);
       router.push('/dashboard');
-      setIsLoading(false);
+      // Do not set isLoading to false here, keep it loading until redirect completes
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Server error. Please try again later.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Server error. Please try again later.'));
       setIsLoading(false);
     },
   });
 
   const onSubmit = (data: LoginFormData) => {
-    if (!isPasswordValid && loginMethod === 'PASSWORD') return;
+    if (loginMethod === 'PASSWORD' && passwordValue.length < 8) return;
     setErrorMsg('');
     setIsLoading(true);
     mutation.mutate(data);
@@ -120,9 +139,10 @@ export default function LoginPage() {
       setOtpSent(true);
       setErrorMsg('');
       setIsLoading(false);
+      setOtpTimer(60);
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Failed to send OTP.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Failed to send OTP.'));
       setIsLoading(false);
     },
   });
@@ -133,10 +153,10 @@ export default function LoginPage() {
       const { token, user } = response.data.data;
       setAuth(user, token);
       router.push('/dashboard');
-      setIsLoading(false);
+      // Do not set isLoading to false here, keep it loading until redirect completes
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Invalid OTP.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Invalid OTP.'));
       setIsLoading(false);
     },
   });
@@ -144,7 +164,7 @@ export default function LoginPage() {
   const handleSendOtp = () => {
     const email = getValues('email');
     if (!email || errors.email) {
-      setErrorMsg('Please enter a valid work email address.');
+      setErrorMsg('Please enter a valid email address containing an "@" and a domain (e.g., name@company.com).');
       return;
     }
     setIsLoading(true);
@@ -152,6 +172,10 @@ export default function LoginPage() {
   };
 
   const handleVerifyOtp = () => {
+    if (otpTimer === 0) {
+      setErrorMsg('OTP has expired. Please resend a new one.');
+      return;
+    }
     if (otpCode.length !== 6) {
       setErrorMsg('Please enter a valid 6-digit OTP.');
       return;
@@ -166,10 +190,10 @@ export default function LoginPage() {
       const { token, user } = response.data.data;
       setAuth(user, token);
       router.push('/dashboard');
-      setIsLoading(false);
+      // Do not set isLoading to false here, keep it loading until redirect completes
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Google Login failed. Please try again.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Google Login failed. Please try again.'));
       setIsLoading(false);
     },
   });
@@ -185,19 +209,32 @@ export default function LoginPage() {
   const isEmailValid = emailValue && !errors.email && emailValue.includes('@');
   
   const isSubmitDisabled = loginMethod === 'PASSWORD' 
-    ? (!isEmailValid || !isPasswordValid || isLoading)
+    ? (!isEmailValid || passwordValue.length < 8 || isLoading)
     : (otpSent ? (!otpCode || isLoading) : (!isEmailValid || isLoading));
 
   return (
-    <div className="h-screen w-full flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
+    <div className="h-screen w-full flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans relative">
       
+      {/* Theme Toggle Button */}
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="absolute top-6 right-6 z-50 rounded-full bg-white/50 dark:bg-slate-900/50 dark:bg-slate-800/50 backdrop-blur-sm border shadow-sm" 
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      >
+        <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-slate-700" />
+        <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-slate-300" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+
       {/* LEFT SIDE - DYNAMIC PANEL */}
-      <div className="hidden md:flex flex-col w-[40%] lg:w-[45%] xl:w-[50%] relative bg-[#0a1128] text-white overflow-hidden p-8 lg:p-14 border-r border-slate-800 shadow-2xl shrink-0">
+      <div className="hidden md:flex flex-col w-[40%] lg:w-[45%] xl:w-[50%] relative bg-gradient-to-br from-emerald-400 to-blue-600 text-white overflow-hidden p-8 lg:p-14 border-r border-slate-800 shadow-2xl shrink-0">
         
-        {/* Animated Background */}
+        {/* Animated Background / Shapes */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-blue-600/10 blur-[140px] mix-blend-screen animate-pulse duration-10000"></div>
-          <div className="absolute bottom-[-10%] right-[-20%] w-[70%] h-[70%] rounded-full bg-indigo-600/10 blur-[140px] mix-blend-screen"></div>
+          <div className="absolute top-[10%] right-[10%] w-[160px] h-[160px] rounded-full bg-white/10 dark:bg-slate-900/10 backdrop-blur-md"></div>
+          <div className="absolute bottom-[10%] left-[10%] w-[200px] h-[200px] rounded-full bg-white/10 dark:bg-slate-900/10 backdrop-blur-md"></div>
+          <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-white/5 dark:bg-slate-900/5 blur-[120px]"></div>
         </div>
 
         {/* Content */}
@@ -206,8 +243,8 @@ export default function LoginPage() {
           {/* Top Logo */}
           <div className="flex flex-col gap-6 mb-8 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
-                <Building2 className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30 shadow-sm">
+                <Building2 className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-widest text-white/90 uppercase">Enterprise HRMS</span>
             </div>
@@ -225,17 +262,17 @@ export default function LoginPage() {
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   className="w-full flex flex-col items-start"
                 >
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/15 dark:bg-slate-900/15 backdrop-blur-md border border-white/30 text-white flex items-center justify-center mb-6 shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
                     {iconMap[heroSlides[currentSlide].icon] || <Bot className="w-10 h-10" />}
                   </div>
                   
                   {/* Title uses clamp for responsive scaling without full stops */}
-                  <h1 className="text-[clamp(2rem,4vw,3.5rem)] font-extrabold leading-[1.1] tracking-tight mb-4 text-white">
+                  <h1 className="text-[clamp(1.75rem,3vw,3rem)] font-extrabold leading-[1.1] tracking-tight mb-4 text-white">
                     {heroSlides[currentSlide].title}
                   </h1>
                   
                   {/* Description includes full stop per rules */}
-                  <p className="text-[clamp(1rem,1.5vw,1.25rem)] text-blue-100/70 font-medium leading-relaxed max-w-[85%]">
+                  <p className="text-[clamp(0.95rem,1.2vw,1.15rem)] text-blue-100/70 font-medium leading-relaxed max-w-[90%]">
                     {heroSlides[currentSlide].description}
                   </p>
                 </motion.div>
@@ -248,7 +285,7 @@ export default function LoginPage() {
                 {heroSlides.map((_: any, i: number) => (
                   <div 
                     key={i} 
-                    className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === i ? 'w-8 bg-blue-500' : 'w-2 bg-white/20'}`}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === i ? 'w-8 bg-white dark:bg-slate-900' : 'w-2 bg-white/30 dark:bg-slate-900/30'}`}
                   />
                 ))}
               </div>
@@ -256,9 +293,8 @@ export default function LoginPage() {
           </div>
 
           {/* Bottom Footer Section (Version/Stats) */}
-          <div className="mt-8 pt-8 border-t border-white/10 flex justify-between items-center text-xs text-blue-200/50 uppercase tracking-wider shrink-0">
+          <div className="mt-8 pt-8 border-t border-white/20 flex justify-between items-center text-xs text-white/70 uppercase tracking-wider shrink-0">
             <div>© {new Date().getFullYear()} Enterprise Inc.</div>
-            <div>Version {contentData?.version || '1.0.0'}</div>
           </div>
           
         </div>
@@ -266,7 +302,7 @@ export default function LoginPage() {
 
       {/* RIGHT SIDE - LOGIN FORM */}
       <div className="flex-1 flex flex-col justify-center items-center p-4 md:p-8 relative overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-[#0f172a]">
-        <div className="w-full max-w-[420px] lg:max-w-[440px] flex flex-col justify-center min-h-full">
+        <div className="w-full max-w-[460px] lg:max-w-[480px] xl:max-w-[500px] flex flex-col justify-center min-h-full">
           
           {/* Mobile Logo */}
           <div className="md:hidden flex flex-col items-center gap-3 mb-8">
@@ -277,11 +313,17 @@ export default function LoginPage() {
           </div>
 
           {/* Glassmorphism Form Card */}
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 shadow-[0_8px_40px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_40px_rgb(0,0,0,0.2)] border border-white dark:border-slate-800">
+          <div className="bg-white/80 dark:bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 py-12 lg:p-12 lg:py-14 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/50 dark:border-slate-800 min-h-[580px] flex flex-col justify-center">
             
-            <div className="mb-8">
-              <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Welcome Back</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Sign in to your HRMS dashboard.</p>
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                <Building2 className="w-10 h-10 text-white" />
+              </div>
+            </div>
+
+            <div className="mb-8 text-center sm:text-left">
+              <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Login</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Choose login method.</p>
             </div>
 
             {/* Login Tabs */}
@@ -291,14 +333,14 @@ export default function LoginPage() {
                 onClick={() => { setLoginMethod('PASSWORD'); setErrorMsg(''); }}
                 className={`flex-1 py-2 text-sm font-semibold rounded-lg z-10 transition-colors ${loginMethod === 'PASSWORD' ? 'text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               >
-                Password Login
+                Password
               </button>
               <button
                 type="button"
                 onClick={() => { setLoginMethod('OTP'); setErrorMsg(''); setOtpSent(false); }}
                 className={`flex-1 py-2 text-sm font-semibold rounded-lg z-10 transition-colors ${loginMethod === 'OTP' ? 'text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
               >
-                OTP Login
+                OTP
               </button>
               
               <motion.div 
@@ -329,7 +371,7 @@ export default function LoginPage() {
                 
                 {/* Email Field */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Work Email</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Work Email <span className="text-red-500">*</span></label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                       <Mail className="h-4 w-4" />
@@ -341,19 +383,26 @@ export default function LoginPage() {
                       className={`pl-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
                     />
                   </div>
-                  <AnimatePresence>
-                    {errors.email && (
-                      <motion.p initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="text-red-500 text-xs font-medium pl-1">
-                        {errors.email.message}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex justify-between items-start pt-0.5 px-1">
+                    <div className="flex-1">
+                      <AnimatePresence>
+                        {errors.email && (
+                          <motion.p initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="text-red-500 text-xs font-medium">
+                            {errors.email.message}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <span className="text-[10px] font-medium text-slate-400 shrink-0 ml-2">
+                      {(emailValue || '').length}/100 characters
+                    </span>
+                  </div>
                 </div>
 
                 {/* Password Field */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center ml-1">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Password</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
                     <Link href="/forgot-password" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                       Forgot Password?
                     </Link>
@@ -366,23 +415,30 @@ export default function LoginPage() {
                       {...register('password')} 
                       type={showPassword ? 'text' : 'password'} 
                       placeholder="••••••••" 
-                      className={`pl-10 pr-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20`} 
+                      className={`pl-10 pr-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden`} 
                     />
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
                   </div>
-                  
-                  {/* Password Strength Meter */}
-                  <PasswordStrengthMeter 
-                    password={passwordValue} 
-                    onValidationChange={setIsPasswordValid} 
-                    showErrorMsg={passwordValue.length > 0}
-                  />
+                  <div className="flex justify-between items-start pt-0.5 px-1">
+                    <div className="flex-1">
+                      <AnimatePresence>
+                        {errors.password && (
+                          <motion.p initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="text-red-500 text-xs font-medium">
+                            {errors.password.message}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <span className="text-[10px] font-medium text-slate-400 shrink-0 ml-2">
+                      {(passwordValue || '').length}/72 characters
+                    </span>
+                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -404,7 +460,7 @@ export default function LoginPage() {
               <div className="space-y-5">
                 {/* OTP Flow */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Work Email</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Work Email <span className="text-red-500">*</span></label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                       <Mail className="h-4 w-4" />
@@ -417,13 +473,20 @@ export default function LoginPage() {
                       className={`pl-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
                     />
                   </div>
-                  <AnimatePresence>
-                    {errors.email && (
-                      <motion.p initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="text-red-500 text-xs font-medium pl-1">
-                        {errors.email.message}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex justify-between items-start pt-0.5 px-1">
+                    <div className="flex-1">
+                      <AnimatePresence>
+                        {errors.email && (
+                          <motion.p initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="text-red-500 text-xs font-medium">
+                            {errors.email.message}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <span className="text-[10px] font-medium text-slate-400 shrink-0 ml-2">
+                      {(emailValue || '').length}/100 characters
+                    </span>
+                  </div>
                 </div>
 
                 <AnimatePresence>
@@ -442,7 +505,26 @@ export default function LoginPage() {
                         placeholder="••••••" 
                         className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-blue-500 shadow-none text-center tracking-[0.5em] font-black text-xl" 
                       />
-                      <p className="text-xs text-slate-500 text-center mt-2">OTP sent to your email. Valid for 5 minutes.</p>
+                      {otpTimer > 0 ? (
+                        <p className="text-xs text-slate-500 text-center mt-2">
+                          OTP valid for <span className="font-bold text-slate-700 dark:text-slate-300">00:{otpTimer.toString().padStart(2, '0')}</span>
+                        </p>
+                      ) : (
+                        <div className="flex flex-col items-center mt-2">
+                          <p className="text-xs text-red-500 font-semibold mb-2">OTP expired. Please resend.</p>
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            size="sm"
+                            onClick={handleSendOtp}
+                            disabled={isLoading}
+                            className="text-xs font-semibold"
+                          >
+                            {isLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RotateCcw className="w-3 h-3 mr-1" />}
+                            Resend OTP
+                          </Button>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -482,18 +564,20 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex justify-center w-full">
-              <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy.apps.googleusercontent.com'}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setErrorMsg('Google Login Failed')}
-                  theme="outline"
-                  size="large"
-                  shape="rectangular"
-                  width="100%"
-                  text="continue_with"
-                />
-              </GoogleOAuthProvider>
+            <div className="flex justify-center w-full mt-2">
+              <div className="w-full flex justify-center">
+                <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy.apps.googleusercontent.com'}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setErrorMsg('Google Login Failed')}
+                    theme="outline"
+                    size="large"
+                    shape="pill"
+                    width="320"
+                    text="continue_with"
+                  />
+                </GoogleOAuthProvider>
+              </div>
             </div>
             
           </div>

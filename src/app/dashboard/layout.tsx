@@ -6,21 +6,19 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { user, token } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    if (!token) {
+    if (_hasHydrated && !token) {
       router.push('/login');
     }
-  }, [token, router]);
+  }, [token, _hasHydrated, router]);
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {(!mounted || !token) && (
-        <div className="absolute inset-0 z-[9999] flex items-center justify-center bg-white">
+      {(!_hasHydrated || !token) && (
+        <div className="absolute inset-0 z-[9999] flex items-center justify-center bg-white dark:bg-slate-900">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { formatDate } from '@/lib/dateUtils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -99,7 +100,7 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
                     </div>
                     <div>
                       <span className="text-muted-foreground text-xs block mb-1">Joining Date</span>
-                      <span className="font-medium">{employee.joiningDate ? new Date(employee.joiningDate).toLocaleDateString() : "—"}</span>
+                      <span className="font-medium">{employee.joiningDate ? formatDate(employee.joiningDate) : "—"}</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground text-xs block mb-1">Base Salary (CTC)</span>

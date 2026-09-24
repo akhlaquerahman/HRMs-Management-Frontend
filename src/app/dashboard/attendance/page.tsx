@@ -7,6 +7,31 @@ import { Plus, RefreshCw, Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from '@/lib/dateUtils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AddAttendanceModal } from "./components/AddAttendanceModal";
+import { EditAttendanceModal } from "./components/EditAttendanceModal";
+import { BulkUploadModal } from "./components/BulkUploadModal";
+import { CorrectionsTab } from "./components/CorrectionsTab";
+import { HolidaysTab } from "./components/HolidaysTab";
+import { ShiftsTab } from "./components/ShiftsTab";
+import { AnalyticsTab } from "./components/AnalyticsTab";
+import { 
+  UserCheck, UserX, Clock, AlarmClock, Plus, 
+  CalendarDays, Download, ChevronRight, ChevronDown, MoreHorizontal, 
+  AlertCircle, FileText, CheckCircle2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, ArrowUpDown, UploadCloud, Loader2
+} from "lucide-react";
+import { toast } from "sonner";
 
 import { AttendancePunchWidget } from "@/components/shared/AttendancePunchWidget";
 
@@ -244,6 +269,24 @@ export default function AttendancePage() {
   };
 
 
+
+  const SortableHeader = ({ label, sortKeyParam }: { label: string, sortKeyParam: string }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 dark:bg-slate-800 select-none group transition-colors" 
+      onClick={() => handleSort(sortKeyParam)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        <div className="text-gray-400 flex flex-col">
+          {sortKey === sortKeyParam ? (
+            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-blue-600" /> : <ArrowDown className="w-3 h-3 text-blue-600" />
+          ) : (
+            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+          )}
+        </div>
+      </div>
+    </TableHead>
+  );
 
   return (
     <div className="flex flex-col gap-5">

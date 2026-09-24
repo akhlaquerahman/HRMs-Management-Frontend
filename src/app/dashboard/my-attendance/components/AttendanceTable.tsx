@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { ChevronDown, ChevronRight, Clock, AlertCircle, FileEdit } from 'lucide-react';
+import { ChevronDown, ChevronRight, Clock, AlertCircle, FileEdit, ArrowUp, ArrowDown, ArrowUpDown, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { RequestCorrectionModal } from './RequestCorrectionModal';
@@ -39,9 +39,71 @@ export function AttendanceTable({ records, isLoading }: AttendanceTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const totalRecords = records.length;
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({ key: 'date', direction: 'desc' });
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' | null = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
+    else if (sortConfig.key === key && sortConfig.direction === 'desc') direction = null; // Reset to default on 3rd click (or just keep desc, but enterprise level often cycles)
+    // Actually, let's just toggle between asc and desc for simplicity and consistency
+    if (sortConfig.key === key) {
+      direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedRecords = [...records].sort((a, b) => {
+    if (!sortConfig.direction) return 0;
+    
+    let aVal: any = '';
+    let bVal: any = '';
+
+    if (sortConfig.key === 'date') {
+      aVal = new Date(a.date).getTime();
+      bVal = new Date(b.date).getTime();
+    } else if (sortConfig.key === 'checkIn') {
+      aVal = a.logs && a.logs.length > 0 ? new Date(a.logs[0].punchIn).getTime() : 0;
+      bVal = b.logs && b.logs.length > 0 ? new Date(b.logs[0].punchIn).getTime() : 0;
+    } else if (sortConfig.key === 'checkOut') {
+      aVal = a.logs && a.logs.length > 0 && a.logs[a.logs.length - 1].punchOut ? new Date(a.logs[a.logs.length - 1].punchOut).getTime() : 0;
+      bVal = b.logs && b.logs.length > 0 && b.logs[b.logs.length - 1].punchOut ? new Date(b.logs[b.logs.length - 1].punchOut).getTime() : 0;
+    } else if (sortConfig.key === 'workingHours') {
+      aVal = Number(a.effectiveHours || 0);
+      bVal = Number(b.effectiveHours || 0);
+    } else if (sortConfig.key === 'status') {
+      const isPunchedInA = a.logs && a.logs.length > 0 && !a.logs[a.logs.length - 1].punchOut;
+      const isPunchedInB = b.logs && b.logs.length > 0 && !b.logs[b.logs.length - 1].punchOut;
+      aVal = isPunchedInA ? "YET TO CHECK OUT" : a.status;
+      bVal = isPunchedInB ? "YET TO CHECK OUT" : b.status;
+    }
+
+    if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const SortableHeader = ({ label, sortKey }: { label: string, sortKey: string }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-muted/80 select-none group transition-colors" 
+      onClick={() => handleSort(sortKey)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        <div className="text-muted-foreground flex flex-col">
+          {sortConfig.key === sortKey ? (
+            sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3 text-primary" /> : <ArrowDown className="w-3 h-3 text-primary" />
+          ) : (
+            <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+          )}
+        </div>
+      </div>
+    </TableHead>
+  );
+
+  const totalRecords = sortedRecords.length;
   const totalPages = Math.ceil(totalRecords / pageSize);
-  const paginatedRecords = records.slice((page - 1) * pageSize, page * pageSize);
+  const paginatedRecords = sortedRecords.slice((page - 1) * pageSize, page * pageSize);
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
@@ -80,11 +142,11 @@ export function AttendanceTable({ records, isLoading }: AttendanceTableProps) {
 
   if (isLoading) {
     return (
-      <div className="bg-card rounded-xl border shadow-sm p-4 animate-pulse">
-        <div className="h-10 bg-muted rounded-md w-full mb-4" />
-        {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="h-14 border-t w-full" />
-        ))}
+      <div className="rounded-xl border bg-card shadow-sm p-12">
+        <div className="w-full h-[300px] flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          <p className="text-muted-foreground font-medium animate-pulse">Loading attendance records...</p>
+        </div>
       </div>
     );
   }

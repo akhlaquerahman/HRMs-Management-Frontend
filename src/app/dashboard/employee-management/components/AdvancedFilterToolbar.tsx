@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,24 @@ export function AdvancedFilterToolbar({ filters, onFilterChange, onReset }: Adva
     };
     fetchSelectOptions();
   }, []);
+
+  const [localSearch, setLocalSearch] = useState(filters.search || '');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (filters.search !== localSearch) {
+        onFilterChange('search', localSearch);
+      }
+    }, 400); // 400ms debounce
+    return () => clearTimeout(timer);
+  }, [localSearch, onFilterChange, filters.search]);
+
+  useEffect(() => {
+    // Sync if filters reset externally
+    if (filters.search === '') {
+      setLocalSearch('');
+    }
+  }, [filters.search]);
 
   return (
     <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-sm space-y-3 sm:space-y-4">

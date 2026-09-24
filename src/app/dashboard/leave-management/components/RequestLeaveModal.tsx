@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/axios';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -15,12 +17,14 @@ interface RequestLeaveModalProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
   isLoading: boolean;
+  isHR?: boolean;
 }
 
-export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: RequestLeaveModalProps) {
+export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading, isHR }: RequestLeaveModalProps) {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    employeeId: 'self',
     leaveType: '',
     startDate: '',
     endDate: '',
@@ -28,10 +32,24 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: Requ
     workFromHome: false,
     emergencyLeave: false,
     description: '',
-    attachment: ''
+    attachment: '',
+    attachmentName: ''
   });
 
-  const isStep1Valid = formData.leaveType && formData.startDate && formData.endDate;
+  const { data: employeesDataResponse } = useQuery({
+    queryKey: ['employeesList'],
+    queryFn: async () => {
+      const res = await api.get('/employees?limit=100');
+      return res.data; // Return the entire response to match AddAttendanceModal cache shape
+    },
+    enabled: !!isHR
+  });
+
+  const employeesData = Array.isArray(employeesDataResponse?.data) 
+    ? employeesDataResponse.data 
+    : (employeesDataResponse?.data?.data || []);
+
+  const isStep1Valid = formData.leaveType && formData.startDate && formData.endDate && (isHR ? formData.employeeId : true);
   const isStep2Valid = formData.description.length > 5;
 
   const handleNext = () => setStep(2);
@@ -45,12 +63,14 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: Requ
       setTimeout(() => {
         setStep(1);
         setFormData({
-          leaveType: '', startDate: '', endDate: '', halfDay: false,
-          workFromHome: false, emergencyLeave: false, description: '', attachment: ''
+          employeeId: 'self', leaveType: '', startDate: '', endDate: '', halfDay: false,
+          workFromHome: false, emergencyLeave: false, description: '', attachment: '', attachmentName: ''
         });
       }, 300);
     }
   };
+
+  const todayString = new Date().toLocaleDateString('en-CA'); // Gets local YYYY-MM-DD
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -66,6 +86,28 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: Requ
         <div className="py-4">
           {step === 1 && (
             <div className="flex flex-col gap-4">
+              {isHR && (
+                <div className="grid gap-2">
+                  <Label>{t("Select Employee")}</Label>
+                  <Select 
+                    value={formData.employeeId}
+                    onValueChange={(val) => setFormData(p => ({ ...p, employeeId: val }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("Select employee")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="self">Request for Myself</SelectItem>
+                      {employeesData.map((emp: any) => (
+                        <SelectItem key={emp.id} value={emp.id}>
+                          {emp.firstName} {emp.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="grid gap-2">
                 <Label>{t("Leave Type")} *</Label>
                 <Select 
@@ -89,6 +131,7 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: Requ
                   <Label>{t("Start Date")} *</Label>
                   <Input 
                     type="date" 
+                    min={todayString}
                     value={formData.startDate}
                     onChange={(e) => setFormData(p => ({ ...p, startDate: e.target.value }))}
                   />
@@ -97,6 +140,7 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: Requ
                   <Label>{t("End Date")} *</Label>
                   <Input 
                     type="date" 
+                    min={formData.startDate || todayString}
                     value={formData.endDate}
                     onChange={(e) => setFormData(p => ({ ...p, endDate: e.target.value }))}
                   />
@@ -149,10 +193,39 @@ export function RequestLeaveModal({ isOpen, onClose, onSubmit, isLoading }: Requ
                 <div className="flex items-center justify-center w-full">
                   <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/40 transition-colors">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                      <p className="text-xs text-muted-foreground">PDF, JPG, PNG (Max 5MB)</p>
+                      {formData.attachment ? (
+                        <>
+                          <p className="mb-2 text-sm text-green-600 font-semibold truncate max-w-[200px]">
+                            {formData.attachmentName || "Document attached"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Click to replace</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                          <p className="text-xs text-muted-foreground">PDF, JPG, PNG (Max 5MB)</p>
+                        </>
+                      )}
                     </div>
-                    <input type="file" className="hidden" />
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData(p => ({ 
+                              ...p, 
+                              attachment: reader.result as string,
+                              attachmentName: file.name
+                            }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
                   </label>
                 </div>
               </div>

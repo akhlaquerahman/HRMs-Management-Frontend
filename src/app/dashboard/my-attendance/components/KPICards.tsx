@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, UserCheck, UserX, AlertCircle, CalendarRange, Timer } from 'lucide-react';
+import { Clock, UserCheck, UserX, AlertCircle, CalendarRange, Timer, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 export function KPICards({ summaryData, summaryLoading }: { summaryData: any, summaryLoading: boolean }) {

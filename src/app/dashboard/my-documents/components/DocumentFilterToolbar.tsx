@@ -31,12 +31,12 @@ export function DocumentFilterToolbar({
   });
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 items-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+    <div className="flex flex-col sm:flex-row gap-3 items-center bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
       <div className="relative flex-1 w-full">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         <Input 
           placeholder={t("Search documents...")}
-          className="pl-9 bg-gray-50/50 border-gray-200"
+          className="pl-9 bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700"
           onChange={(e) => onSearch(e.target.value)}
         />
       </div>
@@ -58,7 +58,7 @@ export function DocumentFilterToolbar({
         </Select>
 
         <Select onValueChange={(v) => onFilterChange('category', v)}>
-          <SelectTrigger className="w-[140px] bg-white border-gray-200">
+          <SelectTrigger className="w-[140px] bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
             <Filter className="w-4 h-4 mr-2 text-gray-400" />
             <SelectValue placeholder={t("Category")} />
           </SelectTrigger>
@@ -75,7 +75,7 @@ export function DocumentFilterToolbar({
         </Select>
 
         <Select onValueChange={(v) => onFilterChange('status', v)}>
-          <SelectTrigger className="w-[140px] bg-white border-gray-200">
+          <SelectTrigger className="w-[140px] bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700">
             <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
@@ -87,7 +87,7 @@ export function DocumentFilterToolbar({
           </SelectContent>
         </Select>
 
-        <Button variant="ghost" size="sm" onClick={onReset} className="h-10 px-3 text-gray-500 hover:text-gray-900">
+        <Button variant="ghost" size="sm" onClick={onReset} className="h-10 px-3 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-slate-100">
           <RefreshCw className="w-4 h-4" />
         </Button>
       </div>

@@ -31,7 +31,7 @@ import { Input } from '@/components/ui/input';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
 
 const requestSchema = z.object({
-  email: z.string().min(1, "Email is required.").email("Please enter a valid work email address."),
+  email: z.string().min(1, "Email is required.").email("Please enter a valid email address containing an '@' and a domain (e.g., name@company.com)."),
 });
 
 const resetSchema = z.object({
@@ -64,7 +64,8 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [errorMsg, setErrorMsg] = useState('');
-  const [timer, setTimer] = useState(600); // 10 minutes
+  const [timer, setTimer] = useState(60); // 1 minute
+  const [timerKey, setTimerKey] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -108,22 +109,36 @@ export default function ForgotPasswordPage() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (step === 'VERIFY_OTP' && timer > 0) {
-      interval = setInterval(() => setTimer((t) => t - 1), 1000);
+      interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
     return () => clearInterval(interval);
-  }, [step, timer]);
+  }, [step, timerKey]);
+
+  const formatErrorMsg = (msg: string) => {
+    if (!msg) return '';
+    return msg.endsWith('.') ? msg : `${msg}.`;
+  };
 
   const requestMutation = useMutation({
     mutationFn: (data: { email: string }) => api.post('/auth/forgot-password', data),
     onSuccess: (_, variables) => {
       setEmail(variables.email);
       setStep('VERIFY_OTP');
-      setTimer(600);
+      setTimer(60);
+      setTimerKey((prev) => prev + 1);
       setErrorMsg('');
       setIsLoading(false);
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Failed to send OTP.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Failed to send OTP.'));
       setIsLoading(false);
     },
   });
@@ -136,7 +151,7 @@ export default function ForgotPasswordPage() {
       setIsLoading(false);
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Invalid or expired OTP.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Invalid or expired OTP.'));
       setIsLoading(false);
     },
   });
@@ -149,7 +164,7 @@ export default function ForgotPasswordPage() {
       setIsLoading(false);
     },
     onError: (error: any) => {
-      setErrorMsg(error.response?.data?.message || 'Failed to reset password.');
+      setErrorMsg(formatErrorMsg(error.response?.data?.message || 'Failed to reset password.'));
       setIsLoading(false);
     },
   });
@@ -198,6 +213,10 @@ export default function ForgotPasswordPage() {
   };
 
   const submitOtp = () => {
+    if (timer <= 0) {
+      setErrorMsg('OTP expired. Please resend.');
+      return;
+    }
     const otpString = otp.join('');
     if (otpString.length !== 6) {
       setErrorMsg('Please enter all 6 digits.');
@@ -227,12 +246,13 @@ export default function ForgotPasswordPage() {
     <div className="h-screen w-full flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       
       {/* LEFT SIDE - DYNAMIC PANEL */}
-      <div className="hidden md:flex flex-col w-[40%] lg:w-[45%] xl:w-[50%] relative bg-[#0a1128] text-white overflow-hidden p-8 lg:p-14 border-r border-slate-800 shadow-2xl shrink-0">
+      <div className="hidden md:flex flex-col w-[40%] lg:w-[45%] xl:w-[50%] relative bg-gradient-to-br from-emerald-400 to-blue-600 text-white overflow-hidden p-8 lg:p-14 border-r border-slate-800 shadow-2xl shrink-0">
         
-        {/* Animated Background */}
+        {/* Animated Background / Shapes */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-blue-600/10 blur-[140px] mix-blend-screen animate-pulse duration-10000"></div>
-          <div className="absolute bottom-[-10%] right-[-20%] w-[70%] h-[70%] rounded-full bg-indigo-600/10 blur-[140px] mix-blend-screen"></div>
+          <div className="absolute top-[10%] right-[10%] w-[160px] h-[160px] rounded-full bg-white/10 dark:bg-slate-900/10 backdrop-blur-md"></div>
+          <div className="absolute bottom-[10%] left-[10%] w-[200px] h-[200px] rounded-full bg-white/10 dark:bg-slate-900/10 backdrop-blur-md"></div>
+          <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-white/5 dark:bg-slate-900/5 blur-[120px]"></div>
         </div>
 
         {/* Content */}
@@ -241,8 +261,8 @@ export default function ForgotPasswordPage() {
           {/* Top Logo */}
           <div className="flex flex-col gap-6 mb-8 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
-                <Building2 className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30 shadow-sm">
+                <Building2 className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-widest text-white/90 uppercase">Enterprise HRMS</span>
             </div>
@@ -260,7 +280,7 @@ export default function ForgotPasswordPage() {
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   className="w-full flex flex-col items-start"
                 >
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/15 dark:bg-slate-900/15 backdrop-blur-md border border-white/30 text-white flex items-center justify-center mb-6 shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
                     {iconMap[heroSlides[currentSlide].icon] || <Bot className="w-10 h-10" />}
                   </div>
                   
@@ -283,7 +303,7 @@ export default function ForgotPasswordPage() {
                 {heroSlides.map((_: any, i: number) => (
                   <div 
                     key={i} 
-                    className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === i ? 'w-8 bg-blue-500' : 'w-2 bg-white/20'}`}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === i ? 'w-8 bg-white dark:bg-slate-900' : 'w-2 bg-white/30 dark:bg-slate-900/30'}`}
                   />
                 ))}
               </div>
@@ -291,7 +311,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {/* Bottom Footer Section (Version/Stats) */}
-          <div className="mt-8 pt-8 border-t border-white/10 flex justify-between items-center text-xs text-blue-200/50 uppercase tracking-wider shrink-0">
+          <div className="mt-8 pt-8 border-t border-white/20 flex justify-between items-center text-xs text-white/70 uppercase tracking-wider shrink-0">
             <div>© {new Date().getFullYear()} Enterprise Inc.</div>
             <div>Version {contentData?.version || '1.0.0'}</div>
           </div>
@@ -312,7 +332,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {/* Glassmorphism Form Card */}
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 shadow-[0_8px_40px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_40px_rgb(0,0,0,0.2)] border border-white dark:border-slate-800">
+          <div className="bg-white/80 dark:bg-slate-900/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-8 lg:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/50 dark:border-slate-800">
             
             <AnimatePresence mode="wait">
               {/* STEP 1: REQUEST OTP */}
@@ -339,7 +359,7 @@ export default function ForgotPasswordPage() {
 
                   <form onSubmit={handleRequestSubmit(onRequestSubmit)} className="space-y-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Work Email</label>
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Work Email <span className="text-red-500">*</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                           <Mail className="h-4 w-4" />
@@ -429,7 +449,7 @@ export default function ForgotPasswordPage() {
                         type="button"
                         disabled={timer > 0 || isLoading}
                         onClick={() => { setErrorMsg(''); setIsLoading(true); requestMutation.mutate({ email }); }}
-                        className="font-bold text-blue-600 dark:text-blue-400 disabled:opacity-50 disabled:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                        className={`font-bold transition-colors ${timer > 0 || isLoading ? 'opacity-50 text-slate-400 cursor-not-allowed' : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'}`}
                       >
                         Resend Code
                       </button>
@@ -437,7 +457,7 @@ export default function ForgotPasswordPage() {
 
                     <Button 
                       onClick={submitOtp}
-                      disabled={isLoading || otp.join('').length !== 6} 
+                      disabled={isLoading || otp.join('').length !== 6 || timer <= 0} 
                       className="w-full h-12 mt-2 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
@@ -478,7 +498,7 @@ export default function ForgotPasswordPage() {
 
                   <form onSubmit={handleResetSubmit(onResetSubmit)} className="space-y-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">New Password</label>
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">New Password <span className="text-red-500">*</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                           <Lock className="h-4 w-4" />
@@ -487,7 +507,7 @@ export default function ForgotPasswordPage() {
                           {...registerReset('password')} 
                           type={showPassword ? 'text' : 'password'} 
                           placeholder="••••••••" 
-                          className={`pl-10 pr-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20`} 
+                          className={`pl-10 pr-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden`} 
                         />
                         <button 
                           type="button"
@@ -506,7 +526,7 @@ export default function ForgotPasswordPage() {
                     </div>
 
                     <div className="space-y-1.5 pt-2">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Confirm Password</label>
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                           <CheckCircle2 className="h-4 w-4" />
@@ -515,7 +535,7 @@ export default function ForgotPasswordPage() {
                           {...registerReset('confirmPassword')} 
                           type={showConfirmPassword ? 'text' : 'password'} 
                           placeholder="••••••••" 
-                          className={`pl-10 pr-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20 ${resetErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                          className={`pl-10 pr-10 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-none text-sm transition-all focus-visible:border-blue-500 focus-visible:ring-blue-500/20 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${resetErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
                         />
                         <button 
                           type="button"

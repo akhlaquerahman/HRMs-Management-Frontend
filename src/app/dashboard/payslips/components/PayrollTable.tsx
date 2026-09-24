@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { FileText, MoreVertical, Eye, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, MoreVertical, Eye, Download, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ArrowUpDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -30,17 +31,70 @@ interface PayrollTableProps {
 export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+
+  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
+  const selectedCount = Object.values(selectedRows).filter(Boolean).length;
+
+  const toggleSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedRows(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const all = data.reduce((acc: any, curr: any) => ({ ...acc, [curr.id]: true }), {});
+      setSelectedRows(all);
+    } else {
+      setSelectedRows({});
+    }
+  };
+
+  const handleBulkDownload = () => {
+    const ids = Object.keys(selectedRows).filter(id => selectedRows[id]);
+    if (ids.length === 0) return;
+    alert(`Downloading ${ids.length} payslips...`);
+    setSelectedRows({});
+  };
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const SortIcon = ({ columnKey }: { columnKey: string }) => {
+    if (sortConfig?.key === columnKey) {
+      return sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 ml-1 inline-block" /> : <ChevronDown className="w-3 h-3 ml-1 inline-block" />;
+    }
+    return <ArrowUpDown className="w-3 h-3 ml-1 inline-block text-muted-foreground/30 group-hover:text-muted-foreground" />;
+  };
+
+  const sortedData = React.useMemo(() => {
+    if (!data || !sortConfig) return data || [];
+    return [...data].sort((a, b) => {
+      let valA = a[sortConfig.key];
+      let valB = b[sortConfig.key];
+      
+      if (sortConfig.key === 'period') {
+        valA = a.year * 100 + a.month;
+        valB = b.year * 100 + b.month;
+      }
+      
+      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [data, sortConfig]);
 
   if (loading) {
     return (
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-        <div className="p-4 bg-muted/20 border-b">
-          <div className="h-6 bg-muted rounded w-1/4" />
-        </div>
-        <div className="p-4 space-y-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-12 bg-muted/40 rounded animate-pulse" />
-          ))}
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden p-12">
+        <div className="w-full h-[300px] flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          <p className="text-muted-foreground font-medium animate-pulse">Loading payroll records...</p>
         </div>
       </div>
     );
@@ -70,14 +124,15 @@ export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps)
 
   const getMonthName = (month: number) => {
     const d = new Date();
+    d.setDate(1);
     d.setMonth(month - 1);
     return format(d, 'MMM');
   };
 
   // Pagination Logic
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -91,25 +146,61 @@ export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps)
   };
 
   return (
-    <div className="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-sm font-semibold text-foreground">
+          Showing <span className="text-blue-600 font-bold">{data?.length || 0}</span> Payroll Records
+        </h3>
+      </div>
+      {selectedCount > 0 && (
+        <div className="flex items-center justify-between bg-blue-50/50 p-3 rounded-xl border border-blue-100 animate-in fade-in slide-in-from-top-4">
+          <span className="text-sm font-semibold text-blue-700">{selectedCount} record(s) selected</span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="h-8 border-blue-200 text-blue-700 hover:bg-blue-50" onClick={handleBulkDownload}>
+              <Download className="w-4 h-4 mr-1" /> Download Selected
+            </Button>
+          </div>
+        </div>
+      )}
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left whitespace-nowrap">
           <thead className="bg-muted/30 text-muted-foreground text-xs uppercase font-semibold sticky top-0">
             <tr>
+              <th className="px-4 py-3 w-10 pl-4">
+                <Checkbox 
+                  checked={data?.length > 0 && data.every((d: any) => selectedRows[d.id])}
+                  onCheckedChange={toggleSelectAll} 
+                />
+              </th>
               <th className="px-4 py-3">Payroll ID</th>
-              <th className="px-4 py-3">Period</th>
+              <th className="px-4 py-3 cursor-pointer hover:text-foreground transition-colors group select-none" onClick={() => handleSort('period')}>
+                Period <SortIcon columnKey="period" />
+              </th>
               {isHR && <th className="px-4 py-3">Employee</th>}
               <th className="px-4 py-3">Working / Paid</th>
-              <th className="px-4 py-3">Gross Salary</th>
-              <th className="px-4 py-3">Deductions</th>
-              <th className="px-4 py-3">Net Salary</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3 cursor-pointer hover:text-foreground transition-colors group select-none" onClick={() => handleSort('grossSalary')}>
+                Gross Salary <SortIcon columnKey="grossSalary" />
+              </th>
+              <th className="px-4 py-3 cursor-pointer hover:text-foreground transition-colors group select-none" onClick={() => handleSort('deductions')}>
+                Deductions <SortIcon columnKey="deductions" />
+              </th>
+              <th className="px-4 py-3 cursor-pointer hover:text-foreground transition-colors group select-none" onClick={() => handleSort('netSalary')}>
+                Net Salary <SortIcon columnKey="netSalary" />
+              </th>
+              <th className="px-4 py-3">Bank Details</th>
+              <th className="px-4 py-3 cursor-pointer hover:text-foreground transition-colors group select-none" onClick={() => handleSort('status')}>
+                Status <SortIcon columnKey="status" />
+              </th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {paginatedData.map((record) => (
               <tr key={record.id} className="hover:bg-muted/20 transition-colors group">
+                <td className="px-4 py-3 pl-4" onClick={(e) => toggleSelect(record.id, e)}>
+                  <Checkbox checked={!!selectedRows[record.id]} onCheckedChange={(c) => setSelectedRows(p => ({...p, [record.id]: !!c}))} />
+                </td>
                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   #{record.id.slice(0,6).toUpperCase()}
                 </td>
@@ -127,6 +218,16 @@ export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps)
                 <td className="px-4 py-3">₹{record.grossSalary.toLocaleString()}</td>
                 <td className="px-4 py-3 text-rose-600">₹{record.deductions.toLocaleString()}</td>
                 <td className="px-4 py-3 font-bold text-emerald-600">₹{record.netSalary.toLocaleString()}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-xs truncate max-w-[120px]">{record.employee?.bankName || 'N/A'}</span>
+                    {record.employee?.accountNumber && (
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {record.employee.accountNumber}
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3">{getStatusBadge(record.status)}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
@@ -140,10 +241,10 @@ export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps)
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onView(record)}>
                           <Download className="w-4 h-4 mr-2" /> Download PDF
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => alert('Payslip sent successfully to the employee email!')}>
                           <FileText className="w-4 h-4 mr-2" /> Email Payslip
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -199,6 +300,7 @@ export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps)
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

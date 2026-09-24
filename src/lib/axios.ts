@@ -2,8 +2,16 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import NProgress from 'nprogress';
 
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:6002/api`;
+  }
+  return 'http://localhost:6002/api';
+};
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6002/api',
+  baseURL: getBaseUrl(),
   withCredentials: true,
 });
 
@@ -37,7 +45,7 @@ api.interceptors.response.use(
   async (error) => {
     stopLoader();
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/auth/refresh') {
+    if (error.response?.status === 401 && !originalRequest._retry && !['/auth/login', '/auth/refresh', '/auth/send-login-otp', '/auth/verify-login-otp', '/auth/google-login'].includes(originalRequest.url)) {
       originalRequest._retry = true;
       try {
         startLoader();

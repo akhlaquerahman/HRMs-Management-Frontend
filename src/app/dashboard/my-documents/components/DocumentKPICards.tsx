@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, CheckCircle, AlertCircle, Clock, Database, UploadCloud } from 'lucide-react';
+import { FileText, CheckCircle, AlertCircle, Clock, Database, UploadCloud, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { KPICard } from '@/components/dashboard/KPICard';
 
@@ -9,10 +9,9 @@ export function DocumentKPICards({ metrics, loading }: { metrics: any, loading: 
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="animate-pulse bg-muted/20 border-border/50 rounded-xl p-4 h-24" />
-        ))}
+      <div className="w-full h-24 flex items-center justify-center gap-3">
+        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+        <p className="text-muted-foreground font-medium animate-pulse">Loading document metrics...</p>
       </div>
     );
   }

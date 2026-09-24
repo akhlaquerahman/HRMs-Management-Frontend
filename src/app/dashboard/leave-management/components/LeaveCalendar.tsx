@@ -2,15 +2,21 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Palmtree, Users } from 'lucide-react';
+import { Palmtree, Users, Plus, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface LeaveCalendarProps {
   data: any;
   loading?: boolean;
+  isHR?: boolean;
+  onAddHoliday?: () => void;
+  onEditHoliday?: (holiday: any) => void;
+  onDeleteHoliday?: (id: string) => void;
 }
 
-export function LeaveCalendar({ data, loading }: LeaveCalendarProps) {
+export function LeaveCalendar({ data, loading, isHR, onAddHoliday, onEditHoliday, onDeleteHoliday }: LeaveCalendarProps) {
   if (loading) {
     return (
       <div className="rounded-xl border bg-card p-6 min-h-[300px] animate-pulse">
@@ -26,27 +32,37 @@ export function LeaveCalendar({ data, loading }: LeaveCalendarProps) {
 
   const { upcomingLeaves = [], holidays = [] } = data || {};
   
-  // Combine and sort events
   const events = [
-    ...upcomingLeaves.map((l: any) => ({ ...l, isHoliday: false })),
     ...holidays.map((h: any) => ({ ...h, isHoliday: true, startDate: h.date }))
-  ].sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).slice(0, 8);
+  ].sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
   if (events.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-12 flex flex-col items-center justify-center text-center">
         <Palmtree className="w-12 h-12 text-muted-foreground/30 mb-4" />
         <h3 className="text-lg font-semibold mb-2">Clear Schedule</h3>
-        <p className="text-sm text-muted-foreground">No upcoming leaves or holidays.</p>
+        <p className="text-sm text-muted-foreground">No upcoming holidays.</p>
+        {isHR && (
+          <Button size="sm" variant="outline" className="mt-4" onClick={onAddHoliday}>
+            <Plus className="w-4 h-4 mr-2" /> Add Holiday
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="rounded-xl border bg-card p-6 flex flex-col h-full">
-      <h3 className="text-lg font-semibold mb-6 text-primary">Calendar & Schedule</h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-primary">Calendar & Schedule</h3>
+        {isHR && (
+          <Button size="sm" variant="outline" className="h-8" onClick={onAddHoliday}>
+            <Plus className="w-4 h-4 mr-2" /> Add
+          </Button>
+        )}
+      </div>
       
-      <div className="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar flex-1 max-h-[400px]">
+      <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[600px] custom-scrollbar">
         {events.map((event: any, i: number) => {
           const isHoliday = event.isHoliday;
           
@@ -83,6 +99,26 @@ export function LeaveCalendar({ data, loading }: LeaveCalendarProps) {
                   )}
                 </div>
               </div>
+
+              {isHR && isHoliday && (
+                <div className="flex items-center ml-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEditHoliday?.(event)}>
+                        <Pencil className="w-4 h-4 mr-2" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-rose-600 focus:text-rose-600" onClick={() => onDeleteHoliday?.(event.id)}>
+                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           );
         })}

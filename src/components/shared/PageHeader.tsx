@@ -36,7 +36,7 @@ export function PageHeader({
           <h1 className="text-3xl font-bold tracking-tight">{t(title)}</h1>
           {description && <p className="text-muted-foreground mt-1">{t(description)}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
           {showImport && (
             <Button variant="outline" size="sm">
               <Upload className="mr-2 h-4 w-4" />

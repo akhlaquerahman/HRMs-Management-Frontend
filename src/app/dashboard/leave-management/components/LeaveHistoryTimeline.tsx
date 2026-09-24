@@ -33,7 +33,7 @@ export function LeaveHistoryTimeline({ history }: LeaveHistoryTimelineProps) {
       case 'SUBMITTED': return "bg-blue-100 border-blue-200";
       case 'APPROVED': return "bg-emerald-100 border-emerald-200";
       case 'REJECTED': return "bg-rose-100 border-rose-200";
-      case 'CANCELLED': return "bg-gray-100 border-gray-200";
+      case 'CANCELLED': return "bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700";
       default: return "bg-amber-100 border-amber-200";
     }
   };

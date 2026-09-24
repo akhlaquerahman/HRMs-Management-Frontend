@@ -52,11 +52,11 @@ export function DashboardDataTable<T>({
 
   return (
     <div className="flex flex-col h-full bg-card border rounded-xl shadow-sm overflow-hidden">
-      <div className="p-4 border-b flex items-center justify-between gap-4 bg-muted/20">
+      <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-muted/20">
         <h3 className="font-semibold text-lg">{t(title)}</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {searchable && (
-            <div className="relative w-48">
+            <div className="relative flex-1 sm:w-48">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder={t('Search...')} 

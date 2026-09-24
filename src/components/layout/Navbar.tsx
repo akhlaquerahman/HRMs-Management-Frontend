@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from 'react';
+
 import { useAuthStore } from '@/store/authStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +31,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
+import Sidebar from './Sidebar';
 
 import { AttendancePunchWidget } from '../shared/AttendancePunchWidget';
 
@@ -42,6 +46,7 @@ export default function Navbar({ onOpenMobileSidebar }: NavbarProps) {
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
   const { setTheme, theme } = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();

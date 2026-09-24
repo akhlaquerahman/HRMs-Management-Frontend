@@ -13,14 +13,16 @@ import { RecruitmentPipelineCard } from '@/components/dashboard/RecruitmentPipel
 import { DepartmentDistributionCard } from '@/components/dashboard/DepartmentDistributionCard';
 import { format } from 'date-fns';
 
-export function HRManagerDashboard({ stats }: { stats: any }) {
+export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { stats: any, trendFilter?: string, setTrendFilter?: (val: string) => void }) {
   const { t } = useTranslation();
 
+  const totalEmployees = stats?.pieChartData?.reduce((acc: number, curr: any) => acc + curr.value, 0) || 0;
+
   const deptColumns = [
-    { header: "Department", accessor: "department" },
-    { header: "Present", accessor: "present", className: "text-green-600 font-medium" },
-    { header: "Absent", accessor: "absent", className: "text-red-600 font-medium" },
-    { header: "On Leave", accessor: "onLeave", className: "text-orange-600 font-medium" },
+    { header: t("Department"), accessor: "department" },
+    { header: t("Present"), accessor: "present", className: "text-green-600 font-medium" },
+    { header: t("Absent"), accessor: "absent", className: "text-red-600 font-medium" },
+    { header: t("On Leave"), accessor: "onLeave", className: "text-orange-600 font-medium" },
   ];
 
   return (
@@ -62,7 +64,7 @@ export function HRManagerDashboard({ stats }: { stats: any }) {
           <div className="grid gap-6 md:grid-cols-2">
             <DepartmentDistributionCard data={stats?.pieChartData} />
             <DashboardDataTable 
-              title="Department Attendance Summary" 
+              title={t("Department Attendance Summary")} 
               data={stats?.deptAttendance || []} 
               columns={deptColumns}
             />
@@ -79,8 +81,6 @@ export function HRManagerDashboard({ stats }: { stats: any }) {
         {/* Right Sidebar Column (Takes up 4 columns out of 12) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           
-          <CompanyAnnouncements announcements={stats?.announcements || []} />
-
           {/* Celebrations Widget */}
           <CelebrationsCard
             upcomingBirthdays={stats?.upcomingBirthdays || []}
@@ -88,7 +88,7 @@ export function HRManagerDashboard({ stats }: { stats: any }) {
           />
 
           <div className="rounded-xl border bg-card shadow-sm p-6">
-            <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("Recent Activities")}</h3>
             <ActivityTimeline activities={stats?.recentActivities || []} />
           </div>
         </div>

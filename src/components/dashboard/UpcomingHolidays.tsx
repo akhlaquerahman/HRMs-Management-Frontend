@@ -26,11 +26,11 @@ export function UpcomingHolidays({ holidays, loading }: UpcomingHolidaysProps) {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
           <Palmtree className="w-5 h-5 text-primary" />
-          {t('Upcoming Holidays')}
+          {t('Holidays')}
         </h3>
       </div>
 
-      <div className="flex flex-col gap-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar flex-1">
+      <div className="flex flex-col gap-3 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
         {loading ? (
           [1, 2, 3].map(i => (
             <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-muted/20 animate-pulse border">
@@ -73,12 +73,18 @@ export function UpcomingHolidays({ holidays, loading }: UpcomingHolidaysProps) {
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium">
                       {holiday.type}
                     </span>
-                    <span className={cn(
-                      "text-xs font-medium",
-                      isSoon ? "text-primary" : "text-muted-foreground"
-                    )}>
-                      {daysAway === 0 ? 'Today' : daysAway === 1 ? 'Tomorrow' : `In ${daysAway} days`}
-                    </span>
+                    {daysAway >= 0 ? (
+                      <span className={cn(
+                        "text-xs font-medium",
+                        isSoon ? "text-primary" : "text-muted-foreground"
+                      )}>
+                        {daysAway === 0 ? 'Today' : daysAway === 1 ? 'Tomorrow' : `In ${daysAway} days`}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Past
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

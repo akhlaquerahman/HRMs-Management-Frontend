@@ -111,7 +111,7 @@ export default function RegisterPage() {
                   {...register('firstName')} 
                   type="text" 
                   placeholder="John" 
-                  className={`pl-11 h-12 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.firstName ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                  className={`pl-11 h-12 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.firstName ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
                 />
               </div>
               {errors.firstName && <p className="text-red-500 text-xs font-medium pl-1">{errors.firstName.message}</p>}
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                   {...register('lastName')} 
                   type="text" 
                   placeholder="Doe" 
-                  className={`pl-11 h-12 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.lastName ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                  className={`pl-11 h-12 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.lastName ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
                 />
               </div>
               {errors.lastName && <p className="text-red-500 text-xs font-medium pl-1">{errors.lastName.message}</p>}
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                 {...register('email')} 
                 type="email" 
                 placeholder="you@example.com" 
-                className={`pl-11 h-12 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                className={`pl-11 h-12 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
               />
             </div>
             {errors.email && <p className="text-red-500 text-xs font-medium pl-1">{errors.email.message}</p>}
@@ -163,7 +163,7 @@ export default function RegisterPage() {
                 {...register('password')} 
                 type={showPassword ? 'text' : 'password'} 
                 placeholder="••••••••" 
-                className={`pl-11 pr-11 h-12 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                className={`pl-11 pr-11 h-12 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
               />
               <button 
                 type="button"
@@ -187,7 +187,7 @@ export default function RegisterPage() {
                 {...register('confirmPassword')} 
                 type={showConfirmPassword ? 'text' : 'password'} 
                 placeholder="••••••••" 
-                className={`pl-11 pr-11 h-12 rounded-2xl bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
+                className={`pl-11 pr-11 h-12 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm focus-visible:ring-pink-500 focus-visible:border-pink-500 transition-all ${errors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
               />
               <button 
                 type="button"

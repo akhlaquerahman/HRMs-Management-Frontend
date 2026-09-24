@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Phone, Mail, FileText, Activity, ShieldCheck, User } from 'lucide-react';

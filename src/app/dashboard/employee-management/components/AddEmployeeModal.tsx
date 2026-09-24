@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,22 +7,46 @@ import { Label } from '@/components/ui/label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
+import { Loader2 } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { nameValidation, employeeNameValidation, emailValidation, passwordValidation, empIdValidation, dateValidation } from '@/lib/validations/common.schema';
+
+const employeeSchema = z.object({
+  firstName: employeeNameValidation,
+  lastName: employeeNameValidation,
+  email: emailValidation,
+  password: passwordValidation,
+  employeeId: empIdValidation,
+  departmentId: z.string().optional(),
+  designationId: z.string().optional(),
+  joiningDate: dateValidation,
+  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT']),
+  baseSalary: z.string().optional(),
+});
+
+type EmployeeFormData = z.infer<typeof employeeSchema>;
 
 export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    employeeId: '',
-    departmentId: '',
-    designationId: '',
-    joiningDate: new Date().toISOString().split('T')[0],
-    employmentType: 'FULL_TIME',
-    baseSalary: '',
+  const { register, handleSubmit, formState: { errors, isValid }, reset } = useForm<EmployeeFormData>({
+    resolver: zodResolver(employeeSchema),
+    mode: "onTouched",
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      employeeId: '',
+      departmentId: '',
+      designationId: '',
+      joiningDate: new Date().toISOString().split('T')[0],
+      employmentType: 'FULL_TIME',
+      baseSalary: '',
+    },
   });
 
   // Fetch meta data
@@ -39,14 +63,20 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
   useEffect(() => {
     if (isOpen) {
       const randomId = `EMP-${Math.floor(Math.random() * 9000) + 1000}`;
-      setFormData(prev => ({ ...prev, employeeId: randomId }));
+      reset({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        employeeId: randomId,
+        departmentId: '',
+        designationId: '',
+        joiningDate: new Date().toISOString().split('T')[0],
+        employmentType: 'FULL_TIME',
+        baseSalary: '',
+      });
     }
-  }, [isOpen]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, [isOpen, reset]);
 
   const createEmployee = useMutation({
     mutationFn: async (data: any) => {
@@ -57,38 +87,18 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
       queryClient.invalidateQueries({ queryKey: ['workforceEmployees'] });
       queryClient.invalidateQueries({ queryKey: ['workforceDashboard'] });
       onClose();
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        employeeId: '',
-        departmentId: '',
-        designationId: '',
-        joiningDate: new Date().toISOString().split('T')[0],
-        employmentType: 'FULL_TIME',
-        baseSalary: '',
-      });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || error.message);
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.employeeId || !formData.password) {
-      return toast.error(t("Please fill all required fields."));
-    }
-    
-    // Ensure date is properly formatted
+  const onSubmitForm = (data: EmployeeFormData) => {
     const payload = {
-      ...formData,
-      joiningDate: new Date(formData.joiningDate).toISOString(),
-      baseSalary: formData.baseSalary ? parseFloat(formData.baseSalary) : 0,
+      ...data,
+      joiningDate: new Date(data.joiningDate).toISOString(),
+      baseSalary: data.baseSalary ? parseFloat(data.baseSalary) : 0,
     };
-    
     createEmployee.mutate(payload);
   };
 

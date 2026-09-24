@@ -1,4 +1,5 @@
-"use client";
+import { Metadata } from 'next';
+import { PayrollManagementClient } from '../payslips/components/PayrollManagementClient';
 
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

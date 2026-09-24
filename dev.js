@@ -20,7 +20,9 @@ console.log(`📱 Access HRMS on your mobile or other devices via:`);
 console.log(`👉 http://${ip}:3000`);
 console.log('========================================================\n');
 
-const child = spawn('npx', ['next', 'dev', '--turbo', '-H', '0.0.0.0'], { stdio: 'inherit', shell: true });
+const path = require('path');
+const nextPath = path.resolve(__dirname, 'node_modules', 'next', 'dist', 'bin', 'next');
+const child = spawn('node', [nextPath, 'dev', '--turbo', '-H', '0.0.0.0'], { stdio: 'inherit' });
 
 child.on('error', (err) => {
   console.error('Failed to start Next.js dev server:', err);

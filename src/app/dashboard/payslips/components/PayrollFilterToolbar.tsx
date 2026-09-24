@@ -13,6 +13,9 @@ interface PayrollFilterToolbarProps {
   onReset: () => void;
   onExportCSV: () => void;
   showEmployeeFilter?: boolean;
+  onCreateClick?: () => void;
+  onBulkPayClick?: () => void;
+  filters?: any;
 }
 
 export function PayrollFilterToolbar({ 
@@ -20,7 +23,10 @@ export function PayrollFilterToolbar({
   onFilterChange, 
   onReset, 
   onExportCSV,
-  showEmployeeFilter = false
+  showEmployeeFilter = false,
+  onCreateClick,
+  onBulkPayClick,
+  filters
 }: PayrollFilterToolbarProps) {
   const { t } = useTranslation();
 
@@ -83,6 +89,18 @@ export function PayrollFilterToolbar({
           <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
           CSV
         </Button>
+        {onBulkPayClick && (
+          <Button size="sm" className="h-10 px-4 bg-secondary text-secondary-foreground hover:bg-secondary/90" onClick={onBulkPayClick}>
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            {t("Bulk Pay")}
+          </Button>
+        )}
+        {onCreateClick && (
+          <Button size="sm" className="h-10 px-4 bg-primary text-primary-foreground hover:bg-primary/90" onClick={onCreateClick}>
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            {t("Pay Salary")}
+          </Button>
+        )}
       </div>
 
     </div>

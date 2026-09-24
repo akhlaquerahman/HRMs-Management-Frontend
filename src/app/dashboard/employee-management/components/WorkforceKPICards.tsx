@@ -1,16 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, UserCheck, UserX, CalendarDays, UserPlus, Clock } from 'lucide-react';
+import { Users, UserCheck, UserX, CalendarDays, UserPlus, Clock, Loader2 } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function WorkforceKPICards({ data, loading }: { data: any, loading: boolean }) {
   const { t } = useTranslation();
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="animate-pulse bg-muted/20 border-border/50 rounded-xl p-4 h-24" />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+          <div key={i} className="flex flex-col gap-2 p-4 border rounded-xl bg-card shadow-sm h-[100px]">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-8 w-12" />
+          </div>
         ))}
       </div>
     );

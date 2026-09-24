@@ -171,13 +171,13 @@ export function DocumentPreviewDrawer({ isOpen, onClose, record, isHR }: Documen
         {/* Footer Actions */}
         <div className="shrink-0 p-4 bg-muted/30 border-t flex flex-wrap justify-end gap-3">
           <Button variant="outline" onClick={onClose} className="hidden sm:inline-flex">{t("Close")}</Button>
-          <Button variant="outline" onClick={handleDownload} className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-white">
+          <Button variant="outline" onClick={handleDownload} className="text-blue-600 border-blue-200 hover:bg-blue-50 bg-white dark:bg-slate-900">
             <Download className="w-4 h-4 mr-2" /> {t("Download")}
           </Button>
           
           {isHR && record.verificationStatus === 'PENDING' && (
             <>
-              <Button variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50 bg-white">
+              <Button variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50 bg-white dark:bg-slate-900">
                 <XCircle className="w-4 h-4 mr-2" /> {t("Reject")}
               </Button>
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">

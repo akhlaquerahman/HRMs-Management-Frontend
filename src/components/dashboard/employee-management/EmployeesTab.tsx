@@ -24,7 +24,7 @@ export function EmployeesTab() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
   });
 
-  const employees = res?.data || [];
+  const employees = Array.isArray(res?.data) ? res.data : (res?.data?.data || []);
 
   if (isLoading) return <div className="p-8 text-center">{t("Loading...")}</div>;
 

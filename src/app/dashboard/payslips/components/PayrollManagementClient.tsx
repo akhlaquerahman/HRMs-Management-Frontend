@@ -17,17 +17,21 @@ import { PayrollAnalytics } from './PayrollAnalytics';
 import { YTDSummaryWidget } from './YTDSummaryWidget';
 import { PayrollTimelineWidget } from './PayrollTimelineWidget';
 import { RaiseQueryModal } from './RaiseQueryModal';
+import { PaySalaryModal } from './PaySalaryModal';
+import { BulkPayModal } from './BulkPayModal';
 import { AIInsightsCard } from '@/components/dashboard/AIInsightsCard';
 import { UpcomingHolidays } from '@/components/dashboard/UpcomingHolidays'; // Using existing widgets
 
 export function PayrollManagementClient() {
   const { t } = useTranslation();
   const user = useAuthStore(state => state.user);
-  const isHR = user?.role === 'HR_MANAGER' || user?.role === 'SUPER_ADMIN';
+  const isHR = user?.role === 'HR_MANAGER' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR Admin' || user?.role === 'HR_ADMIN';
 
   const [filters, setFilters] = useState({ search: '', status: 'ALL', year: 'ALL', month: 'ALL' });
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isBulkPayModalOpen, setIsBulkPayModalOpen] = useState(false);
 
   // Queries
   const { data: summaryData, isLoading: isLoadingSummary } = useQuery({
@@ -112,11 +116,14 @@ export function PayrollManagementClient() {
       <div className="grid grid-cols-1 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <PayrollFilterToolbar 
+            filters={filters}
             onSearch={(v) => handleFilterChange('search', v)}
             onFilterChange={handleFilterChange}
             onReset={handleReset}
             onExportCSV={handleExportCSV}
             showEmployeeFilter={isHR}
+            onCreateClick={isHR ? () => setIsCreateModalOpen(true) : undefined}
+            onBulkPayClick={isHR ? () => setIsBulkPayModalOpen(true) : undefined}
           />
           <PayrollTable 
             data={tableData} 
@@ -124,7 +131,6 @@ export function PayrollManagementClient() {
             isHR={isHR}
             onView={(r) => setSelectedRecord(r)} 
           />
-          <PayrollAnalytics analytics={analyticsData} loading={isLoadingAnalytics} />
         </div>
       </div>
 
@@ -137,6 +143,16 @@ export function PayrollManagementClient() {
       <RaiseQueryModal 
         isOpen={isQueryModalOpen}
         onClose={() => setIsQueryModalOpen(false)}
+      />
+
+      <PaySalaryModal 
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
+
+      <BulkPayModal
+        isOpen={isBulkPayModalOpen}
+        onClose={() => setIsBulkPayModalOpen(false)}
       />
     </div>
   );

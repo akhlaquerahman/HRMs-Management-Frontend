@@ -16,6 +16,11 @@ interface PayslipDrawerProps {
 export function PayslipDrawer({ isOpen, onClose, record }: PayslipDrawerProps) {
   const { t } = useTranslation();
 
+  const { data: companyRes } = useQuery({
+    queryKey: ["company"],
+    queryFn: async () => (await api.get("/company")).data
+  });
+
   if (!record) return null;
 
   const handlePrint = () => {

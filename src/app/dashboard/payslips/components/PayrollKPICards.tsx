@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { KPICard } from '@/components/dashboard/KPICard';
-import { Wallet, Banknote, CheckCircle, Award, TrendingDown, Receipt, FileText, Clock } from 'lucide-react';
+import { Wallet, Banknote, CheckCircle, Award, TrendingDown, Receipt, FileText, Clock, Loader2 } from 'lucide-react';
 
 interface PayrollKPICardsProps {
   metrics: any[];
@@ -12,16 +12,9 @@ interface PayrollKPICardsProps {
 export function PayrollKPICards({ metrics, loading }: PayrollKPICardsProps) {
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-6 lg:grid-cols-6 xl:grid-cols-6">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-xl border bg-card p-6 h-[120px] animate-pulse flex gap-4 items-center">
-            <div className="w-12 h-12 rounded-lg bg-muted shrink-0" />
-            <div className="flex-1 flex flex-col gap-2">
-              <div className="h-4 bg-muted rounded w-1/2" />
-              <div className="h-6 bg-muted rounded w-3/4" />
-            </div>
-          </div>
-        ))}
+      <div className="w-full h-24 flex items-center justify-center gap-3">
+        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+        <p className="text-muted-foreground font-medium animate-pulse">Loading payroll metrics...</p>
       </div>
     );
   }
@@ -54,7 +47,7 @@ export function PayrollKPICards({ metrics, loading }: PayrollKPICardsProps) {
   };
 
   return (
-    <div className="grid gap-4 grid-cols-2 md:grid-cols-6 ">
+    <div className="grid gap-6 grid-cols-2 md:grid-cols-6 ">
       {metrics?.map((metric: any, i: number) => {
         const { color, bg, cardBg } = getColorClasses(metric.title);
         return (

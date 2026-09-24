@@ -65,9 +65,11 @@ export default function MyAttendancePage() {
   const filteredRecords = (records || []).filter((item: any) => {
     let matchesPeriod = true;
     if (periodFilter) {
-      const [year, month] = periodFilter.split('-');
+      const selectedDate = new Date(periodFilter);
       const itemDate = new Date(item.date);
-      matchesPeriod = itemDate.getFullYear() === parseInt(year) && (itemDate.getMonth() + 1) === parseInt(month);
+      matchesPeriod = itemDate.getFullYear() === selectedDate.getFullYear() && 
+                      itemDate.getMonth() === selectedDate.getMonth() &&
+                      itemDate.getDate() === selectedDate.getDate();
     }
 
     const logs = [...(item.logs || [])].sort((a: any, b: any) => new Date(a.punchIn).getTime() - new Date(b.punchIn).getTime());
