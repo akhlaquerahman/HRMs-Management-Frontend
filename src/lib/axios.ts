@@ -4,6 +4,9 @@ import NProgress from 'nprogress';
 
 const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://hr-ms-management-backend.vercel.app/api';
+  }
   if (typeof window !== 'undefined') {
     return `${window.location.protocol}//${window.location.hostname}:6002/api`;
   }
