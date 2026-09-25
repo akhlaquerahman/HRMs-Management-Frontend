@@ -382,6 +382,7 @@ export default function LoginPage() {
                     <Input 
                       {...register('email')} 
                       type="email" 
+                      autoComplete="username"
                       placeholder="name@company.com" 
                       className={`pl-10 h-11 sm:h-12 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`} 
                     />
@@ -419,6 +420,7 @@ export default function LoginPage() {
                     <Input 
                       {...register('password')} 
                       type={showPassword ? 'text' : 'password'} 
+                      autoComplete="current-password"
                       placeholder="••••••••" 
                       className={`pl-10 pr-10 h-11 sm:h-12 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden`} 
                     />
@@ -582,7 +584,7 @@ export default function LoginPage() {
                     theme="outline"
                     size="large"
                     shape="pill"
-                    width="100%"
+                    width="320"
                     text="continue_with"
                   />
                 </GoogleOAuthProvider>
