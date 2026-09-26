@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, FileDown, Layers } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -20,6 +20,7 @@ interface DashboardDataTableProps<T> {
   onExport?: () => void;
   searchable?: boolean;
   searchKey?: keyof T;
+  headerAction?: React.ReactNode;
 }
 
 export function DashboardDataTable<T>({ 
@@ -29,7 +30,8 @@ export function DashboardDataTable<T>({
   loading, 
   onExport,
   searchable,
-  searchKey
+  searchKey,
+  headerAction
 }: DashboardDataTableProps<T>) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,13 +53,17 @@ export function DashboardDataTable<T>({
   const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="flex flex-col h-full bg-card border rounded-xl shadow-sm overflow-hidden">
-      <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-muted/20">
-        <h3 className="font-semibold text-lg">{t(title)}</h3>
+    <div className="flex flex-col h-full bg-card border rounded-2xl shadow-xs overflow-hidden transition-all duration-200 hover:shadow-md">
+      {/* Header */}
+      <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-muted/10">
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-primary shrink-0" />
+          <h3 className="font-bold text-base text-foreground tracking-tight">{t(title)}</h3>
+        </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {searchable && (
             <div className="relative flex-1 sm:w-48">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input 
                 placeholder={t('Search...')} 
                 value={searchTerm}
@@ -65,59 +71,60 @@ export function DashboardDataTable<T>({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="h-9 pl-9 bg-background"
+                className="h-8 pl-8 text-xs bg-background rounded-lg border-muted"
               />
             </div>
           )}
+          {headerAction}
           {onExport && (
-            <Button variant="outline" size="icon" onClick={onExport} className="h-9 w-9">
-              <FileDown className="h-4 w-4" />
+            <Button variant="outline" size="icon" onClick={onExport} className="h-8 w-8 rounded-lg">
+              <FileDown className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm text-left whitespace-nowrap">
-          <thead className="text-xs text-muted-foreground uppercase bg-muted/40 sticky top-0 z-10">
+      {/* Table Container */}
+      <div className="flex-1 overflow-x-auto">
+        <table className="w-full text-xs sm:text-sm text-left border-collapse">
+          <thead className="text-[11px] text-muted-foreground uppercase font-semibold bg-muted/30 border-b">
             <tr>
               {columns.map((col, idx) => (
-                <th key={idx} className={`px-4 py-3 font-medium ${col.className || ''}`}>
+                <th key={idx} className={`px-4 py-3 font-semibold tracking-wider ${col.className || ''}`}>
                   {t(col.header)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border/60">
             {loading ? (
               Array.from({ length: itemsPerPage }).map((_, idx) => (
-                <tr key={idx} className="border-b last:border-0">
+                <tr key={idx}>
                   {columns.map((_, cIdx) => (
                     <td key={cIdx} className="px-4 py-3">
-                      <div className="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+                      <div className="h-4 bg-muted/60 animate-pulse rounded-md w-3/4"></div>
                     </td>
                   ))}
                 </tr>
               ))
             ) : paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-muted-foreground text-xs">
                   {t('No data available')}
                 </td>
               </tr>
             ) : (
               paginatedData.map((row, idx) => (
-                <tr key={idx} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                <tr key={idx} className="hover:bg-muted/20 transition-colors">
                   {columns.map((col, cIdx) => {
                     let content = typeof col.accessor === 'function' ? col.accessor(row) : (row[col.accessor as keyof T] as any);
                     
-                    // Safe render fallback for accidental objects
                     if (content && typeof content === 'object' && !React.isValidElement(content)) {
                       content = content.name || content.title || JSON.stringify(content);
                     }
                     
                     return (
-                      <td key={cIdx} className={`px-4 py-3 ${col.className || ''}`}>
+                      <td key={cIdx} className={`px-4 py-3.5 max-w-[220px] truncate ${col.className || ''}`}>
                         {content as React.ReactNode}
                       </td>
                     );
@@ -129,31 +136,32 @@ export function DashboardDataTable<T>({
         </table>
       </div>
 
-      <div className="p-3 border-t bg-muted/20 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">
-          {t('Showing')} {Math.min((currentPage - 1) * itemsPerPage + 1, filteredData.length)} {t('to')} {Math.min(currentPage * itemsPerPage, filteredData.length)} {t('of')} {filteredData.length}
+      {/* Footer Pagination */}
+      <div className="p-3 border-t bg-muted/10 flex items-center justify-between text-xs text-muted-foreground">
+        <span>
+          {t('Showing')} <strong className="font-semibold text-foreground">{filteredData.length > 0 ? Math.min((currentPage - 1) * itemsPerPage + 1, filteredData.length) : 0}</strong> {t('to')} <strong className="font-semibold text-foreground">{Math.min(currentPage * itemsPerPage, filteredData.length)}</strong> {t('of')} <strong className="font-semibold text-foreground">{filteredData.length}</strong>
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-7 w-7" 
+            className="h-7 w-7 rounded-lg" 
             disabled={currentPage === 1 || loading}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <span className="text-xs px-2 font-medium">
+          <span className="text-[11px] px-2 font-medium">
             {currentPage} / {totalPages}
           </span>
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-7 w-7"
+            className="h-7 w-7 rounded-lg"
             disabled={currentPage === totalPages || loading}
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>

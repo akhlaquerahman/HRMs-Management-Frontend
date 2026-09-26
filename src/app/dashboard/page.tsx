@@ -161,11 +161,17 @@ export default function DashboardPage() {
     }
   }
 
+  const displayName = profileRes?.data?.firstName 
+    ? `${profileRes.data.firstName} ${profileRes.data.lastName || ''}`.trim() 
+    : user?.firstName 
+      ? `${user.firstName} ${user.lastName || ''}`.trim() 
+      : user?.email ? user.email.split('@')[0] : 'User';
+
   return (
     <div className="flex flex-col gap-6 max-w-[1600px] mx-auto pt-2 sm:pt-4 pb-10">
       <PageHeader 
         title="Overview" 
-        description={`${t('Welcome back,')} ${profileRes?.data?.firstName || user?.email || 'User'}!`}
+        description={`${t('Welcome back,')} ${displayName}!`}
         showSearch={false}
         showFilters={false}
         showCreate={false}

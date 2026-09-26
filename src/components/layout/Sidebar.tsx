@@ -279,12 +279,16 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
       
       <div className="p-4 border-t shrink-0 bg-muted/20">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
-            {user?.firstName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+          <div className="h-9 w-9 rounded-full bg-primary/15 text-primary font-extrabold flex items-center justify-center shrink-0 shadow-xs border border-primary/20">
+            {user?.firstName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'S'}
           </div>
-          <div className="flex flex-col truncate">
-            <span className="text-sm font-medium truncate">{user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email}</span>
-            <span className="text-xs text-muted-foreground truncate">{user?.role}</span>
+          <div className="flex flex-col truncate min-w-0 flex-1">
+            <span className="text-sm font-bold truncate text-foreground" title={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email}>
+              {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : (user?.email ? user.email.split('@')[0] : 'User')}
+            </span>
+            <span className="text-[11px] font-semibold text-primary/80 uppercase tracking-wider truncate" title={user?.email}>
+              {user?.role ? user.role.replace(/_/g, ' ') : 'SUPER ADMIN'}
+            </span>
           </div>
         </div>
       </div>

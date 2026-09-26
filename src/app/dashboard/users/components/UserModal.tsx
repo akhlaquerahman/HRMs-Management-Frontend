@@ -12,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { emailValidation, employeeNameValidation, passwordValidation } from "@/lib/validations/common.schema";
+import { emailValidation, nameValidation, passwordValidation } from "@/lib/validations/common.schema";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -26,11 +26,15 @@ export function UserModal({ isOpen, onClose, user, roles }: UserModalProps) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  const isEditMode = Boolean(user && user.id);
+
   const userSchema = z.object({
-    firstName: employeeNameValidation,
-    lastName: employeeNameValidation,
+    firstName: nameValidation,
+    lastName: nameValidation,
     email: emailValidation,
-    password: user ? z.string().optional().refine(val => !val || val.length >= 8, "Password must be at least 8 characters (if provided)") : passwordValidation,
+    password: isEditMode
+      ? z.string().optional().refine(val => !val || val.length >= 8, "Password must be at least 8 characters (if provided)") 
+      : passwordValidation,
     roleId: z.string().min(1, "Role is required"),
     companyName: z.string().optional(),
     companyWebsite: z.string().optional(),
@@ -50,7 +54,7 @@ export function UserModal({ isOpen, onClose, user, roles }: UserModalProps) {
   });
 
   useEffect(() => {
-    if (user && isOpen) {
+    if (user && user.id && isOpen) {
       reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -73,7 +77,7 @@ export function UserModal({ isOpen, onClose, user, roles }: UserModalProps) {
   const onSubmit = async (data: UserFormData) => {
     setIsSubmitting(true);
     try {
-      if (user) {
+      if (isEditMode) {
         // Edit mode (exclude password if empty)
         const payload = { ...data };
         if (!payload.password) {
@@ -144,7 +148,11 @@ export function UserModal({ isOpen, onClose, user, roles }: UserModalProps) {
               <label className="text-sm font-medium mb-1 block">{t("Role")} *</label>
               <select {...register("roleId")} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                 <option value="" disabled>Select Role</option>
-                {roles.map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                {roles.map((r: any) => (
+                  <option key={r.id || r.name || r} value={r.id || r.name || r}>
+                    {r.name || r}
+                  </option>
+                ))}
               </select>
               {errors.roleId && <span className="text-xs text-red-500">{errors.roleId.message}</span>}
             </div>
