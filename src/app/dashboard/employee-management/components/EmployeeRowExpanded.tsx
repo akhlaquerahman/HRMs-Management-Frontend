@@ -20,6 +20,13 @@ export function EmployeeRowExpanded({ employee }: { employee: any }) {
           <div className="flex items-center gap-2 text-muted-foreground">
             <Mail className="w-3.5 h-3.5" /> <span className="truncate">{employee.email}</span>
           </div>
+          {(employee.companyName || employee.user?.companyName) && (
+            <div className="flex items-center gap-2 font-medium text-blue-600 dark:text-blue-400">
+              <span className="text-xs bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200/50 dark:border-blue-800/50">
+                🏢 {employee.companyName || employee.user?.companyName}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 text-muted-foreground">
             <Phone className="w-3.5 h-3.5" /> <span>{employee.phone || "—"}</span>
           </div>

@@ -1,5 +1,17 @@
 const { spawn } = require('child_process');
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
+
+// Ensure development static directory exists to prevent Next.js Turbopack ENOENT errors on Windows
+const devDir = path.join(__dirname, '.next', 'static', 'development');
+try {
+  if (!fs.existsSync(devDir)) {
+    fs.mkdirSync(devDir, { recursive: true });
+  }
+} catch (e) {
+  // Ignore folder creation errors
+}
 
 function getLocalIp() {
   const interfaces = os.networkInterfaces();
@@ -20,9 +32,8 @@ console.log(`📱 Access HRMS on your mobile or other devices via:`);
 console.log(`👉 http://${ip}:3000`);
 console.log('========================================================\n');
 
-const path = require('path');
 const nextPath = path.resolve(__dirname, 'node_modules', 'next', 'dist', 'bin', 'next');
-const child = spawn('node', [nextPath, 'dev', '--turbo', '-H', '0.0.0.0'], { stdio: 'inherit' });
+const child = spawn('node', [nextPath, 'dev', '-H', '0.0.0.0'], { stdio: 'inherit' });
 
 child.on('error', (err) => {
   console.error('Failed to start Next.js dev server:', err);

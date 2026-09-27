@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { MoreVertical, Edit, Trash2, ChevronLeft, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, ChevronLeft, ChevronRight, ChevronDown, Loader2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -27,9 +27,10 @@ interface RolesTableProps {
   loading?: boolean;
   onEdit: (role: any) => void;
   onDelete: (id: string) => void;
+  onManageAccess?: (role: any) => void;
 }
 
-export function RolesTable({ data, loading, onEdit, onDelete }: RolesTableProps) {
+export function RolesTable({ data, loading, onEdit, onDelete, onManageAccess }: RolesTableProps) {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -191,6 +192,9 @@ export function RolesTable({ data, loading, onEdit, onDelete }: RolesTableProps)
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onManageAccess?.(role)} className="text-blue-600 font-medium">
+                            <Shield className="w-4 h-4 mr-2 text-blue-600" /> Manage Page Access
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => onEdit(role)}>
                             <Edit className="w-4 h-4 mr-2" /> Edit Role
                           </DropdownMenuItem>

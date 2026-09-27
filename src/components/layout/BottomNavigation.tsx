@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useTranslation } from 'react-i18next';
+import { extractRoleName } from '@/lib/pagePermissions';
 import {
   LayoutDashboard,
   Clock,
@@ -24,8 +25,9 @@ export default function BottomNavigation({ onOpenMore }: BottomNavigationProps) 
   const { user } = useAuthStore();
   const { t } = useTranslation();
 
-  const userRole = user?.role?.toUpperCase() || '';
-  const isHR = userRole === 'HR_ADMIN' || userRole === 'HR ADMIN' || userRole === 'SUPER_ADMIN' || userRole === 'SUPER ADMIN';
+  const roleNameRaw = extractRoleName(user?.role);
+  const userRole = roleNameRaw.toUpperCase().trim().replace(/[\s\_]+/g, '_');
+  const isHR = userRole.includes('HR') || userRole === 'HR_MANAGER' || userRole === 'HR_ADMIN' || userRole === 'SUPER_ADMIN';
 
   // Role-specific bottom tabs (5 primary tabs)
   const employeeTabs = [

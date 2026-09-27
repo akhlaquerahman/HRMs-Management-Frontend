@@ -42,8 +42,9 @@ export function WorkforceManagementClient() {
     queryKey: ['workforceEmployees', filters, page, limit],
     queryFn: async () => {
       const res = await api.get('/employees', { params: { ...filters, page, limit } });
-      return res.data.data; // { data: [], total, page, totalPages }
+      return res.data.data;
     },
+    staleTime: 0,
     placeholderData: keepPreviousData,
   });
 
@@ -61,6 +62,10 @@ export function WorkforceManagementClient() {
     setIsDrawerOpen(true);
   };
 
+  const employeesList = Array.isArray(employeesData) 
+    ? employeesData 
+    : (Array.isArray(employeesData?.data) ? employeesData.data : []);
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -74,6 +79,7 @@ export function WorkforceManagementClient() {
               variant="outline"
               size="sm"
               title="Bulk Import"
+              onClick={() => setIsBulkImportModalOpen(true)}
               className="h-9 px-2.5 sm:px-3 text-xs font-medium gap-1.5 shrink-0"
             >
               <UploadCloud className="w-3.5 h-3.5" />
@@ -109,7 +115,7 @@ export function WorkforceManagementClient() {
       <div className="grid grid-cols-1 gap-6">
         <div className="lg:col-span-9 space-y-6">
           <EmployeeTable 
-            data={employeesData?.data || []} 
+            data={employeesList} 
             loading={isTableLoading} 
             onOpenProfile={handleOpenProfile} 
             onEditEmployee={(emp: any) => {

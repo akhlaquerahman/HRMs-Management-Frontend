@@ -8,6 +8,7 @@ import { useMutation } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Building2, 
@@ -75,8 +76,8 @@ export default function RegisterPage() {
         className="w-full max-w-[460px] p-6 sm:p-10 relative z-10"
       >
         {/* Logo Icon */}
-        <div className="w-14 h-14 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-8 mx-auto">
-          <Building2 className="w-7 h-7 text-slate-700 dark:text-slate-300" />
+        <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-md border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-6 mx-auto p-2">
+          <Image src="/hrms-logo.png" alt="HRMS Logo" width={48} height={48} className="w-full h-full object-contain" />
         </div>
 
         <div className="mb-8 text-center">

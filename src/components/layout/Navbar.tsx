@@ -4,6 +4,8 @@ import { useState } from 'react';
 
 import { useAuthStore } from '@/store/authStore';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'next-themes';
 import {
@@ -75,10 +77,19 @@ export default function Navbar({ onOpenMobileSidebar }: NavbarProps) {
   return (
     <header className="flex h-14 sm:h-16 items-center justify-between px-1.5 sm:px-6 bg-card border-b shadow-xs shrink-0 z-20 gap-1">
       {/* Left */}
-      <div className="flex items-center gap-1 sm:gap-4 shrink-0 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0 min-w-0">
         <Button variant="ghost" size="icon" className="lg:hidden shrink-0 h-7 w-7 sm:h-9 sm:w-9 p-0" onClick={onOpenMobileSidebar} aria-label="Toggle navigation sidebar">
           <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
+        <Link href="/dashboard" className="flex items-center gap-2 shrink-0" title="HRMS Dashboard">
+          <Image
+            src="/hrms-logo.png"
+            alt="HRMS Logo"
+            width={32}
+            height={32}
+            className="h-7 w-7 sm:h-8 sm:w-8 object-contain rounded-md"
+          />
+        </Link>
         <div className="hidden sm:flex items-center text-sm text-muted-foreground gap-2 truncate">
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center gap-2 truncate">

@@ -2,9 +2,11 @@
 
 import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
+import { getRolePagePermissions, extractRoleName } from '@/lib/pagePermissions';
 import {
   LayoutDashboard,
   Users,
@@ -172,34 +174,52 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
     };
   }, [isMobileOpen, onClose]);
 
-  // Filter links based on role
-  const userRole = user?.role?.toUpperCase() || '';
-  const isSuperAdmin = userRole === 'SUPER_ADMIN' || userRole === 'SUPER ADMIN';
-  const isHrAdmin = userRole === 'HR_ADMIN' || userRole === 'HR ADMIN';
+  // Dynamic Page Permissions & Role Filtering
+  const roleNameRaw = extractRoleName(user?.role);
+  const normalizedRole = roleNameRaw.toUpperCase().trim().replace(/[\s\_]+/g, '_');
+  const isSuperAdmin = normalizedRole === 'SUPER_ADMIN' || normalizedRole === 'SUPER_ADMINISTRATOR';
+  const isHrAdmin = normalizedRole.includes('HR') || normalizedRole === 'HR_MANAGER' || normalizedRole === 'HR_ADMIN';
+
+  const [allowedPages, setAllowedPages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const syncPermissions = () => {
+      const perms = getRolePagePermissions(user?.role);
+      setAllowedPages(perms);
+    };
+    syncPermissions();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('hrms_permissions_updated', syncPermissions);
+      window.addEventListener('storage', syncPermissions);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('hrms_permissions_updated', syncPermissions);
+        window.removeEventListener('storage', syncPermissions);
+      }
+    };
+  }, [user?.role]);
   
   const filteredLinks = menuConfig.filter(link => {
-    const adminOnlyLinks = ['/dashboard/users', '/dashboard/roles', '/dashboard/audit-logs'];
-    const hrOnlyLinks = [
-      '/dashboard/organization',
-      '/dashboard/employee-management', 
-      '/dashboard/org-setup',
-      '/dashboard/attendance', 
-      '/dashboard/leave-management', 
-      '/dashboard/payroll', 
-      '/dashboard/recruitment', 
-      '/dashboard/documents'
-    ];
-    const employeeOnlyLinks = [
-      '/dashboard/my-attendance',
-      '/dashboard/leave-request',
-      '/dashboard/payslips',
-      '/dashboard/my-documents'
-    ];
+    // Dedicated clean Admin sidebar for Super Admin
+    if (isSuperAdmin) {
+      const superAdminPages = [
+        '/dashboard',
+        '/dashboard/my-attendance',
+        '/dashboard/users',
+        '/dashboard/roles',
+        '/dashboard/audit-logs',
+        '/dashboard/profile'
+      ];
+      return superAdminPages.includes(link.href);
+    }
+
+    // Use Super Admin configured page access if set for HR / Employee
+    if (allowedPages && allowedPages.length > 0) {
+      return allowedPages.includes(link.href);
+    }
     
-    if (adminOnlyLinks.includes(link.href)) return isSuperAdmin;
-    if (hrOnlyLinks.includes(link.href)) return isHrAdmin;
-    if (link.href === '/dashboard/my-attendance') return true;
-    if (employeeOnlyLinks.includes(link.href)) return userRole === 'EMPLOYEE';
+    if (isHrAdmin) return true;
     
     return true;
   });
@@ -211,9 +231,15 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
   const sidebarContent = (
     <div className="flex flex-col h-full bg-card">
       <div className="h-16 flex items-center justify-between px-6 border-b shrink-0">
-        <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-primary">
-          <Briefcase className="h-6 w-6" />
-          HRMS Pro
+        <div className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-primary">
+          <Image
+            src="/hrms-logo.png"
+            alt="HRMS Logo"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain rounded-md"
+          />
+          <span>HRMS Pro</span>
         </div>
         {onClose && (
           <button

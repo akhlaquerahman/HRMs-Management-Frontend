@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserCircle, MoreVertical, ChevronDown, ChevronRight, Edit, Eye, Trash2, Shield, ChevronLeft, ChevronRight as ChevronRightIcon, UserPlus, Loader2 } from 'lucide-react';
+import { UserCircle, MoreVertical, ChevronDown, ChevronRight, Edit, Eye, Trash2, Shield, ChevronLeft, ChevronRight as ChevronRightIcon, UserPlus, Loader2, Building2 } from 'lucide-react';
 import { formatDate } from '@/lib/dateUtils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -293,6 +293,16 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
                         <div className="flex flex-col min-w-0">
                           <span className="font-semibold text-sm truncate">{emp.firstName} {emp.lastName}</span>
                           <span className="text-xs text-muted-foreground truncate">{emp.email}</span>
+                          {(emp.companyName || emp.user?.companyName) ? (
+                            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 mt-0.5 truncate">
+                              <Building2 className="w-3.5 h-3.5 shrink-0 text-blue-500" />
+                              <span className="truncate">{emp.companyName || emp.user?.companyName}</span>
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground mt-0.5 block truncate">
+                              No Company
+                            </span>
+                          )}
                         </div>
                       </div>
                     </TableCell>

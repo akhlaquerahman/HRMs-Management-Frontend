@@ -9,6 +9,7 @@ import api from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -239,8 +240,8 @@ export default function LoginPage() {
           
           {/* Top Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg">
-              <Building2 className="w-6 h-6 text-white" />
+            <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg p-1.5">
+              <Image src="/hrms-logo.png" alt="HRMS Logo" width={40} height={40} className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-black tracking-wider text-white uppercase">Enterprise HRMS</span>
@@ -308,8 +309,8 @@ export default function LoginPage() {
           
           {/* Mobile Logo Branding */}
           <div className="md:hidden flex flex-col items-center gap-2 mb-6 text-center">
-            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-              <Building2 className="w-6 h-6 text-white" />
+            <div className="w-14 h-14 bg-white/90 dark:bg-slate-800 rounded-2xl flex items-center justify-center shadow-lg p-2 border border-slate-200 dark:border-slate-700">
+              <Image src="/hrms-logo.png" alt="HRMS Logo" width={48} height={48} className="w-full h-full object-contain" />
             </div>
             <span className="text-lg font-black tracking-wider text-slate-900 dark:text-white uppercase">Enterprise HRMS</span>
           </div>

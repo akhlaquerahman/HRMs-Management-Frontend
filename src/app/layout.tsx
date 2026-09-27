@@ -6,7 +6,12 @@ import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from 'sonner';
 
 export const metadata = {
-  title: 'Enterprise HRMS',
+  title: 'HRMS',
+  icons: {
+    icon: '/hrms-logo.png',
+    shortcut: '/hrms-logo.png',
+    apple: '/hrms-logo.png',
+  },
 };
 
 export default function RootLayout({

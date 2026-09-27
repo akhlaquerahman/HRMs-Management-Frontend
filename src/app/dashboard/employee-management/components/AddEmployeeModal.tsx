@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,46 +7,22 @@ import { Label } from '@/components/ui/label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
-import { Loader2 } from "lucide-react";
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { nameValidation, employeeNameValidation, emailValidation, passwordValidation, empIdValidation, dateValidation } from '@/lib/validations/common.schema';
-
-const employeeSchema = z.object({
-  firstName: employeeNameValidation,
-  lastName: employeeNameValidation,
-  email: emailValidation,
-  password: passwordValidation,
-  employeeId: empIdValidation,
-  departmentId: z.string().optional(),
-  designationId: z.string().optional(),
-  joiningDate: dateValidation,
-  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT']),
-  baseSalary: z.string().optional(),
-});
-
-type EmployeeFormData = z.infer<typeof employeeSchema>;
 
 export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   
-  const { register, handleSubmit, formState: { errors, isValid }, reset } = useForm<EmployeeFormData>({
-    resolver: zodResolver(employeeSchema),
-    mode: "onTouched",
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      employeeId: '',
-      departmentId: '',
-      designationId: '',
-      joiningDate: new Date().toISOString().split('T')[0],
-      employmentType: 'FULL_TIME',
-      baseSalary: '',
-    },
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    employeeId: '',
+    departmentId: '',
+    designationId: '',
+    joiningDate: new Date().toISOString().split('T')[0],
+    employmentType: 'FULL_TIME',
+    baseSalary: '',
   });
 
   // Fetch meta data
@@ -63,7 +39,7 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
   useEffect(() => {
     if (isOpen) {
       const randomId = `EMP-${Math.floor(Math.random() * 9000) + 1000}`;
-      reset({
+      setFormData({
         firstName: '',
         lastName: '',
         email: '',
@@ -76,7 +52,16 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
         baseSalary: '',
       });
     }
-  }, [isOpen, reset]);
+  }, [isOpen]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'departmentId' ? { designationId: '' } : {})
+    }));
+  };
 
   const createEmployee = useMutation({
     mutationFn: async (data: any) => {
@@ -93,11 +78,12 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
     }
   });
 
-  const onSubmitForm = (data: EmployeeFormData) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     const payload = {
-      ...data,
-      joiningDate: new Date(data.joiningDate).toISOString(),
-      baseSalary: data.baseSalary ? parseFloat(data.baseSalary) : 0,
+      ...formData,
+      joiningDate: formData.joiningDate ? new Date(formData.joiningDate).toISOString() : new Date().toISOString(),
+      baseSalary: formData.baseSalary ? parseFloat(formData.baseSalary) : 0,
     };
     createEmployee.mutate(payload);
   };
@@ -170,7 +156,9 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
                 className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1.5 text-xs sm:text-sm ring-offset-background"
               >
                 <option value="">{t("Select Role")}</option>
-                {designations?.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                {designations
+                  ?.filter((des: any) => !formData.departmentId || des.departmentId === formData.departmentId)
+                  .map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
             <div className="space-y-1.5">
@@ -189,7 +177,7 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
 
           <DialogFooter className="pt-4 flex flex-row justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={createEmployee.isPending} className="h-9 text-xs sm:text-sm px-4">{t("Cancel")}</Button>
-            <Button type="submit" disabled={createEmployee.isPending} className="h-9 text-xs sm:text-sm px-4">
+            <Button type="submit" disabled={createEmployee.isPending} className="h-9 text-xs sm:text-sm px-4 bg-blue-600 hover:bg-blue-700">
               {createEmployee.isPending ? t("Saving...") : t("Add Employee")}
             </Button>
           </DialogFooter>

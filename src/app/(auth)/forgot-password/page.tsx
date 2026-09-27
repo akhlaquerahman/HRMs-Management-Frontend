@@ -8,6 +8,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Building2, 
@@ -261,8 +262,8 @@ export default function ForgotPasswordPage() {
           {/* Top Logo */}
           <div className="flex flex-col gap-6 mb-8 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30 shadow-sm">
-                <Building2 className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-white/20 dark:bg-slate-900/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30 shadow-sm p-1">
+                <Image src="/hrms-logo.png" alt="HRMS Logo" width={36} height={36} className="w-full h-full object-contain" />
               </div>
               <span className="text-xl font-bold tracking-widest text-white/90 uppercase">Enterprise HRMS</span>
             </div>
@@ -325,8 +326,8 @@ export default function ForgotPasswordPage() {
           
           {/* Mobile Logo */}
           <div className="md:hidden flex flex-col items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-              <Building2 className="w-6 h-6 text-white" />
+            <div className="w-14 h-14 bg-white/90 dark:bg-slate-800 rounded-xl flex items-center justify-center shadow-lg p-2 border border-slate-200 dark:border-slate-700">
+              <Image src="/hrms-logo.png" alt="HRMS Logo" width={48} height={48} className="w-full h-full object-contain" />
             </div>
             <span className="text-xl font-bold tracking-widest text-slate-900 dark:text-white uppercase">Enterprise HRMS</span>
           </div>

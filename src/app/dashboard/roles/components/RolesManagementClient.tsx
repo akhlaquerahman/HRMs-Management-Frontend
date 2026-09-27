@@ -9,8 +9,10 @@ import { RolesKPICards } from './RolesKPICards';
 import { RolesFilterToolbar } from './RolesFilterToolbar';
 import { RolesTable } from './RolesTable';
 import { RoleModal } from './RoleModal';
+import { PageAccessModal } from './PageAccessModal';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Shield } from 'lucide-react';
 
 export function RolesManagementClient() {
   const { t } = useTranslation();
@@ -20,6 +22,8 @@ export function RolesManagementClient() {
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<any>(null);
+  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
+  const [selectedAccessRole, setSelectedAccessRole] = useState<any>(null);
 
   const { data: rolesRes, isLoading: isLoadingRoles } = useQuery({ 
     queryKey: ["admin_roles"], 
@@ -64,6 +68,11 @@ export function RolesManagementClient() {
     setIsModalOpen(true);
   };
 
+  const handleOpenAccess = (role: any) => {
+    setSelectedAccessRole(role);
+    setIsAccessModalOpen(true);
+  };
+
   const handleResetFilters = () => {
     setSearchTerm("");
     setTypeFilter("ALL");
@@ -78,6 +87,10 @@ export function RolesManagementClient() {
         showSearch={false}
         actionButton={
           <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={() => handleOpenAccess({ name: 'HR_MANAGER' })} className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm font-semibold">
+              <Shield className="w-4 h-4 mr-2" />
+              {t("Page Access Control")}
+            </Button>
             <Button onClick={handleCreateClick} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
               <span className="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus w-4 h-4 mr-2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
               {t("Add Role")}
@@ -101,6 +114,7 @@ export function RolesManagementClient() {
             loading={isLoadingRoles} 
             onEdit={handleEditClick}
             onDelete={handleDelete}
+            onManageAccess={handleOpenAccess}
           />
         </div>
       </div>
@@ -109,6 +123,12 @@ export function RolesManagementClient() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         role={editingRole}
+      />
+
+      <PageAccessModal 
+        isOpen={isAccessModalOpen}
+        onClose={() => setIsAccessModalOpen(false)}
+        role={selectedAccessRole}
       />
     </div>
   );
