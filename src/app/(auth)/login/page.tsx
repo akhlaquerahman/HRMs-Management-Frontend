@@ -55,7 +55,16 @@ const iconMap: Record<string, React.ReactNode> = {
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
-  
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const _hasHydrated = useAuthStore((state) => state._hasHydrated);
+
+  useEffect(() => {
+    if (_hasHydrated && token && user) {
+      router.replace('/dashboard');
+    }
+  }, [_hasHydrated, token, user, router]);
+
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'PASSWORD' | 'OTP'>('PASSWORD');
@@ -209,6 +218,14 @@ export default function LoginPage() {
   const isSubmitDisabled = loginMethod === 'PASSWORD' 
     ? (!isEmailValid || passwordValue.length < 8 || isLoading)
     : (otpSent ? (!otpCode || isLoading) : (!isEmailValid || isLoading));
+
+  if (_hasHydrated && token && user) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 font-sans relative">
