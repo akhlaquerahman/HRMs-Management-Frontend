@@ -88,7 +88,7 @@ export function OrganizationDirectoryModal({
   companyName,
 }: OrganizationDirectoryModalProps) {
   const { user } = useAuthStore();
-  const activeCompanyName = user?.companyName || companyName || "Mobiloitte";
+  const activeCompanyName = companyName || user?.companyName || "HRMs";
 
   const [selectedDeptId, setSelectedDeptId] = useState<string>("ALL");
   const [search, setSearch] = useState<string>("");

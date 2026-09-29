@@ -20,7 +20,6 @@ const pageIconsMap: Record<string, React.ElementType> = {
   'dashboard': Building2,
   'organization': Building2,
   'employee-management': Users,
-  'org-setup': Building,
   'attendance': Clock,
   'leave-management': CalendarCheck,
   'payroll': DollarSign,

@@ -27,8 +27,8 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 6-Column KPI Grid */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-6 xl:grid-cols-6">
+      {/* 6-Column Responsive KPI Grid */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         {stats?.metrics?.map((metric: any, i: number) => {
           let icon = Users;
           let color = "text-blue-600";

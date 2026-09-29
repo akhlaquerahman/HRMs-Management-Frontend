@@ -58,8 +58,12 @@ export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boole
 
   const updateEmployee = useMutation({
     mutationFn: async (data: any) => {
-      const payload = { ...data };
-      if (payload.baseSalary !== undefined) {
+      const payload = { 
+        ...data,
+        departmentId: data.departmentId || undefined,
+        designationId: data.designationId || undefined,
+      };
+      if (payload.baseSalary !== undefined && payload.baseSalary !== '') {
         payload.baseSalary = parseFloat(payload.baseSalary) || 0;
       }
       return await api.put(`/employees/${employee.id}`, payload);
@@ -71,7 +75,13 @@ export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boole
       onClose();
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || error.message);
+      const fieldErrors = error.response?.data?.data;
+      if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+        const errorDetails = fieldErrors.map((f: any) => `${f.field}: ${f.message}`).join(', ');
+        toast.error(`Validation error: ${errorDetails}`);
+      } else {
+        toast.error(error.response?.data?.message || error.message);
+      }
     }
   });
 

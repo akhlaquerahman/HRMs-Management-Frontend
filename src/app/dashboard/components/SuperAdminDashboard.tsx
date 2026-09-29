@@ -58,7 +58,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
     <div className="flex flex-col gap-6">
       
       {/* 1. Top KPI Summary Cards (6-Column Responsive Grid) */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         {stats?.metrics?.map((metric: any, i: number) => {
           let icon = Users;
           let color = "text-blue-600 dark:text-blue-400";
@@ -297,7 +297,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
               <Button 
                 variant="outline" 
                 className="h-20 flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all text-xs font-semibold"
-                onClick={() => router.push('/dashboard/org-setup')}
+                onClick={() => router.push('/dashboard/organization')}
               >
                 <Settings className="w-5 h-5 text-amber-600" />
                 <span>{t("Settings")}</span>

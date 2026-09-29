@@ -4,14 +4,34 @@ import { ThemeProvider } from '../providers/ThemeProvider';
 import { I18nProvider } from '../providers/I18nProvider';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from 'sonner';
+import { PwaRegister } from '../components/shared/PwaRegister';
+import { Metadata, Viewport } from 'next';
 
-export const metadata = {
-  title: 'HRMS',
-  icons: {
-    icon: '/hrms-logo.png',
-    shortcut: '/hrms-logo.png',
-    apple: '/hrms-logo.png',
+export const metadata: Metadata = {
+  title: 'HRMS Pro - Enterprise HR Management System',
+  description: 'Enterprise Human Resource Management System Portal for multi-tenant administration, employee management, attendance, and payroll.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'HRMS Pro',
   },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/hrms-logo.png', sizes: '512x512', type: 'image/png' }
+    ],
+    shortcut: '/hrms-logo.png',
+    apple: '/apple-touch-icon.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#3b82f6',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -22,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
+        <PwaRegister />
         <NextTopLoader color="#3b82f6" showSpinner={false} shadow="0 0 10px #3b82f6,0 0 5px #3b82f6" zIndex={1600} />
         <Toaster richColors position="top-right" />
         <QueryProvider>

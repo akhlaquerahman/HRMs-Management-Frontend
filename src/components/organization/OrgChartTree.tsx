@@ -97,7 +97,7 @@ export function OrgChartTree({
 }: OrgChartTreeProps) {
   const router = useRouter();
   const { user } = useAuthStore();
-  const activeCompanyName = user?.companyName || companyName || "Mobiloitte";
+  const activeCompanyName = companyName || user?.companyName || "HRMs";
 
   const safeDepartments = Array.isArray(departments) ? departments : [];
 

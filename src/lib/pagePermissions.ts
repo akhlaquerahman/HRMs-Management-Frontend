@@ -9,12 +9,12 @@ export const ALL_MANAGEABLE_PAGES: PagePermissionItem[] = [
   { id: 'dashboard', title: 'Dashboard', href: '/dashboard', category: 'Core' },
   { id: 'organization', title: 'Organization', href: '/dashboard/organization', category: 'HR Management' },
   { id: 'employee-management', title: 'Employee Management', href: '/dashboard/employee-management', category: 'HR Management' },
-  { id: 'org-setup', title: 'Organization Setup', href: '/dashboard/org-setup', category: 'HR Management' },
   { id: 'attendance', title: 'Attendance Management', href: '/dashboard/attendance', category: 'HR Management' },
   { id: 'leave-management', title: 'Leave Management', href: '/dashboard/leave-management', category: 'HR Management' },
   { id: 'payroll', title: 'Payroll', href: '/dashboard/payroll', category: 'HR Management' },
   { id: 'recruitment', title: 'Recruitment', href: '/dashboard/recruitment', category: 'HR Management' },
   { id: 'documents', title: 'Documents Management', href: '/dashboard/documents', category: 'HR Management' },
+  { id: 'tenant-employees', title: 'Tenant Employees', href: '/dashboard/tenant-employees', category: 'Administration' },
   { id: 'my-attendance', title: 'My Attendance', href: '/dashboard/my-attendance', category: 'Employee Self-Service' },
   { id: 'leave-request', title: 'Leave Request', href: '/dashboard/leave-request', category: 'Employee Self-Service' },
   { id: 'payslips', title: 'Payslips', href: '/dashboard/payslips', category: 'Employee Self-Service' },
@@ -22,7 +22,16 @@ export const ALL_MANAGEABLE_PAGES: PagePermissionItem[] = [
   { id: 'profile', title: 'Profile', href: '/dashboard/profile', category: 'Core' },
 ];
 
-export const DEFAULT_HR_PAGES = ALL_MANAGEABLE_PAGES.map(p => p.href);
+export const SUPER_ADMIN_ONLY_PAGES = [
+  '/dashboard/tenant-employees',
+  '/dashboard/users',
+  '/dashboard/roles',
+  '/dashboard/audit-logs'
+];
+
+export const DEFAULT_HR_PAGES = ALL_MANAGEABLE_PAGES
+  .map(p => p.href)
+  .filter(href => !SUPER_ADMIN_ONLY_PAGES.includes(href));
 
 export function extractRoleName(roleInput: any): string {
   if (!roleInput) return '';
@@ -40,11 +49,7 @@ export function getRolePagePermissions(roleInput: any): string[] {
   const normalizedRole = rawRole.toUpperCase().trim().replace(/[\s\_]+/g, '_');
   
   if (normalizedRole === 'SUPER_ADMIN' || normalizedRole === 'SUPER_ADMINISTRATOR') {
-    return ALL_MANAGEABLE_PAGES.map(p => p.href).concat([
-      '/dashboard/users',
-      '/dashboard/roles',
-      '/dashboard/audit-logs'
-    ]);
+    return ALL_MANAGEABLE_PAGES.map(p => p.href).concat(SUPER_ADMIN_ONLY_PAGES);
   }
 
   try {
@@ -59,7 +64,8 @@ export function getRolePagePermissions(roleInput: any): string[] {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          // Strictly exclude Super Admin only pages for non-Super Admin roles
+          return parsed.filter((href: string) => !SUPER_ADMIN_ONLY_PAGES.includes(href));
         }
       }
     }
@@ -67,7 +73,7 @@ export function getRolePagePermissions(roleInput: any): string[] {
     console.error('Error reading page permissions', e);
   }
 
-  // Default permissions for ANY HR role if no custom permission is set
+  // Default permissions for ANY HR role if no custom permission is set (Excludes Super Admin only pages)
   if (
     normalizedRole.includes('HR') || 
     normalizedRole === 'HR_MANAGER' || 

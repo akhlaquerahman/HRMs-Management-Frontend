@@ -49,8 +49,12 @@ import { DepartmentDetailsModal } from "@/components/organization/DepartmentDeta
 import { OrganizationDirectoryModal } from "@/components/organization/OrganizationDirectoryModal";
 import { OrgChartTree } from "@/components/organization/OrgChartTree";
 import { DeleteConfirmModal } from "@/components/organization/DeleteConfirmModal";
+import { useAuthStore } from "@/store/authStore";
 
 export default function OrganizationPage() {
+  const { user, updateUser } = useAuthStore();
+  const [companyName, setCompanyName] = useState<string>("");
+
   // Summary Metrics
   const [summary, setSummary] = useState({
     departments: 0,
@@ -111,16 +115,25 @@ export default function OrganizationPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [overviewRes, desigRes, empListRes] = await Promise.all([
+      const [overviewRes, desigRes, empListRes, companyRes] = await Promise.all([
         api.get("/departments/overview"),
         api.get("/designations"),
         api.get("/employees?all=true&limit=5000"), // Complete list for manager dropdowns including HR Admins
+        api.get("/company").catch(() => null),
       ]);
 
       if (overviewRes.data?.data) {
         const overview = overviewRes.data.data;
         setSummary(overview.summary || { departments: 0, designations: 0, employees: 0, managers: 0 });
         setDepartments(overview.departments || []);
+
+        const resolvedCompanyName = overview.companyName || companyRes?.data?.data?.companyName || companyRes?.data?.companyName;
+        if (resolvedCompanyName) {
+          setCompanyName(resolvedCompanyName);
+          if (resolvedCompanyName !== user?.companyName) {
+            updateUser({ companyName: resolvedCompanyName });
+          }
+        }
       }
 
       if (desigRes.data?.data) {
@@ -135,7 +148,7 @@ export default function OrganizationPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.companyName, updateUser]);
 
   useEffect(() => {
     fetchData();
@@ -438,6 +451,7 @@ export default function OrganizationPage() {
             <OrgChartTree
               departments={filteredDepartments}
               totalEmployees={summary.employees}
+              companyName={companyName || user?.companyName}
               onViewDetails={handleViewDeptDetails}
               onEditDepartment={handleOpenEditDept}
               onDeleteDepartment={handleDeleteDept}
@@ -745,6 +759,7 @@ export default function OrganizationPage() {
         initialDesignationId={directoryDesigId}
         departments={departments}
         designations={allDesignations}
+        companyName={companyName || user?.companyName}
       />
 
       <DeleteConfirmModal

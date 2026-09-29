@@ -74,7 +74,13 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
       onClose();
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || error.message);
+      const fieldErrors = error.response?.data?.data;
+      if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+        const errorDetails = fieldErrors.map((f: any) => `${f.field}: ${f.message}`).join(', ');
+        toast.error(`Validation error: ${errorDetails}`);
+      } else {
+        toast.error(error.response?.data?.message || error.message);
+      }
     }
   });
 
@@ -82,7 +88,9 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
     e.preventDefault();
     const payload = {
       ...formData,
-      joiningDate: formData.joiningDate ? new Date(formData.joiningDate).toISOString() : new Date().toISOString(),
+      departmentId: formData.departmentId || undefined,
+      designationId: formData.designationId || undefined,
+      joiningDate: formData.joiningDate ? formData.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
       baseSalary: formData.baseSalary ? parseFloat(formData.baseSalary) : 0,
     };
     createEmployee.mutate(payload);

@@ -67,8 +67,16 @@ export default function ProfilePage() {
   const [isSavingSecurity, setIsSavingSecurity] = useState(false);
   const [securityMessage, setSecurityMessage] = useState({ text: "", type: "" });
 
-  // Avatar Upload State
+  // Avatar & Cover Upload State
   const [isUploadingPic, setIsUploadingPic] = useState(false);
+  const [coverPic, setCoverPic] = useState<string>("");
+
+  useEffect(() => {
+    try {
+      const savedCover = localStorage.getItem('user_cover_pic');
+      if (savedCover) setCoverPic(savedCover);
+    } catch (e) {}
+  }, []);
 
   // Company Details State
   const [companyName, setCompanyName] = useState("");
@@ -157,12 +165,15 @@ export default function ProfilePage() {
     }
 
     const cData = companyRes?.data?.data || companyRes?.data;
-    if (cData) {
-      setCompanyName(cData.companyName || "");
-      setCompanyWebsite(cData.companyWebsite || "");
-      setCompanyAddress(cData.companyAddress || "");
-      setCompanyPhone(cData.companyPhone || "");
+    const resolvedCompName = cData?.companyName || pData?.companyName || "";
+
+    setCompanyName(resolvedCompName);
+    if (resolvedCompName && resolvedCompName !== user?.companyName) {
+      updateUser({ companyName: resolvedCompName });
     }
+    setCompanyWebsite(cData?.companyWebsite || pData?.companyWebsite || "");
+    setCompanyAddress(cData?.companyAddress || pData?.companyAddress || "");
+    setCompanyPhone(cData?.companyPhone || pData?.companyPhone || "");
   }, [profileRes, companyRes]);
 
   // Handlers
@@ -192,11 +203,26 @@ export default function ProfilePage() {
         emergencyContactPhone: formData.emergencyContactPhone
       });
 
-      updateUser({ firstName: formData.firstName, lastName: formData.lastName });
+      if (canEditCompany) {
+        await api.put("/company", { 
+          companyName, 
+          companyWebsite, 
+          companyAddress, 
+          companyPhone 
+        });
+      }
+
+      updateUser({ firstName: formData.firstName, lastName: formData.lastName, companyName });
       queryClient.invalidateQueries({ queryKey: ["auth_profile_full"] });
-      setPersonalMsg({ text: "Profile details updated successfully!", type: "success" });
+      queryClient.invalidateQueries({ queryKey: ["company"] });
+      setPersonalMsg({ text: "Profile and company details updated successfully!", type: "success" });
     } catch (err: any) { 
-      setPersonalMsg({ text: err?.response?.data?.message || "Failed to update profile", type: "error" });
+      const fieldErrors = err?.response?.data?.data;
+      let errMsg = err?.response?.data?.message || "Failed to update profile";
+      if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+        errMsg = fieldErrors.map((f: any) => `${f.message || f.field}`).join(', ');
+      }
+      setPersonalMsg({ text: errMsg, type: "error" });
     }
   };
 
@@ -265,16 +291,38 @@ export default function ProfilePage() {
     }
   };
 
+  const handleCoverPicUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setCoverPic(reader.result);
+        try {
+          localStorage.setItem('user_cover_pic', reader.result);
+        } catch (err) {}
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleUpdateCompany = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingCompany(true);
     setCompanyMsg({ text: "", type: "" });
     try {
       await api.put("/company", { companyName, companyWebsite, companyAddress, companyPhone });
+      updateUser({ companyName });
       queryClient.invalidateQueries({ queryKey: ["company"] });
+      queryClient.invalidateQueries({ queryKey: ["auth_profile_full"] });
       setCompanyMsg({ text: "Company details updated successfully!", type: "success" });
     } catch (err: any) {
-      setCompanyMsg({ text: err?.response?.data?.message || "Failed to update company details", type: "error" });
+      const fieldErrors = err?.response?.data?.data;
+      let errMsg = err?.response?.data?.message || "Failed to update company details";
+      if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+        errMsg = fieldErrors.map((f: any) => `${f.message || f.field}`).join(', ');
+      }
+      setCompanyMsg({ text: errMsg, type: "error" });
     } finally {
       setIsSavingCompany(false);
     }
@@ -292,7 +340,7 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-sm font-medium text-muted-foreground">Loading Executive Profile & Workspace...</p>
+        <p className="text-sm font-medium text-muted-foreground">Loading Profile & Workspace...</p>
       </div>
     );
   }
@@ -301,7 +349,7 @@ export default function ProfilePage() {
     <div className="space-y-6 pb-12 max-w-6xl">
       {/* Top Header */}
       <PageHeader 
-        title={t("Executive Profile Hub")} 
+        title={t("Profile")} 
         description={t("Manage your individual profile identity, corporate credentials, security controls, and tenant settings.")} 
         showCreate={false}
         showImport={false}
@@ -312,34 +360,54 @@ export default function ProfilePage() {
 
       {/* Hero Banner Header Card */}
       <div className="relative rounded-2xl overflow-hidden border bg-card shadow-lg">
-        {/* Ambient Gradient Backdrop */}
-        <div className="h-44 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 relative p-6 flex justify-between items-start">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        {/* Ambient Gradient / Custom Cover Backdrop */}
+        <div className="h-32 sm:h-36 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 relative p-4 sm:p-6 flex justify-between items-start overflow-hidden">
+          {coverPic && (
+            <img src={coverPic} alt="Banner Cover" className="absolute inset-0 w-full h-full object-cover z-0" />
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff12_1px,transparent_1px),linear-gradient(to_bottom,#ffffff12_1px,transparent_1px)] bg-[size:24px_24px] z-0"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent z-0"></div>
           
-          <div className="relative z-10 flex items-center gap-2 text-white/90 text-xs font-semibold uppercase tracking-wider bg-white/15 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+          <div className="relative z-10 flex items-center gap-2 text-white/90 text-xs font-semibold uppercase tracking-wider bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
             <Building className="w-3.5 h-3.5" />
             <span>{companyName || "Enterprise Tenant"}</span>
           </div>
 
           <div className="relative z-10 flex items-center gap-2">
-            <Badge className="bg-emerald-500/20 text-emerald-200 border-emerald-400/30 backdrop-blur-md px-3 py-1 text-xs font-semibold">
+            <Badge className="bg-emerald-500/20 text-emerald-200 border-emerald-400/30 backdrop-blur-md px-3 py-1 text-xs font-semibold hidden sm:flex">
               <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Active Account
             </Badge>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => document.getElementById('coverPicInput')?.click()}
+              className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border border-white/20 text-xs font-semibold gap-1.5 h-8 px-3 transition-all cursor-pointer"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>Edit Banner</span>
+            </Button>
+            <input 
+              type="file" 
+              id="coverPicInput" 
+              className="hidden" 
+              accept="image/*"
+              onChange={handleCoverPicUpdate}
+            />
           </div>
         </div>
 
-        {/* Profile Content Details */}
-        <div className="px-6 pb-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-6 -mt-16 z-20">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
+        {/* Profile Content Details - Positioned Cleanly Outside Banner */}
+        <div className="px-6 pb-6 pt-3 relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 z-20">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             {/* Avatar Uploader */}
-            <div className="relative group cursor-pointer shrink-0" onClick={() => document.getElementById('profilePicInput')?.click()}>
-              <div className="w-28 h-28 rounded-2xl ring-4 ring-background bg-card shadow-xl overflow-hidden flex items-center justify-center relative border">
+            <div className="relative group cursor-pointer shrink-0 -mt-14 sm:-mt-16" onClick={() => document.getElementById('profilePicInput')?.click()}>
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl ring-4 ring-background bg-card shadow-xl overflow-hidden flex items-center justify-center relative border">
                 {isUploadingPic ? (
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 ) : formData.profilePic ? (
                   <img src={formData.profilePic} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <UserCircle className="w-24 h-24 text-primary/80" />
+                  <UserCircle className="w-20 h-20 text-primary/80" />
                 )}
                 {!isUploadingPic && (
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center text-white gap-1">
@@ -357,8 +425,8 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* Name & Headline */}
-            <div className="space-y-1">
+            {/* Name & Headline - Completely outside banner */}
+            <div className="space-y-1 pt-1 sm:pt-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {formData.firstName} {formData.lastName}
@@ -372,13 +440,13 @@ export default function ProfilePage() {
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-primary font-medium flex items-center gap-2">
+              <p className="text-xs sm:text-sm text-primary font-medium flex items-center gap-2 flex-wrap">
                 <Briefcase className="w-4 h-4 text-primary/80" />
                 <span>{empDesignation}</span>
                 <span className="text-muted-foreground">•</span>
                 <span className="text-muted-foreground">{empDepartment}</span>
               </p>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5 pt-0.5">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                 {formData.email}
               </p>
@@ -408,67 +476,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* KPI Metric Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Profile Completeness Card */}
-        <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Profile Completeness</span>
-            <Sparkles className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-foreground">{profileCompleteness}%</span>
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Excellent</span>
-          </div>
-          <Progress value={profileCompleteness} className="h-2" />
-        </div>
-
-        {/* Access Tier Card */}
-        <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Access Permission Tier</span>
-            <ShieldCheck className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-lg font-bold text-foreground">{formData.roleName}</span>
-            <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-700 border-blue-300">
-              Verified
-            </Badge>
-          </div>
-          <p className="text-[11px] text-muted-foreground">Authorized for company resources</p>
-        </div>
-
-        {/* Org Department Head */}
-        <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Supervisor / Manager</span>
-            <UserCheck className="w-4 h-4 text-indigo-500" />
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm font-bold text-foreground truncate max-w-[150px]">{empManager}</span>
-            <Badge variant="outline" className="text-[10px] bg-indigo-500/10 text-indigo-700 border-indigo-300">
-              Reporting
-            </Badge>
-          </div>
-          <p className="text-[11px] text-muted-foreground">{empDepartment}</p>
-        </div>
-
-        {/* Security Health */}
-        <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Security Health</span>
-            <Lock className="w-4 h-4 text-emerald-500" />
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Secured</span>
-            <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-300 text-[10px]">
-              Encrypted
-            </Badge>
-          </div>
-          <p className="text-[11px] text-muted-foreground">Password & Sessions protected</p>
-        </div>
-      </div>
-
       {/* Main Tabbed Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-card border p-1 rounded-xl w-full justify-start overflow-x-auto gap-1">
@@ -487,10 +494,6 @@ export default function ProfilePage() {
           <TabsTrigger value="security" className="text-xs font-semibold gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Lock className="w-3.5 h-3.5" />
             Security & Credentials
-          </TabsTrigger>
-          <TabsTrigger value="company" className="text-xs font-semibold gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Building className="w-3.5 h-3.5" />
-            Company & Tenant
           </TabsTrigger>
         </TabsList>
 
@@ -601,6 +604,58 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+
+                {/* Integrated Company / Organization Sub-Section */}
+                <div className="border-t pt-4 mt-2 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-primary" />
+                    Company & Organization Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold">Company Name *</label>
+                      <Input 
+                        disabled={!canEditCompany}
+                        placeholder="Enterprise Company Name"
+                        className="h-9 text-xs" 
+                        value={companyName} 
+                        onChange={e => setCompanyName(e.target.value)} 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold">Company Website</label>
+                      <Input 
+                        disabled={!canEditCompany}
+                        placeholder="https://company.com"
+                        className="h-9 text-xs" 
+                        value={companyWebsite} 
+                        onChange={e => setCompanyWebsite(e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold">Headquarters Address</label>
+                      <Input 
+                        disabled={!canEditCompany}
+                        placeholder="Corporate Address"
+                        className="h-9 text-xs" 
+                        value={companyAddress} 
+                        onChange={e => setCompanyAddress(e.target.value)} 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold">Support Contact Phone</label>
+                      <Input 
+                        disabled={!canEditCompany}
+                        placeholder="+91 11 4000 5000"
+                        className="h-9 text-xs" 
+                        value={companyPhone} 
+                        onChange={e => setCompanyPhone(e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Contact & Address Box */}
@@ -669,43 +724,42 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Emergency Contact Card */}
-            <div className="rounded-xl border bg-card p-6 space-y-4 shadow-sm">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 border-b pb-3 flex items-center gap-2">
-                <Heart className="w-4 h-4 text-rose-500" />
-                Emergency Contact Directory
-              </h3>
-
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold">Contact Full Name</label>
-                  <Input 
-                    placeholder="e.g. Parent / Spouse Name"
-                    className="h-9 text-xs" 
-                    value={formData.emergencyContactName} 
-                    onChange={e => setFormData({ ...formData, emergencyContactName: e.target.value })} 
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold">Relationship</label>
-                  <Input 
-                    placeholder="e.g. Spouse / Father / Sister"
-                    className="h-9 text-xs" 
-                    value={formData.emergencyContactRelation} 
-                    onChange={e => setFormData({ ...formData, emergencyContactRelation: e.target.value })} 
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold">Emergency Phone No.</label>
-                  <Input 
-                    placeholder="+91 99999 88888"
-                    className="h-9 text-xs" 
-                    value={formData.emergencyContactPhone} 
-                    onChange={e => setFormData({ ...formData, emergencyContactPhone: e.target.value })} 
-                  />
+                {/* Integrated Emergency Contact Section */}
+                <div className="border-t pt-4 mt-2 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                    <Heart className="w-3.5 h-3.5 text-rose-500" />
+                    Emergency Contact Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold">Contact Full Name</label>
+                      <Input 
+                        placeholder="e.g. Parent / Spouse Name"
+                        className="h-9 text-xs" 
+                        value={formData.emergencyContactName} 
+                        onChange={e => setFormData({ ...formData, emergencyContactName: e.target.value })} 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold">Relationship</label>
+                      <Input 
+                        placeholder="e.g. Spouse / Father"
+                        className="h-9 text-xs" 
+                        value={formData.emergencyContactRelation} 
+                        onChange={e => setFormData({ ...formData, emergencyContactRelation: e.target.value })} 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold">Emergency Phone No.</label>
+                    <Input 
+                      placeholder="+91 99999 88888"
+                      className="h-9 text-xs" 
+                      value={formData.emergencyContactPhone} 
+                      onChange={e => setFormData({ ...formData, emergencyContactPhone: e.target.value })} 
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -943,152 +997,9 @@ export default function ProfilePage() {
                 </Button>
               </div>
             </div>
-
-            {/* Active Sessions */}
-            <div className="rounded-xl border bg-card p-6 space-y-4 shadow-sm">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-3 flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-primary" />
-                Active Sessions & Login Audit
-              </h3>
-
-              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-foreground">Current Desktop Session (Web Browser)</h4>
-                    <p className="text-[11px] text-muted-foreground">Windows 11 • Chrome / Edge • Active Now</p>
-                  </div>
-                </div>
-                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 text-[10px]">
-                  Current Session
-                </Badge>
-              </div>
-            </div>
           </form>
         </TabsContent>
 
-        {/* TAB 5: COMPANY TENANT DETAILS */}
-        <TabsContent value="company" className="space-y-6">
-          <div className="rounded-xl border bg-card p-6 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                <Building className="w-4 h-4" />
-                Company Organization Profile & Tenant Workspace
-              </h3>
-              {canEditCompany ? (
-                <Badge className="bg-blue-500/15 text-blue-700 border-blue-300 text-xs">
-                  HR Admin Manager Mode
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-xs text-muted-foreground">
-                  Read Only Employee View
-                </Badge>
-              )}
-            </div>
-
-            {companyMsg.text && (
-              <div className={`p-3 rounded-lg border text-xs font-medium flex items-center gap-2 ${
-                companyMsg.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
-              }`}>
-                {companyMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <ShieldAlert className="w-4 h-4 shrink-0" />}
-                <span>{companyMsg.text}</span>
-              </div>
-            )}
-
-            {canEditCompany ? (
-              <form onSubmit={handleUpdateCompany} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold">Company Name *</label>
-                    <Input 
-                      required 
-                      placeholder="Enterprise Company Name"
-                      className="h-9 text-xs" 
-                      value={companyName} 
-                      onChange={e => setCompanyName(e.target.value)} 
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold">Company Website</label>
-                    <Input 
-                      placeholder="https://company.com"
-                      className="h-9 text-xs" 
-                      value={companyWebsite} 
-                      onChange={e => setCompanyWebsite(e.target.value)} 
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold">Headquarters Address</label>
-                    <Input 
-                      placeholder="Full Corporate Address"
-                      className="h-9 text-xs" 
-                      value={companyAddress} 
-                      onChange={e => setCompanyAddress(e.target.value)} 
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold">Corporate Support Contact Phone</label>
-                    <Input 
-                      placeholder="+91 11 4000 5000"
-                      className="h-9 text-xs" 
-                      value={companyPhone} 
-                      onChange={e => setCompanyPhone(e.target.value)} 
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-3">
-                  <Button type="submit" disabled={isSavingCompany} className="bg-primary hover:bg-primary/90 font-semibold px-6 gap-2">
-                    {isSavingCompany && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Save Organization Settings
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-6 pt-2">
-                <div className="space-y-3">
-                  <div className="border-b pb-2">
-                    <span className="text-xs text-muted-foreground block font-medium">Company Name</span>
-                    <span className="text-sm font-bold text-foreground">{companyName || "N/A"}</span>
-                  </div>
-                  <div className="border-b pb-2">
-                    <span className="text-xs text-muted-foreground block font-medium">Official Website</span>
-                    {companyWebsite ? (
-                      <a 
-                        href={companyWebsite.startsWith('http') ? companyWebsite : `https://${companyWebsite}`} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="text-sm font-semibold text-primary hover:underline flex items-center gap-1.5 mt-0.5"
-                      >
-                        <Globe className="h-3.5 w-3.5" />
-                        {companyWebsite}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : (
-                      <span className="text-sm text-foreground font-semibold">N/A</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="border-b pb-2">
-                    <span className="text-xs text-muted-foreground block font-medium">Corporate Address</span>
-                    <span className="text-sm font-semibold text-foreground">{companyAddress || "N/A"}</span>
-                  </div>
-                  <div className="border-b pb-2">
-                    <span className="text-xs text-muted-foreground block font-medium">Corporate Contact</span>
-                    <span className="text-sm font-semibold text-foreground">{companyPhone || "N/A"}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );

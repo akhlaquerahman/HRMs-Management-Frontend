@@ -62,11 +62,6 @@ const menuConfig: MenuItem[] = [
     icon: Users,
   },
   {
-    title: 'Organization Setup',
-    href: '/dashboard/org-setup',
-    icon: Building,
-  },
-  {
     title: 'Attendance',
     href: '/dashboard/attendance',
     icon: Clock,
@@ -110,6 +105,11 @@ const menuConfig: MenuItem[] = [
     title: 'My Documents',
     href: '/dashboard/my-documents',
     icon: FolderOpen,
+  },
+  {
+    title: 'Tenant Employees',
+    href: '/dashboard/tenant-employees',
+    icon: Building,
   },
   {
     title: 'Users',
@@ -201,10 +201,23 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
   }, [user?.role]);
   
   const filteredLinks = menuConfig.filter(link => {
+    const superAdminOnlyRoutes = [
+      '/dashboard/tenant-employees',
+      '/dashboard/users',
+      '/dashboard/roles',
+      '/dashboard/audit-logs'
+    ];
+
+    // Non-Super Admin users MUST NEVER see Super Admin only links
+    if (!isSuperAdmin && superAdminOnlyRoutes.includes(link.href)) {
+      return false;
+    }
+
     // Dedicated clean Admin sidebar for Super Admin
     if (isSuperAdmin) {
       const superAdminPages = [
         '/dashboard',
+        '/dashboard/tenant-employees',
         '/dashboard/my-attendance',
         '/dashboard/users',
         '/dashboard/roles',
@@ -218,8 +231,6 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
     if (allowedPages && allowedPages.length > 0) {
       return allowedPages.includes(link.href);
     }
-    
-    if (isHrAdmin) return true;
     
     return true;
   });
