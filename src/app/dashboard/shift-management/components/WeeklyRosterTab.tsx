@@ -572,6 +572,43 @@ export function WeeklyRosterTab() {
     }
   };
 
+  // Helper to calculate daily shift & leave breakdown for a specific date string
+  const getDailyMetricsForDate = useCallback((dateStr: string) => {
+    let scheduled = 0;
+    let weekOff = 0;
+    let leave = 0;
+    let holiday = 0;
+    let wfh = 0;
+    let halfDay = 0;
+
+    grid.forEach(row => {
+      const day = row.days.find(d => d.date === dateStr);
+      if (!day) return;
+
+      if (day.type === 'SHIFT' && day.shiftId) scheduled++;
+      else if (day.type === 'WEEK_OFF' || day.type === 'OFF') weekOff++;
+      else if (day.type === 'LEAVE') leave++;
+      else if (day.type === 'HOLIDAY') holiday++;
+      else if (day.type === 'WFH') wfh++;
+      else if (day.type === 'HALF_DAY') halfDay++;
+      else if (day.type === 'SHIFT' && !day.shiftId) scheduled++;
+    });
+
+    const totalEmployees = grid.length;
+    const workingCount = scheduled + wfh + halfDay;
+
+    return {
+      scheduled,
+      weekOff,
+      leave,
+      holiday,
+      wfh,
+      halfDay,
+      workingCount,
+      totalEmployees
+    };
+  }, [grid]);
+
   // Helper for today highlight
   const todayStr = formatDateToYYYYMMDD(new Date());
 
@@ -824,7 +861,7 @@ export function WeeklyRosterTab() {
 
         {/* Scrollable Grid Container (Sticky Employee Column) */}
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left border-collapse text-xs min-w-[900px]">
+          <table className="w-full text-left border-collapse text-xs min-w-[950px]">
             <thead className="bg-muted/40 border-b font-bold uppercase tracking-wider text-[11px]">
               <tr>
                 {/* Sticky Employee Header Column */}
@@ -848,15 +885,16 @@ export function WeeklyRosterTab() {
                   const isToday = dateStr === todayStr;
                   const dayNameShort = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
                   const dateShort = d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' }).toUpperCase();
+                  const metrics = getDailyMetricsForDate(dateStr);
 
                   return (
                     <th 
                       key={dateStr} 
-                      className={`p-3 text-center border-r min-w-[130px] transition-colors ${
+                      className={`p-3 text-center border-r min-w-[140px] transition-colors ${
                         isToday ? 'bg-primary/15 text-primary border-primary/30 font-black' : ''
                       }`}
                     >
-                      <div className="flex flex-col items-center justify-center">
+                      <div className="flex flex-col items-center justify-center gap-0.5">
                         <span className="text-[10px] text-muted-foreground">{dayNameShort}</span>
                         <span className="font-extrabold text-xs text-foreground font-mono">{dateShort}</span>
                         {isToday && (
@@ -887,6 +925,34 @@ export function WeeklyRosterTab() {
                           >
                             OFF All
                           </button>
+                        </div>
+
+                        {/* Daily Staffing Summary Micro Pills */}
+                        <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1 font-mono text-[9px] normal-case tracking-normal">
+                          <span 
+                            title={`${metrics.workingCount} working on this date`}
+                            className="px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-extrabold border border-emerald-500/30 whitespace-nowrap"
+                          >
+                            🟢 {metrics.workingCount} On Shift
+                          </span>
+
+                          {metrics.leave > 0 && (
+                            <span 
+                              title={`${metrics.leave} on leave`}
+                              className="px-1.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-400 font-extrabold border border-rose-500/30 whitespace-nowrap"
+                            >
+                              🔴 {metrics.leave} Leave
+                            </span>
+                          )}
+
+                          {metrics.weekOff > 0 && (
+                            <span 
+                              title={`${metrics.weekOff} on week off`}
+                              className="px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-extrabold border border-amber-500/30 whitespace-nowrap"
+                            >
+                              🟡 {metrics.weekOff} Off
+                            </span>
+                          )}
                         </div>
                       </div>
                     </th>
@@ -1045,6 +1111,65 @@ export function WeeklyRosterTab() {
                 })
               )}
             </tbody>
+
+            {/* Enterprise Daily Coverage & Headcount Summary Footer */}
+            <tfoot className="bg-muted/30 border-t font-medium text-xs">
+              <tr>
+                {/* Left Sticky Summary Header */}
+                <td className="p-3 pl-4 sticky left-0 z-10 bg-card border-r shadow-2xs font-extrabold text-foreground text-[11px] uppercase tracking-wider">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-primary font-bold flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />
+                      <span>Daily Coverage & Headcount</span>
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-normal normal-case">
+                      Scheduled vs Leave breakdown per day
+                    </span>
+                  </div>
+                </td>
+
+                {/* 7 Days Daily Summary Cells */}
+                {Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date(currentWeekSunday);
+                  d.setDate(currentWeekSunday.getDate() + i);
+                  const dateStr = formatDateToYYYYMMDD(d);
+                  const metrics = getDailyMetricsForDate(dateStr);
+                  const isToday = dateStr === todayStr;
+
+                  return (
+                    <td 
+                      key={dateStr}
+                      className={`p-2.5 text-center border-r align-top ${isToday ? 'bg-primary/5 font-bold' : ''}`}
+                    >
+                      <div className="flex flex-col items-center gap-1 text-[11px]">
+                        
+                        {/* On Shift / Working Summary Card */}
+                        <div className="w-full p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-1">
+                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">On Shift</span>
+                          <span className="font-extrabold text-emerald-700 dark:text-emerald-300 font-mono text-xs">
+                            {metrics.workingCount} ({metrics.totalEmployees > 0 ? Math.round((metrics.workingCount / metrics.totalEmployees) * 100) : 0}%)
+                          </span>
+                        </div>
+
+                        {/* Leave & Week Off Micro Grid */}
+                        <div className="w-full grid grid-cols-2 gap-1 text-[10px]">
+                          <div className="p-1 rounded bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-col items-center" title={`${metrics.weekOff} employees on week off`}>
+                            <span className="text-[9px] font-semibold text-amber-700 dark:text-amber-400">Week Off</span>
+                            <span className="font-extrabold text-amber-700 dark:text-amber-400 font-mono">{metrics.weekOff}</span>
+                          </div>
+
+                          <div className="p-1 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 flex flex-col items-center" title={`${metrics.leave} employees on leave`}>
+                            <span className="text-[9px] font-semibold text-rose-700 dark:text-rose-400">On Leave</span>
+                            <span className="font-extrabold text-rose-700 dark:text-rose-400 font-mono">{metrics.leave}</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
