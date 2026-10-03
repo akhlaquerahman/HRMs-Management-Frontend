@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Printer, Download } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/axios';
 
 interface PayslipDrawerProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  LogIn, CalendarCheck, Clock, FileText, CalendarDays, TrendingUp 
+  LogIn, CalendarCheck, Clock, FileText, CalendarDays, TrendingUp, Briefcase 
 } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { ActivityTimeline } from '@/components/dashboard/ActivityTimeline';
@@ -11,10 +11,18 @@ import { CompanyAnnouncements } from '@/components/dashboard/CompanyAnnouncement
 import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { UpcomingHolidays } from '@/components/dashboard/UpcomingHolidays';
 import { DashboardDataTable } from '@/components/dashboard/DashboardDataTable';
-import { AttendanceAnalyticsCard } from '@/components/dashboard/AttendanceAnalyticsCard';
+import { WorkforceCalendarCard } from '@/components/dashboard/WorkforceCalendarCard';
+import { useShiftSocket } from '@/hooks/useShiftSocket';
 
 export function EmployeeDashboard({ stats }: { stats: any }) {
   const { t } = useTranslation();
+
+  // Initialize Enterprise Real-Time Socket Connection for Shift Updates
+  const { isLiveConnected } = useShiftSocket({
+    userId: stats?.employeeDetails?.userId,
+    employeeId: stats?.employeeDetails?.id,
+    departmentId: stats?.employeeDetails?.departmentId
+  });
 
   const payslipColumns = [
     { 
@@ -74,7 +82,7 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
           if (metric.title.includes('Leave')) { icon = CalendarDays; color = "text-amber-600"; bg = "bg-amber-100/80"; }
           if (metric.title.includes('Holiday')) { icon = Clock; color = "text-purple-600"; bg = "bg-purple-100/80"; }
           if (metric.title.includes('%')) { icon = TrendingUp; color = "text-teal-600"; bg = "bg-teal-100/80"; }
-          if (metric.title.includes('Hours')) { icon = Clock; color = "text-indigo-600"; bg = "bg-indigo-100/80"; }
+          if (metric.title.includes('Shift') || metric.title.includes('Hours')) { icon = Briefcase; color = "text-indigo-600"; bg = "bg-indigo-100/80"; }
 
           return (
             <KPICard 
@@ -97,10 +105,14 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
         {/* Main Left Column (8 of 12) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
 
-          {/* Unified Enterprise Card: Attendance History & Working Hours Trend */}
-          <AttendanceAnalyticsCard 
-            attendanceHistory={stats?.attendanceHistory || []}
-            barChartData={stats?.barChartData || []}
+          {/* Enterprise Shift & Attendance Calendar Card */}
+          <WorkforceCalendarCard 
+            attendanceRecords={stats?.attendanceHistory || []}
+            leaveRequests={stats?.leaveRequests || []}
+            holidays={stats?.holidays || []}
+            rosterEntries={stats?.rosterEntries || []}
+            shiftInfo={stats?.shiftInfo}
+            isLiveConnected={isLiveConnected}
           />
 
           {/* Assigned Documents & Payslips */}
@@ -146,3 +158,4 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
     </div>
   );
 }
+

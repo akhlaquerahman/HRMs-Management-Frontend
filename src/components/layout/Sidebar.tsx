@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { getRolePagePermissions, extractRoleName } from '@/lib/pagePermissions';
+import { getRolePagePermissions, fetchAndSyncRolePagePermissions, extractRoleName } from '@/lib/pagePermissions';
 import {
   LayoutDashboard,
   Users,
@@ -65,6 +65,11 @@ const menuConfig: MenuItem[] = [
     title: 'Attendance',
     href: '/dashboard/attendance',
     icon: Clock,
+  },
+  {
+    title: 'Shift Management',
+    href: '/dashboard/shift-management',
+    icon: CalendarDays,
   },
   {
     title: 'Leave Management',
@@ -188,11 +193,15 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
       setAllowedPages(perms);
     };
     syncPermissions();
+    fetchAndSyncRolePagePermissions();
+    const interval = setInterval(fetchAndSyncRolePagePermissions, 3000);
+
     if (typeof window !== 'undefined') {
       window.addEventListener('hrms_permissions_updated', syncPermissions);
       window.addEventListener('storage', syncPermissions);
     }
     return () => {
+      clearInterval(interval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('hrms_permissions_updated', syncPermissions);
         window.removeEventListener('storage', syncPermissions);
@@ -227,12 +236,8 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
       return superAdminPages.includes(link.href);
     }
 
-    // Use Super Admin configured page access if set for HR / Employee
-    if (allowedPages && allowedPages.length > 0) {
-      return allowedPages.includes(link.href);
-    }
-    
-    return true;
+    // Dynamic permission check for all other roles (HR_MANAGER, HR_ADMIN, EMPLOYEE, etc.)
+    return allowedPages.includes(link.href);
   });
 
   const displayLinks = filteredLinks.filter((link) =>

@@ -60,7 +60,20 @@ export function PageAccessModal({ isOpen, onClose, role }: PageAccessModalProps)
   };
 
   const handleResetDefaults = () => {
-    setSelectedHrefs(DEFAULT_HR_PAGES);
+    const rawRole = role?.name || '';
+    const normalizedRole = rawRole.toUpperCase().trim().replace(/[\s\_]+/g, '_');
+    if (normalizedRole === 'EMPLOYEE') {
+      setSelectedHrefs([
+        '/dashboard',
+        '/dashboard/my-attendance',
+        '/dashboard/leave-request',
+        '/dashboard/payslips',
+        '/dashboard/my-documents',
+        '/dashboard/profile'
+      ]);
+    } else {
+      setSelectedHrefs(DEFAULT_HR_PAGES);
+    }
   };
 
   const handleSave = () => {

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 import { LeaveKPICards } from './LeaveKPICards';
+import { LeaveBalanceCards } from './LeaveBalanceCards';
 import { LeaveFilterToolbar } from './LeaveFilterToolbar';
 import { LeaveTable } from './LeaveTable';
 import { RequestLeaveModal } from './RequestLeaveModal';

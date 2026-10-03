@@ -10,13 +10,9 @@ import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { PendingTasks } from '@/components/dashboard/PendingTasks';
 import { DashboardDataTable } from '@/components/dashboard/DashboardDataTable';
 import { RecruitmentPipelineCard } from '@/components/dashboard/RecruitmentPipelineCard';
-import { DepartmentDistributionCard } from '@/components/dashboard/DepartmentDistributionCard';
-import { format } from 'date-fns';
 
 export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { stats: any, trendFilter?: string, setTrendFilter?: (val: string) => void }) {
   const { t } = useTranslation();
-
-  const totalEmployees = stats?.pieChartData?.reduce((acc: number, curr: any) => acc + curr.value, 0) || 0;
 
   const deptColumns = [
     { header: t("Department"), accessor: "department" },
@@ -60,9 +56,8 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
         {/* Main Left Column (Takes up 8 columns out of 12) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
 
-          {/* Top Row: Overflow-Free Department Distribution & Single Primary Recruitment Pipeline Card */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <DepartmentDistributionCard data={stats?.pieChartData} />
+          {/* Full-Width Department Attendance Summary Table */}
+          <div className="w-full">
             <DashboardDataTable 
               title={t("Department Attendance Summary")} 
               data={stats?.deptAttendance || []} 
@@ -70,7 +65,7 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
             />
           </div>
           
-          {/* Middle Row: Pending Tasks & Department Attendance Summary */}
+          {/* Middle Row: Pending Tasks & Recruitment Pipeline */}
           <div className="grid gap-6 md:grid-cols-2">
             <PendingTasks tasks={stats?.pendingTasks || []} />
             <RecruitmentPipelineCard pipeline={stats?.pipeline} />
@@ -96,3 +91,4 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
     </div>
   );
 }
+

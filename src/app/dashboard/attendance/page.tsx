@@ -57,6 +57,17 @@ export default function AttendancePage() {
   const [status, setStatus] = useState("ALL");
   const [breakType, setBreakType] = useState("ALL");
   const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortOrder(prev => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
 
   // Column Visibility State
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({

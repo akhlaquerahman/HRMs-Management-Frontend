@@ -26,8 +26,9 @@ interface PersonalDetailsFormProps {
   };
   employeeData?: {
     id: string;
+    employeeId?: string;
     department?: { name: string };
-    designation?: { title: string };
+    designation?: { title?: string; name?: string };
     manager?: { firstName: string; lastName: string };
     createdAt: string;
   };

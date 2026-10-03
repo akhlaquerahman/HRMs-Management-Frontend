@@ -1,3 +1,5 @@
+import api from '@/lib/axios';
+
 export interface PagePermissionItem {
   id: string;
   title: string;
@@ -10,6 +12,7 @@ export const ALL_MANAGEABLE_PAGES: PagePermissionItem[] = [
   { id: 'organization', title: 'Organization', href: '/dashboard/organization', category: 'HR Management' },
   { id: 'employee-management', title: 'Employee Management', href: '/dashboard/employee-management', category: 'HR Management' },
   { id: 'attendance', title: 'Attendance Management', href: '/dashboard/attendance', category: 'HR Management' },
+  { id: 'shift-management', title: 'Shift Management', href: '/dashboard/shift-management', category: 'HR Management' },
   { id: 'leave-management', title: 'Leave Management', href: '/dashboard/leave-management', category: 'HR Management' },
   { id: 'payroll', title: 'Payroll', href: '/dashboard/payroll', category: 'HR Management' },
   { id: 'recruitment', title: 'Recruitment', href: '/dashboard/recruitment', category: 'HR Management' },
@@ -55,16 +58,16 @@ export function getRolePagePermissions(roleInput: any): string[] {
   try {
     const keysToTry = [
       `hrms_page_permissions_${normalizedRole}`,
-      `hrms_page_permissions_HR_MANAGER`,
-      `hrms_page_permissions_HR_ADMIN`
+      ...(normalizedRole.includes('HR') ? ['hrms_page_permissions_HR_MANAGER', 'hrms_page_permissions_HR_ADMIN'] : []),
+      ...(normalizedRole.includes('EMPLOYEE') ? ['hrms_page_permissions_EMPLOYEE'] : [])
     ];
 
     for (const key of keysToTry) {
       const saved = localStorage.getItem(key);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Strictly exclude Super Admin only pages for non-Super Admin roles
+        if (Array.isArray(parsed)) {
+          // Return saved permissions strictly filtered to exclude Super Admin only pages
           return parsed.filter((href: string) => !SUPER_ADMIN_ONLY_PAGES.includes(href));
         }
       }
@@ -73,7 +76,7 @@ export function getRolePagePermissions(roleInput: any): string[] {
     console.error('Error reading page permissions', e);
   }
 
-  // Default permissions for ANY HR role if no custom permission is set (Excludes Super Admin only pages)
+  // Default permissions for ANY HR role if no custom permission has been saved yet
   if (
     normalizedRole.includes('HR') || 
     normalizedRole === 'HR_MANAGER' || 
@@ -94,20 +97,70 @@ export function getRolePagePermissions(roleInput: any): string[] {
   ];
 }
 
-export function setRolePagePermissions(roleInput: any, allowedHrefs: string[]) {
+export async function setRolePagePermissions(roleInput: any, allowedHrefs: string[]) {
   const rawRole = extractRoleName(roleInput);
   const normalizedRole = rawRole.toUpperCase().trim().replace(/[\s\_]+/g, '_');
   
+  if (!normalizedRole) return;
+
   try {
     const payload = JSON.stringify(allowedHrefs);
     localStorage.setItem(`hrms_page_permissions_${normalizedRole}`, payload);
-    localStorage.setItem(`hrms_page_permissions_HR_MANAGER`, payload);
-    localStorage.setItem(`hrms_page_permissions_HR_ADMIN`, payload);
+
+    if (normalizedRole.includes('HR') || normalizedRole === 'HR_MANAGER' || normalizedRole === 'HR_ADMIN') {
+      localStorage.setItem('hrms_page_permissions_HR_MANAGER', payload);
+      localStorage.setItem('hrms_page_permissions_HR_ADMIN', payload);
+    } else if (normalizedRole.includes('EMPLOYEE')) {
+      localStorage.setItem('hrms_page_permissions_EMPLOYEE', payload);
+    }
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('hrms_permissions_updated'));
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: `hrms_page_permissions_${normalizedRole}`,
+        newValue: payload
+      }));
     }
+
+    // Persist to Database via API
+    await api.post('/admin/role-page-permissions', {
+      roleName: normalizedRole,
+      allowedHrefs
+    }).catch(() => {});
   } catch (e) {
     console.error('Error saving page permissions', e);
   }
 }
+
+export async function fetchAndSyncRolePagePermissions() {
+  try {
+    const res = await api.get('/admin/role-page-permissions');
+    if (res.data?.success && res.data?.data) {
+      const permissionsMap = res.data.data;
+      let hasChanges = false;
+      Object.keys(permissionsMap).forEach(roleKey => {
+        const payload = JSON.stringify(permissionsMap[roleKey]);
+        const keysToSet = [
+          `hrms_page_permissions_${roleKey}`,
+          ...(roleKey.includes('HR') ? ['hrms_page_permissions_HR_MANAGER', 'hrms_page_permissions_HR_ADMIN'] : []),
+          ...(roleKey.includes('EMPLOYEE') ? ['hrms_page_permissions_EMPLOYEE'] : [])
+        ];
+
+        keysToSet.forEach(k => {
+          const existing = localStorage.getItem(k);
+          if (existing !== payload) {
+            localStorage.setItem(k, payload);
+            hasChanges = true;
+          }
+        });
+      });
+      if (hasChanges && typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('hrms_permissions_updated'));
+      }
+    }
+  } catch (e) {
+    // Silent fail if network issue
+  }
+}
+
+
