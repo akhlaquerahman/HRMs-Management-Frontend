@@ -135,7 +135,7 @@ export default function Navbar({ onOpenMobileSidebar }: NavbarProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-7 w-7 sm:h-9 sm:w-9 rounded-full shrink-0 p-0">
               <Avatar className="h-7 w-7 sm:h-9 sm:w-9 border">
-                <AvatarImage src={user?.profilePic || ""} alt={user?.firstName || user?.email || 'User'} className="object-cover" />
+                <AvatarImage src={user?.profilePic || undefined} alt={user?.firstName || user?.email || 'User'} className="object-cover" />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px] sm:text-sm">
                   {user?.firstName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>

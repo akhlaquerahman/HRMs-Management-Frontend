@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
+import { Lock } from 'lucide-react';
 
 export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boolean, onClose: () => void, employee: any }) {
   const { t } = useTranslation();
@@ -38,14 +39,23 @@ export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boole
     }
   }, [employee, isOpen]);
 
-  const { data: departments } = useQuery({
+  const { data: rawDepartments = [] } = useQuery({
     queryKey: ['departments'],
-    queryFn: async () => (await api.get('/departments')).data.data
+    queryFn: async () => {
+      const res = await api.get('/departments');
+      return res.data?.data || res.data || [];
+    }
   });
-  const { data: designations } = useQuery({
+  const { data: rawDesignations = [] } = useQuery({
     queryKey: ['designations'],
-    queryFn: async () => (await api.get('/designations')).data.data
+    queryFn: async () => {
+      const res = await api.get('/designations');
+      return res.data?.data || res.data || [];
+    }
   });
+
+  const departments = Array.isArray(rawDepartments) ? rawDepartments : (Array.isArray((rawDepartments as any)?.data) ? (rawDepartments as any).data : []);
+  const designations = Array.isArray(rawDesignations) ? rawDesignations : (Array.isArray((rawDesignations as any)?.data) ? (rawDesignations as any).data : []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -58,10 +68,11 @@ export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boole
 
   const updateEmployee = useMutation({
     mutationFn: async (data: any) => {
+      const { employeeId, ...rest } = data;
       const payload = { 
-        ...data,
-        departmentId: data.departmentId || undefined,
-        designationId: data.designationId || undefined,
+        ...rest,
+        departmentId: rest.departmentId || undefined,
+        designationId: rest.designationId || undefined,
       };
       if (payload.baseSalary !== undefined && payload.baseSalary !== '') {
         payload.baseSalary = parseFloat(payload.baseSalary) || 0;
@@ -117,8 +128,23 @@ export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boole
               <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required className="h-9 text-xs sm:text-sm" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="employeeId" className="text-xs font-semibold">{t("Employee ID")} *</Label>
-              <Input id="employeeId" name="employeeId" value={formData.employeeId} onChange={handleChange} required className="h-9 text-xs sm:text-sm font-mono" />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="employeeId" className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
+                  <Lock className="w-3 h-3 text-muted-foreground/70" />
+                  {t("Employee ID")}
+                </Label>
+                <span className="text-[10px] font-medium text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded border border-border/50">
+                  {t("Immutable")}
+                </span>
+              </div>
+              <Input 
+                id="employeeId" 
+                name="employeeId" 
+                value={formData.employeeId} 
+                disabled 
+                readOnly 
+                className="h-9 text-xs sm:text-sm font-mono bg-muted/60 text-muted-foreground cursor-not-allowed border-muted-foreground/20 opacity-80" 
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="baseSalary" className="text-xs font-semibold">{t("Base Salary (Annual CTC)")}</Label>

@@ -890,21 +890,21 @@ export function WeeklyRosterTab() {
                   return (
                     <th 
                       key={dateStr} 
-                      className={`p-3 text-center border-r min-w-[140px] transition-colors ${
-                        isToday ? 'bg-primary/15 text-primary border-primary/30 font-black' : ''
+                      className={`p-2.5 text-center border-r min-w-[155px] align-top transition-colors ${
+                        isToday ? 'bg-primary/10 text-primary border-primary/30 font-black' : ''
                       }`}
                     >
-                      <div className="flex flex-col items-center justify-center gap-0.5">
+                      <div className="flex flex-col items-center justify-center gap-1">
                         <span className="text-[10px] text-muted-foreground">{dayNameShort}</span>
                         <span className="font-extrabold text-xs text-foreground font-mono">{dateShort}</span>
                         {isToday && (
-                          <Badge className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0 mt-0.5 font-bold">
+                          <Badge className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0 font-bold">
                             TODAY
                           </Badge>
                         )}
 
-                        {/* Column Quick Action Dropdown */}
-                        <div className="mt-1 flex items-center gap-1">
+                        {/* Column Quick Action Links */}
+                        <div className="mt-0.5 flex items-center gap-1">
                           <button
                             type="button"
                             title="Set Shift for all employees on this day"
@@ -927,32 +927,35 @@ export function WeeklyRosterTab() {
                           </button>
                         </div>
 
-                        {/* Daily Staffing Summary Micro Pills */}
-                        <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1 font-mono text-[9px] normal-case tracking-normal">
-                          <span 
-                            title={`${metrics.workingCount} working on this date`}
-                            className="px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-extrabold border border-emerald-500/30 whitespace-nowrap"
+                        {/* Enterprise Staffing & Headcount Integrated Card */}
+                        <div className="mt-1.5 w-full flex flex-col gap-1 text-[10px] font-mono normal-case tracking-normal">
+                          {/* On Shift Summary Pill */}
+                          <div 
+                            title={`${metrics.workingCount} out of ${metrics.totalEmployees} scheduled on shift`}
+                            className="w-full py-1 px-2 rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between font-extrabold text-emerald-700 dark:text-emerald-300"
                           >
-                            🟢 {metrics.workingCount} On Shift
-                          </span>
+                            <span>On Shift</span>
+                            <span>{metrics.workingCount} <span className="text-[9px] font-semibold opacity-80">({metrics.totalEmployees > 0 ? Math.round((metrics.workingCount / metrics.totalEmployees) * 100) : 0}%)</span></span>
+                          </div>
 
-                          {metrics.leave > 0 && (
-                            <span 
-                              title={`${metrics.leave} on leave`}
-                              className="px-1.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-400 font-extrabold border border-rose-500/30 whitespace-nowrap"
+                          {/* Week Off & On Leave Sub-Row */}
+                          <div className="grid grid-cols-2 gap-1 font-bold">
+                            <div 
+                              title={`${metrics.weekOff} employees on week off`}
+                              className="py-0.5 px-1.5 rounded bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between text-amber-700 dark:text-amber-400 text-[9.5px]"
                             >
-                              🔴 {metrics.leave} Leave
-                            </span>
-                          )}
+                              <span className="truncate">Week Off</span>
+                              <span>{metrics.weekOff}</span>
+                            </div>
 
-                          {metrics.weekOff > 0 && (
-                            <span 
-                              title={`${metrics.weekOff} on week off`}
-                              className="px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-extrabold border border-amber-500/30 whitespace-nowrap"
+                            <div 
+                              title={`${metrics.leave} employees on leave`}
+                              className="py-0.5 px-1.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 flex items-center justify-between text-rose-700 dark:text-rose-400 text-[9.5px]"
                             >
-                              🟡 {metrics.weekOff} Off
-                            </span>
-                          )}
+                              <span className="truncate">On Leave</span>
+                              <span>{metrics.leave}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </th>
@@ -1112,64 +1115,7 @@ export function WeeklyRosterTab() {
               )}
             </tbody>
 
-            {/* Enterprise Daily Coverage & Headcount Summary Footer */}
-            <tfoot className="bg-muted/30 border-t font-medium text-xs">
-              <tr>
-                {/* Left Sticky Summary Header */}
-                <td className="p-3 pl-4 sticky left-0 z-10 bg-card border-r shadow-2xs font-extrabold text-foreground text-[11px] uppercase tracking-wider">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-primary font-bold flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>Daily Coverage & Headcount</span>
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-normal normal-case">
-                      Scheduled vs Leave breakdown per day
-                    </span>
-                  </div>
-                </td>
 
-                {/* 7 Days Daily Summary Cells */}
-                {Array.from({ length: 7 }, (_, i) => {
-                  const d = new Date(currentWeekSunday);
-                  d.setDate(currentWeekSunday.getDate() + i);
-                  const dateStr = formatDateToYYYYMMDD(d);
-                  const metrics = getDailyMetricsForDate(dateStr);
-                  const isToday = dateStr === todayStr;
-
-                  return (
-                    <td 
-                      key={dateStr}
-                      className={`p-2.5 text-center border-r align-top ${isToday ? 'bg-primary/5 font-bold' : ''}`}
-                    >
-                      <div className="flex flex-col items-center gap-1 text-[11px]">
-                        
-                        {/* On Shift / Working Summary Card */}
-                        <div className="w-full p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-1">
-                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">On Shift</span>
-                          <span className="font-extrabold text-emerald-700 dark:text-emerald-300 font-mono text-xs">
-                            {metrics.workingCount} ({metrics.totalEmployees > 0 ? Math.round((metrics.workingCount / metrics.totalEmployees) * 100) : 0}%)
-                          </span>
-                        </div>
-
-                        {/* Leave & Week Off Micro Grid */}
-                        <div className="w-full grid grid-cols-2 gap-1 text-[10px]">
-                          <div className="p-1 rounded bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-col items-center" title={`${metrics.weekOff} employees on week off`}>
-                            <span className="text-[9px] font-semibold text-amber-700 dark:text-amber-400">Week Off</span>
-                            <span className="font-extrabold text-amber-700 dark:text-amber-400 font-mono">{metrics.weekOff}</span>
-                          </div>
-
-                          <div className="p-1 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 flex flex-col items-center" title={`${metrics.leave} employees on leave`}>
-                            <span className="text-[9px] font-semibold text-rose-700 dark:text-rose-400">On Leave</span>
-                            <span className="font-extrabold text-rose-700 dark:text-rose-400 font-mono">{metrics.leave}</span>
-                          </div>
-                        </div>
-
-                      </div>
-                    </td>
-                  );
-                })}
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>

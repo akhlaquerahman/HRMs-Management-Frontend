@@ -48,8 +48,11 @@ import {
   Trash2,
   FileText,
   UserCheck,
-  Building2,
   History,
+  ChevronLeft,
+  ChevronRight,
+  UserX,
+  Info,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -93,6 +96,21 @@ export function HRLeaveManagementClient() {
   const [leaveTypeEncashable, setLeaveTypeEncashable] = useState(false);
   const [leaveTypeError, setLeaveTypeError] = useState("");
 
+  // Edit Leave Type State
+  const [isEditLeaveTypeOpen, setIsEditLeaveTypeOpen] = useState(false);
+  const [editingLeaveTypeId, setEditingLeaveTypeId] = useState<string | null>(null);
+  const [editLeaveTypeName, setEditLeaveTypeName] = useState("");
+  const [editLeaveTypeCode, setEditLeaveTypeCode] = useState("");
+  const [editLeaveTypeDesc, setEditLeaveTypeDesc] = useState("");
+  const [editLeaveTypeCategory, setEditLeaveTypeCategory] = useState("PAID");
+  const [editLeaveTypeDefaultAlloc, setEditLeaveTypeDefaultAlloc] = useState(12);
+  const [editLeaveTypeAccrual, setEditLeaveTypeAccrual] = useState("ANNUAL");
+  const [editLeaveTypeCarryForward, setEditLeaveTypeCarryForward] = useState(false);
+  const [editLeaveTypeMaxCarry, setEditLeaveTypeMaxCarry] = useState(0);
+  const [editLeaveTypeEncashable, setEditLeaveTypeEncashable] = useState(false);
+  const [editLeaveTypeStatus, setEditLeaveTypeStatus] = useState(true);
+  const [editLeaveTypeError, setEditLeaveTypeError] = useState("");
+
   const [isAddHolidayOpen, setIsAddHolidayOpen] = useState(false);
   const [holidayName, setHolidayName] = useState("");
   const [holidayDate, setHolidayDate] = useState("");
@@ -100,7 +118,18 @@ export function HRLeaveManagementClient() {
   const [holidayDesc, setHolidayDesc] = useState("");
   const [holidayError, setHolidayError] = useState("");
 
+  // Monthly Calendar & Availability State
+  const [viewingMonthDate, setViewingMonthDate] = useState<Date>(() => new Date());
+  const [selectedShiftFilter, setSelectedShiftFilter] = useState("ALL");
+  const [selectedDayDetails, setSelectedDayDetails] = useState<any | null>(null);
+  const [isDayDetailModalOpen, setIsDayDetailModalOpen] = useState(false);
+
   // FETCH DATA
+  const { data: shiftsList = [] } = useQuery({
+    queryKey: ["shiftsList"],
+    queryFn: async () => (await api.get("/shifts")).data.data || [],
+  });
+
   const { data: hrSummary, isLoading: isSummaryLoading, refetch: refetchSummary } = useQuery({
     queryKey: ["hrLeaveSummary"],
     queryFn: async () => (await api.get("/leaves/summary")).data.data,
@@ -195,6 +224,57 @@ export function HRLeaveManagementClient() {
     },
   });
 
+  const updateLeaveTypeMutation = useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
+      const res = await api.put(`/leaves/types/${id}`, payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leaveTypes"] });
+      setIsEditLeaveTypeOpen(false);
+      setEditingLeaveTypeId(null);
+      setEditLeaveTypeError("");
+    },
+    onError: (err: any) => {
+      setEditLeaveTypeError(err.response?.data?.message || "Failed to update leave type.");
+    },
+  });
+
+  const deleteLeaveTypeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.delete(`/leaves/types/${id}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leaveTypes"] });
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || "Failed to delete/deactivate leave type.");
+    },
+  });
+
+  const handleOpenEditLeaveType = (leaveType: any) => {
+    setEditingLeaveTypeId(leaveType.id);
+    setEditLeaveTypeName(leaveType.name || "");
+    setEditLeaveTypeCode(leaveType.code || "");
+    setEditLeaveTypeDesc(leaveType.description || "");
+    setEditLeaveTypeCategory(leaveType.category || "PAID");
+    setEditLeaveTypeDefaultAlloc(leaveType.defaultAllocation || 0);
+    setEditLeaveTypeAccrual(leaveType.accrualType || "ANNUAL");
+    setEditLeaveTypeCarryForward(Boolean(leaveType.carryForwardEnabled));
+    setEditLeaveTypeMaxCarry(leaveType.maxCarryForward || 0);
+    setEditLeaveTypeEncashable(Boolean(leaveType.encashmentEnabled));
+    setEditLeaveTypeStatus(leaveType.status !== undefined ? Boolean(leaveType.status) : true);
+    setEditLeaveTypeError("");
+    setIsEditLeaveTypeOpen(true);
+  };
+
+  const handleDeleteLeaveType = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to deactivate/delete the leave type "${name}"?`)) {
+      deleteLeaveTypeMutation.mutate(id);
+    }
+  };
+
   const createHolidayMutation = useMutation({
     mutationFn: async (payload: any) => {
       const res = await api.post("/holidays", payload);
@@ -283,6 +363,116 @@ export function HRLeaveManagementClient() {
     availableLeaveTypes: 6,
     upcomingHolidays: 0,
   };
+
+  // Monthly Calendar Helpers
+  const handlePrevMonth = () => {
+    setViewingMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  const handleNextMonth = () => {
+    setViewingMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+  const handleTodayMonth = () => {
+    setViewingMonthDate(new Date());
+  };
+
+  const getDailyStaffingMetrics = (dateStr: string) => {
+    // 1. Calculate Shift Total Staff
+    let targetStaffList = employeeBalances;
+    if (selectedShiftFilter !== "ALL") {
+      const selectedShiftObj = shiftsList.find((s: any) => s.id === selectedShiftFilter);
+      targetStaffList = employeeBalances.filter((b: any) => {
+        return (
+          b.shiftId === selectedShiftFilter ||
+          b.shiftName === selectedShiftFilter ||
+          (selectedShiftObj && b.shiftName === selectedShiftObj.name)
+        );
+      });
+    }
+
+    const totalStaff = targetStaffList.length || (selectedShiftFilter === "ALL" ? (kpis.totalEmployees || 1) : 1);
+
+    // 2. Filter Approved Leaves
+    const approvedLeaves = allRequests.filter((r: any) => {
+      if (r.status !== "APPROVED") return false;
+      const start = r.startDate.split("T")[0];
+      const end = r.endDate.split("T")[0];
+      const matchesDate = start <= dateStr && end >= dateStr;
+      if (!matchesDate) return false;
+
+      if (selectedShiftFilter !== "ALL") {
+        const empShiftId = r.employee?.shiftId || r.employee?.shift?.id;
+        const empShiftName = r.employee?.shiftName || r.employee?.shift?.name;
+        const selectedShiftObj = shiftsList.find((s: any) => s.id === selectedShiftFilter);
+        const matchesShift =
+          empShiftId === selectedShiftFilter ||
+          empShiftName === selectedShiftFilter ||
+          (selectedShiftObj && empShiftName === selectedShiftObj.name);
+
+        return matchesShift;
+      }
+      return true;
+    });
+
+    // 3. Filter Pending Leaves (for quick manager approval)
+    const pendingLeaves = allRequests.filter((r: any) => {
+      if (r.status !== "PENDING") return false;
+      const start = r.startDate.split("T")[0];
+      const end = r.endDate.split("T")[0];
+      const matchesDate = start <= dateStr && end >= dateStr;
+      if (!matchesDate) return false;
+
+      if (selectedShiftFilter !== "ALL") {
+        const empShiftId = r.employee?.shiftId || r.employee?.shift?.id;
+        const empShiftName = r.employee?.shiftName || r.employee?.shift?.name;
+        const selectedShiftObj = shiftsList.find((s: any) => s.id === selectedShiftFilter);
+        const matchesShift =
+          empShiftId === selectedShiftFilter ||
+          empShiftName === selectedShiftFilter ||
+          (selectedShiftObj && empShiftName === selectedShiftObj.name);
+
+        return matchesShift;
+      }
+      return true;
+    });
+
+    const leaveCount = approvedLeaves.length;
+    const pendingCount = pendingLeaves.length;
+    const expectedPresent = Math.max(0, totalStaff - leaveCount);
+    const presentPercent = totalStaff > 0 ? Math.round((expectedPresent / totalStaff) * 100) : 100;
+    const absentPercent = totalStaff > 0 ? Math.round((leaveCount / totalStaff) * 100) : 0;
+
+    const selectedShiftObj = shiftsList.find((s: any) => s.id === selectedShiftFilter);
+
+    return {
+      dateStr,
+      approvedLeaves,
+      pendingLeaves,
+      leaveCount,
+      pendingCount,
+      totalStaff,
+      expectedPresent,
+      presentPercent,
+      absentPercent,
+      selectedShiftName: selectedShiftFilter === "ALL" ? "All Shifts (Company-wide)" : selectedShiftObj?.name || "Selected Shift",
+    };
+  };
+
+  const calYear = viewingMonthDate.getFullYear();
+  const calMonth = viewingMonthDate.getMonth();
+  const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const calFirstDayOffset = new Date(calYear, calMonth, 1).getDay();
+  const calMonthNameStr = viewingMonthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const todayStrDate = format(new Date(), "yyyy-MM-dd");
+
+  const calGridCells: ({ dayNum: number; dateStr: string } | null)[] = [];
+  for (let i = 0; i < calFirstDayOffset; i++) {
+    calGridCells.push(null);
+  }
+  for (let d = 1; d <= calDaysInMonth; d++) {
+    const mm = String(calMonth + 1).padStart(2, "0");
+    const dd = String(d).padStart(2, "0");
+    calGridCells.push({ dayNum: d, dateStr: `${calYear}-${mm}-${dd}` });
+  }
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto p-6">
@@ -411,9 +601,9 @@ export function HRLeaveManagementClient() {
 
         {/* TAB 1: OVERVIEW */}
         <TabsContent value="overview" className="space-y-4 mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Utilization Summary */}
-            <Card className="border shadow-xs lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+            {/* Utilization Summary (Left Side - 5 cols) */}
+            <Card className="border shadow-xs lg:col-span-5">
               <CardHeader className="pb-3 border-b bg-muted/20">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Briefcase className="h-4 w-4 text-primary" />
@@ -421,75 +611,224 @@ export function HRLeaveManagementClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-4">
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span>Annual Leave (AL)</span>
-                      <span>72% Utilized</span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                        Annual Leave (AL)
+                      </span>
+                      <span className="font-mono text-muted-foreground">72% Utilized</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                       <div className="h-full bg-blue-600 rounded-full" style={{ width: "72%" }}></div>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span>Casual Leave (CL)</span>
-                      <span>48% Utilized</span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        Casual Leave (CL)
+                      </span>
+                      <span className="font-mono text-muted-foreground">48% Utilized</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                       <div className="h-full bg-emerald-600 rounded-full" style={{ width: "48%" }}></div>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span>Medical Leave (ML)</span>
-                      <span>31% Utilized</span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                        Medical Leave (ML)
+                      </span>
+                      <span className="font-mono text-muted-foreground">31% Utilized</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                       <div className="h-full bg-rose-600 rounded-full" style={{ width: "31%" }}></div>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span>Earned Leave (EL)</span>
-                      <span>25% Utilized</span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                        Earned Leave (EL)
+                      </span>
+                      <span className="font-mono text-muted-foreground">25% Utilized</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                       <div className="h-full bg-purple-600 rounded-full" style={{ width: "25%" }}></div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-muted/40 border space-y-2 mt-2">
+                  <div className="text-[11px] font-semibold text-muted-foreground flex items-center justify-between">
+                    <span>Configured Categories</span>
+                    <span className="font-mono font-bold text-foreground">{leaveTypes.length || 6} Types</span>
+                  </div>
+                  <div className="text-[11px] font-semibold text-muted-foreground flex items-center justify-between">
+                    <span>Approved Requests (This Month)</span>
+                    <span className="font-mono font-bold text-emerald-600">{kpis.approvedThisMonth || 0} Leaves</span>
+                  </div>
+                  <div className="text-[11px] font-semibold text-muted-foreground flex items-center justify-between">
+                    <span>Pending Manager Action</span>
+                    <span className="font-mono font-bold text-amber-600">{kpis.pendingRequests || 0} Pending</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Upcoming Holidays Widget */}
-            <Card className="border shadow-xs">
-              <CardHeader className="pb-3 border-b bg-muted/20">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4 text-indigo-600" />
-                  Upcoming Holidays
-                </CardTitle>
+            {/* Enterprise Monthly Leave Availability & Capacity Calendar (Right Side - 7 cols) */}
+            <Card className="border shadow-xs lg:col-span-7">
+              <CardHeader className="pb-2.5 pt-3 border-b bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+                    <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+                    Staffing &amp; Leave Calendar
+                  </CardTitle>
+
+                  {/* Shift Filter Dropdown */}
+                  <div className="flex items-center gap-1 bg-background border rounded-md px-2 py-0.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Shift:</span>
+                    <select
+                      value={selectedShiftFilter}
+                      onChange={(e) => setSelectedShiftFilter(e.target.value)}
+                      className="text-[11px] font-semibold bg-transparent border-0 focus:outline-hidden text-foreground cursor-pointer"
+                    >
+                      <option value="ALL">All Shifts (Company-wide)</option>
+                      {shiftsList.map((s: any) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} ({s.startTime} - {s.endTime})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Month Selector Controls */}
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center bg-background border rounded-md p-0.5">
+                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handlePrevMonth} title="Previous Month">
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                    <span className="text-[11px] font-bold font-mono px-1.5 min-w-[95px] text-center select-none">
+                      {calMonthNameStr}
+                    </span>
+                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleNextMonth} title="Next Month">
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 font-semibold" onClick={handleTodayMonth}>
+                    Today
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent className="p-3 space-y-2">
-                {calendarData?.holidays && calendarData.holidays.length > 0 ? (
-                  calendarData.holidays.map((h: any) => (
-                    <div key={h.id} className="p-2.5 border rounded-lg flex items-center gap-3 bg-gray-50/50">
-                      <div className="h-9 w-9 rounded-lg bg-indigo-500/10 text-indigo-700 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-xs font-bold">{format(new Date(h.date), "dd")}</span>
-                        <span className="text-[8px] uppercase font-semibold">{format(new Date(h.date), "MMM")}</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-semibold text-gray-900 truncate">{h.name}</h4>
-                        <span className="text-[10px] text-muted-foreground">{h.type || "National"}</span>
-                      </div>
+
+              <CardContent className="p-3 space-y-2.5">
+                {/* Summary Legend Bar */}
+                <div className="p-2 rounded-md bg-muted/30 border flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+                  <div className="flex items-center gap-2 font-medium text-muted-foreground">
+                    <span>
+                      Staff:{" "}
+                      <strong className="text-foreground font-mono">
+                        {selectedShiftFilter === "ALL"
+                          ? employeeBalances.length || kpis.totalEmployees
+                          : employeeBalances.filter(
+                              (b: any) =>
+                                b.shiftId === selectedShiftFilter ||
+                                b.shiftName === selectedShiftFilter ||
+                                (shiftsList.find((s: any) => s.id === selectedShiftFilter)?.name === b.shiftName)
+                            ).length}
+                      </strong>
+                    </span>
+                    {selectedShiftFilter !== "ALL" && (
+                      <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/30">
+                        {shiftsList.find((s: any) => s.id === selectedShiftFilter)?.name || "Filtered Shift"}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-[10px] font-semibold flex-wrap">
+                    <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Safe (≥80%)
+                    </span>
+                    <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400">
+                      <span className="w-2 h-2 rounded-full bg-amber-500"></span> Caution (60-79%)
+                    </span>
+                    <span className="flex items-center gap-1 text-rose-700 dark:text-rose-400">
+                      <span className="w-2 h-2 rounded-full bg-rose-500"></span> Critical (&lt;60%)
+                    </span>
+                  </div>
+                </div>
+
+                {/* 7 Columns Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                  {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((dayName) => (
+                    <div key={dayName} className="py-1 font-bold text-[10px] text-muted-foreground bg-muted/40 rounded">
+                      {dayName}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground p-4 text-center">No upcoming holidays scheduled.</p>
-                )}
+                  ))}
+
+                  {calGridCells.map((cell, idx) => {
+                    if (!cell) {
+                      return <div key={`empty-${idx}`} className="p-1 min-h-[52px] bg-muted/5 rounded border border-dashed border-border/15 opacity-20"></div>;
+                    }
+
+                    const metrics = getDailyStaffingMetrics(cell.dateStr);
+                    const isToday = cell.dateStr === todayStrDate;
+
+                    let bgClass = "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/60";
+                    let badgeClass = "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-300";
+                    if (metrics.presentPercent < 60) {
+                      bgClass = "bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800 shadow-2xs";
+                      badgeClass = "bg-rose-500/20 text-rose-700 dark:text-rose-300 border-rose-400 font-extrabold";
+                    } else if (metrics.presentPercent < 80) {
+                      bgClass = "bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800";
+                      badgeClass = "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-400 font-bold";
+                    }
+
+                    return (
+                      <div
+                        key={cell.dateStr}
+                        onClick={() => {
+                          setSelectedDayDetails(metrics);
+                          setIsDayDetailModalOpen(true);
+                        }}
+                        className={`p-1.5 min-h-[54px] rounded-md border transition-all cursor-pointer hover:scale-[1.02] hover:shadow-xs flex flex-col justify-between ${bgClass} ${
+                          isToday ? "ring-2 ring-primary ring-offset-1 font-black" : ""
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-extrabold text-[11px] text-foreground font-mono leading-none">{cell.dayNum}</span>
+                          {isToday && (
+                            <span className="text-[7.5px] font-black text-primary bg-primary/15 px-1 rounded leading-tight">TODAY</span>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col gap-0.5 mt-1 font-mono">
+                          {metrics.leaveCount > 0 ? (
+                            <span className={`px-1 py-0.2 rounded border text-[9px] font-bold block truncate leading-tight ${badgeClass}`}>
+                              🔴 {metrics.leaveCount} Off
+                            </span>
+                          ) : (
+                            <span className="text-[8.5px] text-emerald-700 dark:text-emerald-400 font-semibold block truncate leading-tight">
+                              🟢 0 Off
+                            </span>
+                          )}
+
+                          <div className="flex items-center justify-between text-[8px] text-muted-foreground font-semibold leading-tight">
+                            <span>Present:</span>
+                            <span className="font-bold text-foreground font-mono">{metrics.presentPercent}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -850,6 +1189,7 @@ export function HRLeaveManagementClient() {
                     <TableHead>Carry Forward</TableHead>
                     <TableHead>Encashable</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -878,6 +1218,28 @@ export function HRLeaveManagementClient() {
                         ) : (
                           <Badge variant="destructive" className="text-xs">Inactive</Badge>
                         )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title="Edit Leave Type"
+                            onClick={() => handleOpenEditLeaveType(t)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                            title="Delete Leave Type"
+                            onClick={() => handleDeleteLeaveType(t.id, t.name)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1294,6 +1656,154 @@ export function HRLeaveManagementClient() {
         </DialogContent>
       </Dialog>
 
+      {/* MODAL: EDIT LEAVE TYPE */}
+      <Dialog open={isEditLeaveTypeOpen} onOpenChange={setIsEditLeaveTypeOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+              <Edit className="h-5 w-5 text-primary" />
+              Edit Leave Type Configuration
+            </DialogTitle>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (editingLeaveTypeId) {
+                updateLeaveTypeMutation.mutate({
+                  id: editingLeaveTypeId,
+                  payload: {
+                    name: editLeaveTypeName,
+                    code: editLeaveTypeCode,
+                    description: editLeaveTypeDesc,
+                    category: editLeaveTypeCategory,
+                    defaultAllocation: editLeaveTypeDefaultAlloc,
+                    accrualType: editLeaveTypeAccrual,
+                    carryForwardEnabled: editLeaveTypeCarryForward,
+                    maxCarryForward: editLeaveTypeMaxCarry,
+                    encashmentEnabled: editLeaveTypeEncashable,
+                    status: editLeaveTypeStatus,
+                  },
+                });
+              }
+            }}
+            className="space-y-4 py-2"
+          >
+            {editLeaveTypeError && (
+              <div className="p-3 rounded-lg bg-destructive/15 text-destructive text-xs font-medium flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{editLeaveTypeError}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Leave Name *</Label>
+                <Input value={editLeaveTypeName} onChange={(e) => setEditLeaveTypeName(e.target.value)} required />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Code *</Label>
+                <Input value={editLeaveTypeCode} onChange={(e) => setEditLeaveTypeCode(e.target.value.toUpperCase())} required />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Category</Label>
+                <select
+                  className="w-full h-9 px-3 border rounded-lg text-xs bg-background"
+                  value={editLeaveTypeCategory}
+                  onChange={(e) => setEditLeaveTypeCategory(e.target.value)}
+                >
+                  <option value="PAID">Paid Leave</option>
+                  <option value="UNPAID">Unpaid Leave</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">Default Annual Allocation</Label>
+                <Input type="number" value={editLeaveTypeDefaultAlloc} onChange={(e) => setEditLeaveTypeDefaultAlloc(Number(e.target.value))} required />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Accrual Pattern</Label>
+                <select
+                  className="w-full h-9 px-3 border rounded-lg text-xs bg-background"
+                  value={editLeaveTypeAccrual}
+                  onChange={(e) => setEditLeaveTypeAccrual(e.target.value)}
+                >
+                  <option value="ANNUAL">Annual</option>
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="CUSTOM">Custom</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">Status</Label>
+                <select
+                  className="w-full h-9 px-3 border rounded-lg text-xs bg-background"
+                  value={editLeaveTypeStatus ? "ACTIVE" : "INACTIVE"}
+                  onChange={(e) => setEditLeaveTypeStatus(e.target.value === "ACTIVE")}
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 p-3 border rounded-lg bg-gray-50/50">
+              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editLeaveTypeCarryForward}
+                  onChange={(e) => setEditLeaveTypeCarryForward(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                Allow Carry Forward
+              </label>
+
+              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editLeaveTypeEncashable}
+                  onChange={(e) => setEditLeaveTypeEncashable(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                Encashable
+              </label>
+            </div>
+
+            {editLeaveTypeCarryForward && (
+              <div className="space-y-1">
+                <Label className="text-xs">Max Carry Forward Days</Label>
+                <Input
+                  type="number"
+                  value={editLeaveTypeMaxCarry}
+                  onChange={(e) => setEditLeaveTypeMaxCarry(Number(e.target.value))}
+                />
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <Label className="text-xs">Description</Label>
+              <Textarea rows={2} value={editLeaveTypeDesc} onChange={(e) => setEditLeaveTypeDesc(e.target.value)} />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsEditLeaveTypeOpen(false)} disabled={updateLeaveTypeMutation.isPending}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateLeaveTypeMutation.isPending}>
+                {updateLeaveTypeMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* MODAL: ADD HOLIDAY */}
       <Dialog open={isAddHolidayOpen} onOpenChange={setIsAddHolidayOpen}>
         <DialogContent className="sm:max-w-[450px]">
@@ -1366,6 +1876,210 @@ export function HRLeaveManagementClient() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* MODAL: DAILY WORKFORCE STAFFING & LEAVE DETAILS */}
+      {selectedDayDetails && (
+        <Dialog open={isDayDetailModalOpen} onOpenChange={setIsDayDetailModalOpen}>
+          <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary shrink-0" />
+                  Staffing &amp; Leave Roster — {format(new Date(selectedDayDetails.dateStr), "EEEE, dd MMMM yyyy")}
+                </span>
+              </DialogTitle>
+              <div className="flex items-center gap-2 pt-1">
+                <Badge variant="secondary" className="text-[10px] font-mono">
+                  {selectedDayDetails.selectedShiftName}
+                </Badge>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Capacity KPI Bar */}
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="p-2 rounded-lg border bg-card">
+                  <span className="text-[10px] text-muted-foreground block font-semibold">Total Staff</span>
+                  <span className="text-base font-bold font-mono">{selectedDayDetails.totalStaff}</span>
+                </div>
+                <div className="p-2 rounded-lg border bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200">
+                  <span className="text-[10px] text-emerald-700 dark:text-emerald-300 block font-semibold">Present</span>
+                  <span className="text-base font-extrabold text-emerald-700 dark:text-emerald-300 font-mono">{selectedDayDetails.expectedPresent}</span>
+                </div>
+                <div className="p-2 rounded-lg border bg-rose-50 dark:bg-rose-950/40 border-rose-200">
+                  <span className="text-[10px] text-rose-700 dark:text-rose-300 block font-semibold">On Leave</span>
+                  <span className="text-base font-extrabold text-rose-700 dark:text-rose-300 font-mono">{selectedDayDetails.leaveCount}</span>
+                </div>
+                <div className="p-2 rounded-lg border bg-blue-50 dark:bg-blue-950/40 border-blue-200">
+                  <span className="text-[10px] text-blue-700 dark:text-blue-300 block font-semibold">Availability</span>
+                  <span className="text-base font-extrabold text-blue-700 dark:text-blue-300 font-mono">{selectedDayDetails.presentPercent}%</span>
+                </div>
+              </div>
+
+              {/* Manager Leave Approval Recommendation Alert */}
+              <div
+                className={`p-3 rounded-lg border text-xs font-semibold flex items-start gap-2.5 ${
+                  selectedDayDetails.presentPercent >= 80
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 text-emerald-800 dark:text-emerald-300"
+                    : selectedDayDetails.presentPercent >= 60
+                    ? "bg-amber-50 dark:bg-amber-950/40 border-amber-300 text-amber-800 dark:text-amber-300"
+                    : "bg-rose-50 dark:bg-rose-950/40 border-rose-300 text-rose-800 dark:text-rose-300"
+                }`}
+              >
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-extrabold block">
+                    {selectedDayDetails.presentPercent >= 80
+                      ? "🟢 HIGH CAPACITY — Safe to Approve"
+                      : selectedDayDetails.presentPercent >= 60
+                      ? "🟡 MODERATE CAPACITY — Review Carefully"
+                      : "🔴 CRITICAL ABSENTEEISM — Recommend Rejecting Further Requests"}
+                  </span>
+                  <span className="font-normal block mt-0.5 text-[11px]">
+                    {selectedDayDetails.presentPercent >= 80
+                      ? `Shift availability is at ${selectedDayDetails.presentPercent}%. Approving additional leave requests for this shift is safe.`
+                      : selectedDayDetails.presentPercent >= 60
+                      ? `Shift availability is at ${selectedDayDetails.presentPercent}%. Check operational coverage before approving new leaves.`
+                      : `High absenteeism detected on this shift (${selectedDayDetails.leaveCount} on leave). Minimum staffing threshold reached.`}
+                  </span>
+                </div>
+              </div>
+
+              {/* PENDING LEAVE REQUESTS DIRECT APPROVAL ACTION */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    Pending Approvals for this Date ({selectedDayDetails.pendingLeaves?.length || 0})
+                  </h4>
+                </div>
+
+                {(!selectedDayDetails.pendingLeaves || selectedDayDetails.pendingLeaves.length === 0) ? (
+                  <div className="p-3 border rounded-lg text-center text-xs text-muted-foreground bg-muted/20">
+                    No pending leave requests requiring action on this date.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedDayDetails.pendingLeaves.map((r: any) => (
+                      <div key={r.id} className="p-3 border rounded-lg bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-foreground">
+                              {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
+                            </span>
+                            <Badge variant="outline" className="text-[9px] bg-background">
+                              {r.employee?.employeeId || "N/A"}
+                            </Badge>
+                            <Badge variant="secondary" className="text-[9px] bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200">
+                              {r.employee?.shift?.name || r.employee?.shiftName || "General Shift"}
+                            </Badge>
+                          </div>
+                          <div className="text-[11px] text-muted-foreground flex items-center gap-2">
+                            <span>Type: <strong className="text-foreground font-semibold">{r.leaveType}</strong></span>
+                            <span>•</span>
+                            <span className="font-mono text-[10px]">
+                              {format(new Date(r.startDate), "dd MMM")} - {format(new Date(r.endDate), "dd MMM yyyy")}
+                            </span>
+                          </div>
+                          {r.description && (
+                            <p className="text-[10px] text-muted-foreground italic max-w-md truncate">
+                              "{r.description}"
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Button
+                            size="sm"
+                            className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                            disabled={approvalMutation.isPending}
+                            onClick={() => {
+                              approvalMutation.mutate({
+                                id: r.id,
+                                status: "APPROVED",
+                                comments: "Approved via Calendar Shift Availability Check",
+                              });
+                            }}
+                          >
+                            {approvalMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Check className="w-3.5 h-3.5 mr-1" />}
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-8 text-xs font-semibold"
+                            disabled={approvalMutation.isPending}
+                            onClick={() => {
+                              approvalMutation.mutate({
+                                id: r.id,
+                                status: "REJECTED",
+                                comments: "Rejected due to shift capacity limits",
+                              });
+                            }}
+                          >
+                            {approvalMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <X className="w-3.5 h-3.5 mr-1" />}
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Approved Leaves List Table */}
+              <div className="space-y-2 pt-1">
+                <h4 className="text-xs font-bold text-foreground">Approved Leaves on this Date</h4>
+                {selectedDayDetails.approvedLeaves.length === 0 ? (
+                  <div className="p-3 border rounded-lg text-center text-xs text-muted-foreground bg-muted/20">
+                    🟢 No staff members on approved leave for this date/shift.
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/30">
+                          <TableHead className="text-xs">Employee</TableHead>
+                          <TableHead className="text-xs">Shift</TableHead>
+                          <TableHead className="text-xs">Leave Type</TableHead>
+                          <TableHead className="text-xs">Leave Period</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedDayDetails.approvedLeaves.map((r: any) => (
+                          <TableRow key={r.id}>
+                            <TableCell className="font-semibold text-xs py-2">
+                              {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
+                              <span className="text-[10px] text-muted-foreground block font-mono">{r.employee?.employeeId}</span>
+                            </TableCell>
+                            <TableCell className="py-2 text-[11px] font-medium text-muted-foreground">
+                              {r.employee?.shift?.name || r.employee?.shiftName || "General Shift"}
+                            </TableCell>
+                            <TableCell className="py-2">
+                              <Badge variant="outline" className="text-[10px] bg-rose-50 text-rose-700 border-rose-200">
+                                {r.leaveType}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs font-mono py-2">
+                              {format(new Date(r.startDate), "dd MMM")} - {format(new Date(r.endDate), "dd MMM yyyy")}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDayDetailModalOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

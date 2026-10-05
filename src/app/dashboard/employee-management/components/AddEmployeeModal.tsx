@@ -26,14 +26,23 @@ export function AddEmployeeModal({ isOpen, onClose }: { isOpen: boolean, onClose
   });
 
   // Fetch meta data
-  const { data: departments } = useQuery({
+  const { data: rawDepartments = [] } = useQuery({
     queryKey: ['departments'],
-    queryFn: async () => (await api.get('/departments')).data.data
+    queryFn: async () => {
+      const res = await api.get('/departments');
+      return res.data?.data || res.data || [];
+    }
   });
-  const { data: designations } = useQuery({
+  const { data: rawDesignations = [] } = useQuery({
     queryKey: ['designations'],
-    queryFn: async () => (await api.get('/designations')).data.data
+    queryFn: async () => {
+      const res = await api.get('/designations');
+      return res.data?.data || res.data || [];
+    }
   });
+
+  const departments = Array.isArray(rawDepartments) ? rawDepartments : (Array.isArray((rawDepartments as any)?.data) ? (rawDepartments as any).data : []);
+  const designations = Array.isArray(rawDesignations) ? rawDesignations : (Array.isArray((rawDesignations as any)?.data) ? (rawDesignations as any).data : []);
 
   // Auto fill employee ID on open
   useEffect(() => {
