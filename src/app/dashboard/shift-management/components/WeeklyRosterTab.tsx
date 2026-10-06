@@ -98,7 +98,7 @@ export function WeeklyRosterTab() {
   // Departments & Designations
   const [departments, setDepartments] = useState<Department[]>([]);
   const [designations, setDesignations] = useState<Designation[]>([]);
-  const [selectedDeptId, setSelectedDeptId] = useState<string>('');
+  const [selectedDeptId, setSelectedDeptId] = useState<string>('ALL');
   const [selectedDesigId, setSelectedDesigId] = useState<string>('ALL');
 
   // Date Navigation (Default current week Sunday)
@@ -168,9 +168,6 @@ export function WeeklyRosterTab() {
         if (res.data?.success) {
           const depts = res.data.data || [];
           setDepartments(depts);
-          if (depts.length > 0) {
-            setSelectedDeptId(depts[0].id);
-          }
         }
       } catch (e) {
         console.error('Failed to load departments', e);
@@ -627,6 +624,7 @@ export function WeeklyRosterTab() {
             onChange={(e) => setSelectedDeptId(e.target.value)}
             className="h-8 px-2.5 rounded-lg border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shrink-0 min-w-[140px]"
           >
+            <option value="ALL">All Departments</option>
             {departments.map(d => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
