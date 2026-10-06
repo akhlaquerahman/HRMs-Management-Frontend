@@ -178,18 +178,14 @@ export function WeeklyRosterTab() {
 
   // Fetch Designations dependent on Department Selection
   useEffect(() => {
-    if (!selectedDeptId) {
-      setDesignations([]);
-      setSelectedDesigId('ALL');
-      return;
-    }
-
     const loadDesignations = async () => {
       try {
-        const res = await api.get(`/designations?departmentId=${selectedDeptId}`);
+        const url = selectedDeptId && selectedDeptId !== 'ALL'
+          ? `/designations?departmentId=${selectedDeptId}`
+          : '/designations';
+        const res = await api.get(url);
         if (res.data?.success) {
           setDesignations(res.data.data || []);
-          setSelectedDesigId('ALL'); // Reset designation to ALL when department changes
         }
       } catch (e) {
         console.error('Failed to load designations', e);
@@ -621,7 +617,10 @@ export function WeeklyRosterTab() {
           {/* Department Select */}
           <select
             value={selectedDeptId}
-            onChange={(e) => setSelectedDeptId(e.target.value)}
+            onChange={(e) => {
+              setSelectedDeptId(e.target.value);
+              setSelectedDesigId('ALL');
+            }}
             className="h-8 px-2.5 rounded-lg border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shrink-0 min-w-[140px]"
           >
             <option value="ALL">All Departments</option>
