@@ -137,8 +137,10 @@ export function WeeklyRosterTab() {
   const [saveStatus, setSaveStatus] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Search filter
+  // Search & Shift filter
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedShiftFilter, setSelectedShiftFilter] = useState<string>('ALL');
+  const [shiftSortOrder, setShiftSortOrder] = useState<string>('GROUP_BY_SHIFT');
 
   // Bulk Selection
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
@@ -185,7 +187,14 @@ export function WeeklyRosterTab() {
           : '/designations';
         const res = await api.get(url);
         if (res.data?.success) {
-          setDesignations(res.data.data || []);
+          let list = res.data.data || [];
+          if (list.length === 0 && selectedDeptId !== 'ALL') {
+            const fallbackRes = await api.get('/designations');
+            if (fallbackRes.data?.success) {
+              list = fallbackRes.data.data || [];
+            }
+          }
+          setDesignations(list);
         }
       } catch (e) {
         console.error('Failed to load designations', e);
@@ -542,12 +551,92 @@ export function WeeklyRosterTab() {
     }
   };
 
-  // Filter Grid by search term
-  const filteredGrid = grid.filter(emp => {
-    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
-    return fullName.includes(searchTerm.toLowerCase()) || 
-           emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  // Helper to get employee primary shift
+  const getPrimaryShift = (emp: EmployeeGridRow): Shift | null => {
+    for (const d of emp.days) {
+      if (d.type === 'SHIFT' && d.shift) {
+        return d.shift;
+      }
+    }
+    return null;
+  };
+
+  // Filter & Sort Grid by Search, Shift Filter, and Sort Order
+  const filteredGrid = React.useMemo(() => {
+    return grid
+      .filter(emp => {
+        // 1. Search filter
+        const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+        const matchesSearch = fullName.includes(searchTerm.toLowerCase()) || 
+                              emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+        if (!matchesSearch) return false;
+
+        // 2. Shift filter
+        if (selectedShiftFilter !== 'ALL') {
+          if (selectedShiftFilter === 'UNASSIGNED') {
+            const hasUnassigned = emp.days.some(d => d.type === 'SHIFT' && !d.shiftId);
+            if (!hasUnassigned) return false;
+          } else {
+            const matchesShift = emp.days.some(d => d.shiftId === selectedShiftFilter || d.shift?.id === selectedShiftFilter);
+            if (!matchesShift) return false;
+          }
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        const shiftA = getPrimaryShift(a);
+        const shiftB = getPrimaryShift(b);
+
+        if (shiftSortOrder === 'NAME_ASC') {
+          return a.firstName.localeCompare(b.firstName);
+        }
+        if (shiftSortOrder === 'NAME_DESC') {
+          return b.firstName.localeCompare(a.firstName);
+        }
+        if (shiftSortOrder === 'SHIFT_NAME_ASC' || shiftSortOrder === 'GROUP_BY_SHIFT') {
+          const nameA = shiftA?.name || 'ZZZ_UNASSIGNED';
+          const nameB = shiftB?.name || 'ZZZ_UNASSIGNED';
+          if (nameA !== nameB) return nameA.localeCompare(nameB);
+          return a.firstName.localeCompare(b.firstName);
+        }
+        if (shiftSortOrder === 'SHIFT_TIME_ASC') {
+          const timeA = shiftA?.startTime || '99:99';
+          const timeB = shiftB?.startTime || '99:99';
+          if (timeA !== timeB) return timeA.localeCompare(timeB);
+          return a.firstName.localeCompare(b.firstName);
+        }
+        if (shiftSortOrder === 'SHIFT_TIME_DESC') {
+          const timeA = shiftA?.startTime || '00:00';
+          const timeB = shiftB?.startTime || '00:00';
+          if (timeA !== timeB) return timeB.localeCompare(timeA);
+          return a.firstName.localeCompare(b.firstName);
+        }
+        return 0;
+      });
+  }, [grid, searchTerm, selectedShiftFilter, shiftSortOrder]);
+
+  // Group grid employees by shift when GROUP_BY_SHIFT is selected
+  const groupedGrid = React.useMemo(() => {
+    if (shiftSortOrder !== 'GROUP_BY_SHIFT') return null;
+
+    const groupMap: { [key: string]: { shift: Shift | null; employees: EmployeeGridRow[] } } = {};
+
+    filteredGrid.forEach(emp => {
+      const primaryShift = getPrimaryShift(emp);
+      const key = primaryShift ? primaryShift.id : 'UNASSIGNED';
+
+      if (!groupMap[key]) {
+        groupMap[key] = {
+          shift: primaryShift,
+          employees: []
+        };
+      }
+      groupMap[key].employees.push(emp);
+    });
+
+    return Object.values(groupMap);
+  }, [filteredGrid, shiftSortOrder]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -639,6 +728,33 @@ export function WeeklyRosterTab() {
             {designations.map(d => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
+          </select>
+
+          {/* Shift Filter Select */}
+          <select
+            value={selectedShiftFilter}
+            onChange={(e) => setSelectedShiftFilter(e.target.value)}
+            className="h-8 px-2.5 rounded-lg border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shrink-0 min-w-[130px]"
+          >
+            <option value="ALL">All Shifts</option>
+            {shifts.map(s => (
+              <option key={s.id} value={s.id}>{s.name} ({s.startTime} - {s.endTime})</option>
+            ))}
+            <option value="UNASSIGNED">Unassigned / No Shift</option>
+          </select>
+
+          {/* Shift Arranging & Sort Select */}
+          <select
+            value={shiftSortOrder}
+            onChange={(e) => setShiftSortOrder(e.target.value)}
+            className="h-8 px-2.5 rounded-lg border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shrink-0 min-w-[165px]"
+          >
+            <option value="GROUP_BY_SHIFT">Arrange: Group by Shift 📂</option>
+            <option value="SHIFT_TIME_ASC">Sort: Shift Time (Earliest First 🟢)</option>
+            <option value="SHIFT_TIME_DESC">Sort: Shift Time (Latest First 🔴)</option>
+            <option value="SHIFT_NAME_ASC">Sort: Shift Name (A-Z)</option>
+            <option value="NAME_ASC">Sort: Name (A-Z)</option>
+            <option value="NAME_DESC">Sort: Name (Z-A)</option>
           </select>
 
           {/* Week Selector Controls */}
@@ -837,22 +953,34 @@ export function WeeklyRosterTab() {
       <div className="rounded-xl border bg-card shadow-2xs overflow-hidden flex flex-col">
         
         {/* Table Filter Subheader */}
-        <div className="p-3 border-b bg-muted/20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-primary" />
+        <div className="p-3 border-b bg-muted/20 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Layers className="w-4 h-4 text-primary shrink-0" />
             <span className="font-semibold text-xs text-foreground">
               Workforce Roster Grid ({selectedDepartmentName} • {selectedDesignationName})
             </span>
+            {selectedShiftFilter !== 'ALL' && (
+              <Badge className="bg-primary/10 text-primary border-primary/30 text-[10px] font-bold">
+                Filtered: {selectedShiftFilter === 'UNASSIGNED' ? 'Unassigned' : shifts.find(s => s.id === selectedShiftFilter)?.name}
+              </Badge>
+            )}
+            {shiftSortOrder === 'GROUP_BY_SHIFT' && (
+              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
+                Grouped by Shift 📂
+              </Badge>
+            )}
           </div>
 
-          <div className="relative min-w-[220px]">
-            <Search className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search employee by name/ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 h-8 text-xs bg-background"
-            />
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative min-w-[200px]">
+              <Search className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search employee by name/ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 h-8 text-xs bg-background"
+              />
+            </div>
           </div>
         </div>
 
@@ -972,9 +1100,161 @@ export function WeeklyRosterTab() {
               ) : filteredGrid.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-10 text-center text-muted-foreground">
-                    No active employees found for the selected Department & Designation.
+                    No active employees found for the selected Department, Designation & Shift.
                   </td>
                 </tr>
+              ) : groupedGrid ? (
+                groupedGrid.map((group) => (
+                  <React.Fragment key={`group-${group.shift?.id || 'unassigned'}`}>
+                    {/* Enterprise Shift Banner Header */}
+                    <tr className="bg-muted/50 border-y">
+                      <td colSpan={8} className="p-2.5 pl-4 sticky left-0 z-10 bg-muted/50 border-r font-extrabold text-foreground shadow-2xs">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-primary shrink-0" />
+                          <span className="text-xs font-bold text-foreground">
+                            {group.shift ? `${group.shift.name} (${group.shift.startTime} – ${group.shift.endTime})` : 'Unassigned / Default Shift'}
+                          </span>
+                          <Badge className="bg-primary/10 text-primary border-primary/30 text-[10px] font-mono font-bold px-2 py-0.5">
+                            {group.employees.length} Employees
+                          </Badge>
+                        </div>
+                      </td>
+                    </tr>
+                    {group.employees.map((row) => {
+                      const isSelected = selectedEmployeeIds.includes(row.id);
+
+                      return (
+                        <tr key={row.id} className={`hover:bg-muted/15 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}>
+                          
+                          {/* Sticky Employee Left Column */}
+                          <td className="p-3 pl-4 sticky left-0 z-10 bg-card border-r font-medium shadow-2xs">
+                            <div className="flex items-center gap-3">
+                              <input 
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleSelectEmployee(row.id)}
+                                className="rounded border-slate-300 cursor-pointer"
+                              />
+                              <div className="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 border border-primary/20 text-xs">
+                                {row.firstName.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="overflow-hidden">
+                                <span className="font-bold text-foreground block truncate text-xs">
+                                  {row.firstName} {row.lastName}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground font-mono block">
+                                  {row.employeeId}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground block truncate">
+                                  {row.designation?.name || 'Associate'}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* 7 Days Cells */}
+                          {Array.from({ length: 7 }, (_, i) => {
+                            const d = new Date(currentWeekSunday);
+                            d.setDate(currentWeekSunday.getDate() + i);
+                            const targetDateStr = formatDateToYYYYMMDD(d);
+                            const day = row.days.find(dayItem => dayItem.date === targetDateStr) || row.days[i] || {
+                              date: targetDateStr,
+                              dayName: d.toLocaleDateString('en-US', { weekday: 'long' }),
+                              type: 'SHIFT',
+                              shiftId: null
+                            };
+                            const isToday = targetDateStr === todayStr;
+
+                            return (
+                              <td 
+                                key={targetDateStr}
+                                onClick={() => {
+                                  setEditingCell({ row, day });
+                                  setIsCellModalOpen(true);
+                                }}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  setContextMenu({
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                    employeeId: row.id,
+                                    date: day.date
+                                  });
+                                }}
+                                className={`p-2 border-r text-center align-middle cursor-pointer hover:bg-primary/10 transition-all select-none group relative ${
+                                  isToday ? 'bg-primary/5' : ''
+                                }`}
+                              >
+                                <div className="flex flex-col items-center justify-center gap-1 min-h-[48px]">
+                                  
+                                  {/* SHIFT CELL */}
+                                  {day.type === 'SHIFT' && (
+                                    day.shift ? (
+                                      <Badge className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 font-bold px-2 py-1 flex flex-col items-center text-[10px] leading-tight">
+                                        <span className="font-extrabold">{day.shift.name}</span>
+                                        <span className="font-mono text-[9px] font-normal text-blue-600 dark:text-blue-400">
+                                          {day.shift.startTime}–{day.shift.endTime}
+                                        </span>
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="bg-slate-100 text-slate-600 text-[10px]">
+                                        General (09-18)
+                                      </Badge>
+                                    )
+                                  )}
+
+                                  {/* WEEK OFF CELL */}
+                                  {day.type === 'WEEK_OFF' && (
+                                    <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 font-extrabold text-[10px] px-2.5 py-1">
+                                      OFF
+                                    </Badge>
+                                  )}
+
+                                  {/* LEAVE CELL */}
+                                  {day.type === 'LEAVE' && (
+                                    <Badge className="bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30 font-extrabold text-[10px] px-2 py-1 flex flex-col items-center">
+                                      <span>{day.leaveType || 'LEAVE'}</span>
+                                    </Badge>
+                                  )}
+
+                                  {/* HOLIDAY CELL */}
+                                  {day.type === 'HOLIDAY' && (
+                                    <Badge className="bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border-indigo-500/30 font-extrabold text-[10px] px-2 py-1 flex flex-col items-center">
+                                      <span>HOLIDAY</span>
+                                      {day.holidayName && <span className="text-[9px] font-normal truncate max-w-[90px]">{day.holidayName}</span>}
+                                    </Badge>
+                                  )}
+
+                                  {/* WFH CELL */}
+                                  {day.type === 'WFH' && (
+                                    <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-extrabold text-[10px] px-2.5 py-1">
+                                      WFH
+                                    </Badge>
+                                  )}
+
+                                  {/* HALF DAY CELL */}
+                                  {day.type === 'HALF_DAY' && (
+                                    <Badge className="bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/30 font-extrabold text-[10px] px-2.5 py-1">
+                                      HALF DAY
+                                    </Badge>
+                                  )}
+
+                                  {/* Approved leave indicator icon */}
+                                  {day.hasApprovedLeave && day.type === 'SHIFT' && (
+                                    <div title={`Approved leave exists: ${day.approvedLeaveType}`} className="absolute top-1 right-1">
+                                      <AlertTriangle className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            );
+                          })}
+
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))
               ) : (
                 filteredGrid.map((row) => {
                   const isSelected = selectedEmployeeIds.includes(row.id);

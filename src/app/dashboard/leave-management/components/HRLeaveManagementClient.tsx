@@ -63,6 +63,7 @@ export function HRLeaveManagementClient() {
   // Filters State
   const [requestSearch, setRequestSearch] = useState("");
   const [requestDeptFilter, setRequestDeptFilter] = useState("ALL");
+  const [requestDesigFilter, setRequestDesigFilter] = useState("ALL");
   const [requestStatusFilter, setRequestStatusFilter] = useState("ALL");
 
   const [balanceSearch, setBalanceSearch] = useState("");
@@ -140,15 +141,31 @@ export function HRLeaveManagementClient() {
     queryFn: async () => (await api.get("/departments")).data.data || [],
   });
 
+  const { data: designationsList = [] } = useQuery({
+    queryKey: ["designationsList", requestDeptFilter],
+    queryFn: async () => {
+      const url = requestDeptFilter && requestDeptFilter !== 'ALL'
+        ? `/designations?departmentId=${requestDeptFilter}`
+        : '/designations';
+      const res = await api.get(url);
+      let list = res.data?.data || [];
+      if (list.length === 0 && requestDeptFilter !== 'ALL') {
+        const fallbackRes = await api.get('/designations');
+        list = fallbackRes.data?.data || [];
+      }
+      return list;
+    },
+  });
+
   const { data: allRequests = [], isLoading: isRequestsLoading, refetch: refetchRequests } = useQuery({
-    queryKey: ["allLeaveRequests", requestStatusFilter, requestDeptFilter],
+    queryKey: ["allLeaveRequests", requestStatusFilter, requestDeptFilter, requestDesigFilter],
     queryFn: async () =>
-      (await api.get(`/leaves?status=${requestStatusFilter}&departmentId=${requestDeptFilter}`)).data.data || [],
+      (await api.get(`/leaves?status=${requestStatusFilter}&departmentId=${requestDeptFilter}&designationId=${requestDesigFilter}`)).data.data || [],
   });
 
   const { data: employeeBalances = [], isLoading: isBalancesLoading, refetch: refetchBalances } = useQuery({
-    queryKey: ["employeeBalances", balanceDeptFilter],
-    queryFn: async () => (await api.get(`/leaves/balances?departmentId=${balanceDeptFilter}`)).data.data || [],
+    queryKey: ["employeeBalances", balanceDeptFilter, requestDesigFilter],
+    queryFn: async () => (await api.get(`/leaves/balances?departmentId=${balanceDeptFilter}&designationId=${requestDesigFilter}`)).data.data || [],
   });
 
   const { data: leaveTypes = [], refetch: refetchLeaveTypes } = useQuery({
@@ -162,8 +179,8 @@ export function HRLeaveManagementClient() {
   });
 
   const { data: calendarData, refetch: refetchCalendar } = useQuery({
-    queryKey: ["leaveCalendar"],
-    queryFn: async () => (await api.get("/leaves/calendar")).data.data,
+    queryKey: ["leaveCalendar", requestDeptFilter, requestDesigFilter],
+    queryFn: async () => (await api.get(`/leaves/calendar?departmentId=${requestDeptFilter}&designationId=${requestDesigFilter}`)).data.data,
   });
 
   const { data: ledgerLogs = [] } = useQuery({
@@ -376,11 +393,26 @@ export function HRLeaveManagementClient() {
   };
 
   const getDailyStaffingMetrics = (dateStr: string) => {
-    // 1. Calculate Shift Total Staff
+    // 1. Calculate Shift & Dept/Desig Total Staff
     let targetStaffList = employeeBalances;
+
+    if (requestDeptFilter !== "ALL") {
+      const selectedDeptObj = departments.find((d: any) => d.id === requestDeptFilter);
+      targetStaffList = targetStaffList.filter((b: any) => {
+        return b.departmentId === requestDeptFilter || b.department === selectedDeptObj?.name;
+      });
+    }
+
+    if (requestDesigFilter !== "ALL") {
+      const selectedDesigObj = designationsList.find((d: any) => d.id === requestDesigFilter);
+      targetStaffList = targetStaffList.filter((b: any) => {
+        return b.designationId === requestDesigFilter || b.designation === selectedDesigObj?.name;
+      });
+    }
+
     if (selectedShiftFilter !== "ALL") {
       const selectedShiftObj = shiftsList.find((s: any) => s.id === selectedShiftFilter);
-      targetStaffList = employeeBalances.filter((b: any) => {
+      targetStaffList = targetStaffList.filter((b: any) => {
         return (
           b.shiftId === selectedShiftFilter ||
           b.shiftName === selectedShiftFilter ||
@@ -389,7 +421,7 @@ export function HRLeaveManagementClient() {
       });
     }
 
-    const totalStaff = targetStaffList.length || (selectedShiftFilter === "ALL" ? (kpis.totalEmployees || 1) : 1);
+    const totalStaff = targetStaffList.length || (requestDeptFilter === "ALL" && requestDesigFilter === "ALL" && selectedShiftFilter === "ALL" ? (kpis.totalEmployees || 1) : 1);
 
     // 2. Filter Approved Leaves
     const approvedLeaves = allRequests.filter((r: any) => {
@@ -398,6 +430,20 @@ export function HRLeaveManagementClient() {
       const end = r.endDate.split("T")[0];
       const matchesDate = start <= dateStr && end >= dateStr;
       if (!matchesDate) return false;
+
+      if (requestDeptFilter !== "ALL") {
+        const empDeptId = r.employee?.departmentId || r.employee?.department?.id;
+        const selectedDeptObj = departments.find((d: any) => d.id === requestDeptFilter);
+        const matchesDept = empDeptId === requestDeptFilter || r.employee?.department?.name === selectedDeptObj?.name;
+        if (!matchesDept) return false;
+      }
+
+      if (requestDesigFilter !== "ALL") {
+        const empDesigId = r.employee?.designationId || r.employee?.designation?.id;
+        const selectedDesigObj = designationsList.find((d: any) => d.id === requestDesigFilter);
+        const matchesDesig = empDesigId === requestDesigFilter || r.employee?.designation?.name === selectedDesigObj?.name;
+        if (!matchesDesig) return false;
+      }
 
       if (selectedShiftFilter !== "ALL") {
         const empShiftId = r.employee?.shiftId || r.employee?.shift?.id;
@@ -420,6 +466,20 @@ export function HRLeaveManagementClient() {
       const end = r.endDate.split("T")[0];
       const matchesDate = start <= dateStr && end >= dateStr;
       if (!matchesDate) return false;
+
+      if (requestDeptFilter !== "ALL") {
+        const empDeptId = r.employee?.departmentId || r.employee?.department?.id;
+        const selectedDeptObj = departments.find((d: any) => d.id === requestDeptFilter);
+        const matchesDept = empDeptId === requestDeptFilter || r.employee?.department?.name === selectedDeptObj?.name;
+        if (!matchesDept) return false;
+      }
+
+      if (requestDesigFilter !== "ALL") {
+        const empDesigId = r.employee?.designationId || r.employee?.designation?.id;
+        const selectedDesigObj = designationsList.find((d: any) => d.id === requestDesigFilter);
+        const matchesDesig = empDesigId === requestDesigFilter || r.employee?.designation?.name === selectedDesigObj?.name;
+        if (!matchesDesig) return false;
+      }
 
       if (selectedShiftFilter !== "ALL") {
         const empShiftId = r.employee?.shiftId || r.employee?.shift?.id;
@@ -691,6 +751,43 @@ export function HRLeaveManagementClient() {
                     Staffing &amp; Leave Calendar
                   </CardTitle>
 
+                  {/* Department Filter */}
+                  <div className="flex items-center gap-1 bg-background border rounded-md px-2 py-0.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Dept:</span>
+                    <select
+                      value={requestDeptFilter}
+                      onChange={(e) => {
+                        setRequestDeptFilter(e.target.value);
+                        setRequestDesigFilter("ALL");
+                      }}
+                      className="text-[11px] font-semibold bg-transparent border-0 focus:outline-hidden text-foreground cursor-pointer"
+                    >
+                      <option value="ALL">All Departments</option>
+                      {departments.map((d: any) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Designation Filter */}
+                  <div className="flex items-center gap-1 bg-background border rounded-md px-2 py-0.5 shadow-2xs">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Desig:</span>
+                    <select
+                      value={requestDesigFilter}
+                      onChange={(e) => setRequestDesigFilter(e.target.value)}
+                      className="text-[11px] font-semibold bg-transparent border-0 focus:outline-hidden text-foreground cursor-pointer"
+                    >
+                      <option value="ALL">All Designations</option>
+                      {designationsList.map((des: any) => (
+                        <option key={des.id} value={des.id}>
+                          {des.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* Shift Filter Dropdown */}
                   <div className="flex items-center gap-1 bg-background border rounded-md px-2 py-0.5 shadow-2xs">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase">Shift:</span>
@@ -849,6 +946,7 @@ export function HRLeaveManagementClient() {
                 <TableHeader>
                   <TableRow className="bg-muted/10">
                     <TableHead>Employee</TableHead>
+                    <TableHead>Assigned Shift</TableHead>
                     <TableHead>Leave Type</TableHead>
                     <TableHead>Dates</TableHead>
                     <TableHead>Reason</TableHead>
@@ -858,7 +956,7 @@ export function HRLeaveManagementClient() {
                 <TableBody>
                   {allRequests.filter((r: any) => r.status === "PENDING").length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6 text-xs text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
                         No pending leave requests requiring approval.
                       </TableCell>
                     </TableRow>
@@ -871,6 +969,15 @@ export function HRLeaveManagementClient() {
                           <TableCell className="font-semibold text-xs">
                             {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
                             <span className="text-[10px] text-muted-foreground block font-mono">{r.employee?.employeeId}</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-[11px] font-semibold bg-primary/5 text-primary border-primary/20 shrink-0 flex items-center w-fit gap-1">
+                              <Clock className="w-3 h-3 text-primary/70 shrink-0" />
+                              <span>{r.employee?.shift?.name || "General Shift"}</span>
+                              <span className="font-mono text-[10px] text-muted-foreground">
+                                ({r.employee?.shift?.startTime || "09:00"} - {r.employee?.shift?.endTime || "18:00"})
+                              </span>
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200">
@@ -933,9 +1040,12 @@ export function HRLeaveManagementClient() {
               </select>
 
               <select
-                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background"
+                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium"
                 value={requestDeptFilter}
-                onChange={(e) => setRequestDeptFilter(e.target.value)}
+                onChange={(e) => {
+                  setRequestDeptFilter(e.target.value);
+                  setRequestDesigFilter("ALL");
+                }}
               >
                 <option value="ALL">All Departments</option>
                 {departments.map((d: any) => (
@@ -944,12 +1054,25 @@ export function HRLeaveManagementClient() {
                   </option>
                 ))}
               </select>
+
+              <select
+                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium"
+                value={requestDesigFilter}
+                onChange={(e) => setRequestDesigFilter(e.target.value)}
+              >
+                <option value="ALL">All Designations</option>
+                {designationsList.map((des: any) => (
+                  <option key={des.id} value={des.id}>
+                    {des.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by employee name or ID..."
+                placeholder="Search by employee name, ID or shift..."
                 className="pl-9 h-9 text-xs rounded-lg"
                 value={requestSearch}
                 onChange={(e) => setRequestSearch(e.target.value)}
@@ -964,7 +1087,8 @@ export function HRLeaveManagementClient() {
                   <TableRow className="bg-muted/30">
                     <TableHead className="w-28">Request ID</TableHead>
                     <TableHead>Employee</TableHead>
-                    <TableHead>Department</TableHead>
+                    <TableHead>Department &amp; Designation</TableHead>
+                    <TableHead>Assigned Shift</TableHead>
                     <TableHead>Leave Type</TableHead>
                     <TableHead>From</TableHead>
                     <TableHead>To</TableHead>
@@ -976,13 +1100,13 @@ export function HRLeaveManagementClient() {
                 <TableBody>
                   {isRequestsLoading ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-10">
+                      <TableCell colSpan={10} className="text-center py-10">
                         <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
                       </TableCell>
                     </TableRow>
                   ) : filteredRequests.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-10 text-xs text-muted-foreground">
+                      <TableCell colSpan={10} className="text-center py-10 text-xs text-muted-foreground">
                         No leave requests found matching filters.
                       </TableCell>
                     </TableRow>
@@ -998,7 +1122,19 @@ export function HRLeaveManagementClient() {
                             {r.employee?.employeeId}
                           </span>
                         </TableCell>
-                        <TableCell className="text-xs">{r.employee?.department?.name || "Unassigned"}</TableCell>
+                        <TableCell className="text-xs">
+                          <div className="font-medium text-foreground">{r.employee?.department?.name || "Unassigned"}</div>
+                          <div className="text-[10px] text-muted-foreground">{r.employee?.designation?.name || "N/A"}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs font-semibold bg-primary/5 text-primary border-primary/20 shrink-0 flex items-center w-fit gap-1">
+                            <Clock className="w-3 h-3 text-primary/70 shrink-0" />
+                            <span>{r.employee?.shift?.name || "General Shift"}</span>
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              ({r.employee?.shift?.startTime || "09:00"} - {r.employee?.shift?.endTime || "18:00"})
+                            </span>
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
                             {r.leaveType}
