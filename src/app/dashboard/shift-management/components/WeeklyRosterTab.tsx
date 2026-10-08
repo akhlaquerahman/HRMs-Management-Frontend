@@ -172,7 +172,7 @@ export function WeeklyRosterTab() {
           setDepartments(depts);
         }
       } catch (e) {
-        console.error('Failed to load departments', e);
+        console.warn('Departments load notice:', e);
       }
     };
     loadDepartments();
@@ -189,15 +189,15 @@ export function WeeklyRosterTab() {
         if (res.data?.success) {
           let list = res.data.data || [];
           if (list.length === 0 && selectedDeptId !== 'ALL') {
-            const fallbackRes = await api.get('/designations');
-            if (fallbackRes.data?.success) {
+            const fallbackRes = await api.get('/designations').catch(() => null);
+            if (fallbackRes?.data?.success) {
               list = fallbackRes.data.data || [];
             }
           }
           setDesignations(list);
         }
       } catch (e) {
-        console.error('Failed to load designations', e);
+        console.warn('Designations load notice:', e);
       }
     };
     loadDesignations();
@@ -225,8 +225,8 @@ export function WeeklyRosterTab() {
       const weekStartStr = getWeekStartStr(currentWeekSunday);
       const res = await api.get('/roster', {
         params: {
-          departmentId: selectedDeptId,
-          designationId: selectedDesigId,
+          departmentId: 'ALL',
+          designationId: 'ALL',
           weekStart: weekStartStr
         }
       });
@@ -249,10 +249,8 @@ export function WeeklyRosterTab() {
   };
 
   useEffect(() => {
-    if (selectedDeptId) {
-      loadRoster();
-    }
-  }, [selectedDeptId, selectedDesigId, currentWeekSunday]);
+    loadRoster();
+  }, [currentWeekSunday]);
 
   // Unsaved changes window listener
   useEffect(() => {
@@ -527,27 +525,29 @@ export function WeeklyRosterTab() {
 
   // Export XLSX Handler
   const handleExportXlsx = async () => {
-    if (!selectedDeptId) return;
-
     try {
       const response = await api.post('/roster/export-xlsx', {
         departmentId: selectedDeptId,
         designationId: selectedDesigId,
+        shiftFilter: selectedShiftFilter,
+        searchTerm: searchTerm,
         weekStart: getWeekStartStr(currentWeekSunday)
       }, { responseType: 'blob' });
 
       const deptObj = departments.find(d => d.id === selectedDeptId);
-      const safeDept = deptObj?.name || 'Dept';
+      const safeDept = (deptObj?.name || 'All_Departments').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const desigObj = designations.find(d => d.id === selectedDesigId);
+      const safeDesig = (desigObj?.name || 'All_Designations').replace(/[^a-zA-Z0-9_-]/g, '_');
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `HRMS_Roster_${safeDept}_${getWeekStartStr(currentWeekSunday)}.xlsx`);
+      link.setAttribute('download', `HRMS_Roster_${safeDept}_${safeDesig}_${getWeekStartStr(currentWeekSunday)}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (e) {
-      alert('Failed to export XLSX roster');
+    } catch (e: any) {
+      alert(e?.response?.data?.message || 'Failed to export XLSX roster');
     }
   };
 
@@ -561,7 +561,32 @@ export function WeeklyRosterTab() {
     return null;
   };
 
-  // Filter & Sort Grid by Search, Shift Filter, and Sort Order
+  // Helper to get employee configured week off days string
+  const getEmployeeWeekOffDays = (emp: EmployeeGridRow): string => {
+    const weekOffDays = emp.days
+      .filter(d => d.type === 'WEEK_OFF')
+      .map(d => {
+        const parts = d.date.split('-');
+        if (parts.length === 3) {
+          const dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          return dt.toLocaleDateString('en-US', { weekday: 'short' });
+        }
+        return '';
+      })
+      .filter(Boolean);
+
+    if (weekOffDays.length > 0) {
+      return Array.from(new Set(weekOffDays)).join(', ');
+    }
+
+    if (emp.shift?.weeklyOff && Array.isArray(emp.shift.weeklyOff) && emp.shift.weeklyOff.length > 0) {
+      return emp.shift.weeklyOff.map((w: string) => w.substring(0, 3)).join(', ');
+    }
+
+    return 'Sun';
+  };
+
+  // Filter & Sort Grid by Search, Department, Designation, Shift Filter, and Sort Order
   const filteredGrid = React.useMemo(() => {
     return grid
       .filter(emp => {
@@ -571,7 +596,17 @@ export function WeeklyRosterTab() {
                               emp.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
         if (!matchesSearch) return false;
 
-        // 2. Shift filter
+        // 2. Department filter
+        if (selectedDeptId !== 'ALL') {
+          if (emp.department?.id !== selectedDeptId) return false;
+        }
+
+        // 3. Designation filter
+        if (selectedDesigId !== 'ALL') {
+          if (emp.designation?.id !== selectedDesigId) return false;
+        }
+
+        // 4. Shift filter
         if (selectedShiftFilter !== 'ALL') {
           if (selectedShiftFilter === 'UNASSIGNED') {
             const hasUnassigned = emp.days.some(d => d.type === 'SHIFT' && !d.shiftId);
@@ -614,7 +649,7 @@ export function WeeklyRosterTab() {
         }
         return 0;
       });
-  }, [grid, searchTerm, selectedShiftFilter, shiftSortOrder]);
+  }, [grid, searchTerm, selectedDeptId, selectedDesigId, selectedShiftFilter, shiftSortOrder]);
 
   // Group grid employees by shift when GROUP_BY_SHIFT is selected
   const groupedGrid = React.useMemo(() => {
@@ -1002,6 +1037,21 @@ export function WeeklyRosterTab() {
                   </div>
                 </th>
 
+                {/* Configured Week Off Column Header (Before Sunday) */}
+                <th className="p-2.5 text-center border-r min-w-[125px] align-top bg-amber-500/5">
+                  <div className="flex flex-col items-center justify-center gap-1 py-1">
+                    <span className="text-[10px] text-amber-700 dark:text-amber-400 font-extrabold uppercase tracking-wider">
+                      Configured Off
+                    </span>
+                    <span className="text-[11px] font-extrabold text-foreground font-mono">
+                      WEEK OFF
+                    </span>
+                    <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 text-[9px] px-1.5 py-0 font-bold">
+                      Rule
+                    </Badge>
+                  </div>
+                </th>
+
                 {/* 7 Days Headers (Sun to Sat) */}
                 {Array.from({ length: 7 }, (_, i) => {
                   const d = new Date(currentWeekSunday);
@@ -1092,14 +1142,14 @@ export function WeeklyRosterTab() {
             <tbody className="divide-y">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-muted-foreground">
+                  <td colSpan={9} className="p-10 text-center text-muted-foreground">
                     <RotateCcw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
                     Loading weekly roster schedule...
                   </td>
                 </tr>
               ) : filteredGrid.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-muted-foreground">
+                  <td colSpan={9} className="p-10 text-center text-muted-foreground">
                     No active employees found for the selected Department, Designation & Shift.
                   </td>
                 </tr>
@@ -1108,7 +1158,7 @@ export function WeeklyRosterTab() {
                   <React.Fragment key={`group-${group.shift?.id || 'unassigned'}`}>
                     {/* Enterprise Shift Banner Header */}
                     <tr className="bg-muted/50 border-y">
-                      <td colSpan={8} className="p-2.5 pl-4 sticky left-0 z-10 bg-muted/50 border-r font-extrabold text-foreground shadow-2xs">
+                      <td colSpan={9} className="p-2.5 pl-4 sticky left-0 z-10 bg-muted/50 border-r font-extrabold text-foreground shadow-2xs">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-primary shrink-0" />
                           <span className="text-xs font-bold text-foreground">
@@ -1150,6 +1200,13 @@ export function WeeklyRosterTab() {
                                 </span>
                               </div>
                             </div>
+                          </td>
+
+                          {/* Configured Week Off Column Cell (Before Sunday) */}
+                          <td className="p-2 border-r text-center align-middle bg-amber-500/5 font-semibold text-xs min-w-[125px]">
+                            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 font-bold text-[11px] px-2 py-0.5 whitespace-nowrap">
+                              {getEmployeeWeekOffDays(row)}
+                            </Badge>
                           </td>
 
                           {/* 7 Days Cells */}
@@ -1286,6 +1343,13 @@ export function WeeklyRosterTab() {
                             </span>
                           </div>
                         </div>
+                      </td>
+
+                      {/* Configured Week Off Column Cell (Before Sunday) */}
+                      <td className="p-2 border-r text-center align-middle bg-amber-500/5 font-semibold text-xs min-w-[125px]">
+                        <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 font-bold text-[11px] px-2 py-0.5 whitespace-nowrap">
+                          {getEmployeeWeekOffDays(row)}
+                        </Badge>
                       </td>
 
                       {/* 7 Days Cells */}
