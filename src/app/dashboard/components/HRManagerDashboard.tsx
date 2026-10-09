@@ -2,23 +2,55 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, UserCheck, CalendarDays, AlertCircle, Briefcase, Gift, Award } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Users, UserCheck, CalendarDays, AlertCircle, Briefcase, Percent, Activity } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { ActivityTimeline } from '@/components/dashboard/ActivityTimeline';
-import { CompanyAnnouncements } from '@/components/dashboard/CompanyAnnouncements';
 import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { PendingTasks } from '@/components/dashboard/PendingTasks';
 import { DashboardDataTable } from '@/components/dashboard/DashboardDataTable';
 import { RecruitmentPipelineCard } from '@/components/dashboard/RecruitmentPipelineCard';
 
-export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { stats: any, trendFilter?: string, setTrendFilter?: (val: string) => void }) {
+export function HRManagerDashboard({ stats }: { stats: any, trendFilter?: string, setTrendFilter?: (val: string) => void }) {
   const { t } = useTranslation();
+  const router = useRouter();
+
+  const getKPIDestination = (title: string) => {
+    const lower = title.toLowerCase();
+    if (lower.includes('employee')) return '/dashboard/employee-management';
+    if (lower.includes('present')) return '/dashboard/attendance';
+    if (lower.includes('rate') || lower.includes('percentage') || lower.includes('attendance')) return '/dashboard/attendance';
+    if (lower.includes('leave')) return '/dashboard/leave-management?status=APPROVED';
+    if (lower.includes('pending') || lower.includes('approval')) return '/dashboard/leave-management?status=PENDING';
+    if (lower.includes('recruitment') || lower.includes('job')) return '/dashboard/recruitment';
+    return '/dashboard/employee-management';
+  };
 
   const deptColumns = [
-    { header: t("Department"), accessor: "department" },
-    { header: t("Present"), accessor: "present", className: "text-green-600 font-medium" },
-    { header: t("Absent"), accessor: "absent", className: "text-red-600 font-medium" },
-    { header: t("On Leave"), accessor: "onLeave", className: "text-orange-600 font-medium" },
+    { 
+      header: t("Department"), 
+      accessor: (row: any) => (
+        <span className="font-semibold text-foreground text-xs">{row.department}</span>
+      )
+    },
+    { 
+      header: t("Present"), 
+      accessor: (row: any) => (
+        <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">{row.present}</span>
+      )
+    },
+    { 
+      header: t("Absent"), 
+      accessor: (row: any) => (
+        <span className="text-rose-600 dark:text-rose-400 font-bold text-xs">{row.absent}</span>
+      )
+    },
+    { 
+      header: t("On Leave"), 
+      accessor: (row: any) => (
+        <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">{row.onLeave}</span>
+      )
+    },
   ];
 
   return (
@@ -27,15 +59,17 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
       <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         {stats?.metrics?.map((metric: any, i: number) => {
           let icon = Users;
-          let color = "text-blue-600";
-          let bg = "bg-blue-100";
-          let cardBg = "bg-blue-50/50";
+          let color = "text-blue-600 dark:text-blue-400";
+          let bg = "bg-blue-500/10";
+          let cardBg = "bg-card";
           
-          if (metric.title.includes('Present')) { icon = UserCheck; color = "text-green-600"; bg = "bg-green-100"; cardBg = "bg-green-50/50"; }
-          if (metric.title.includes('Leave')) { icon = CalendarDays; color = "text-orange-600"; bg = "bg-orange-100"; cardBg = "bg-orange-50/50"; }
-          if (metric.title.includes('Pending')) { icon = AlertCircle; color = "text-red-600"; bg = "bg-red-100"; cardBg = "bg-red-50/50"; }
-          if (metric.title.includes('Recruitment')) { icon = Briefcase; color = "text-purple-600"; bg = "bg-purple-100"; cardBg = "bg-purple-50/50"; }
-          if (metric.title.includes('Rate')) { icon = UserCheck; color = "text-emerald-600"; bg = "bg-emerald-100"; cardBg = "bg-emerald-50/50"; }
+          if (metric.title.includes('Present')) { icon = UserCheck; color = "text-emerald-600 dark:text-emerald-400"; bg = "bg-emerald-500/10"; }
+          if (metric.title.includes('Leave')) { icon = CalendarDays; color = "text-amber-600 dark:text-amber-400"; bg = "bg-amber-500/10"; }
+          if (metric.title.includes('Pending')) { icon = AlertCircle; color = "text-rose-600 dark:text-rose-400"; bg = "bg-rose-500/10"; }
+          if (metric.title.includes('Recruitment')) { icon = Briefcase; color = "text-purple-600 dark:text-purple-400"; bg = "bg-purple-500/10"; }
+          if (metric.title.includes('Rate') || metric.title.includes('Percentage')) { icon = Percent; color = "text-indigo-600 dark:text-indigo-400"; bg = "bg-indigo-500/10"; }
+
+          const destination = getKPIDestination(metric.title);
 
           return (
             <KPICard 
@@ -47,6 +81,7 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
               colorClass={color}
               bgClass={bg}
               cardBgClass={cardBg}
+              onClick={() => router.push(destination)}
             />
           );
         })}
@@ -82,8 +117,11 @@ export function HRManagerDashboard({ stats, trendFilter, setTrendFilter }: { sta
             workAnniversaries={stats?.workAnniversaries || []}
           />
 
-          <div className="rounded-xl border bg-card shadow-sm p-6">
-            <h3 className="text-lg font-semibold mb-4">{t("Recent Activities")}</h3>
+          <div className="rounded-xl border bg-card shadow-xs p-5">
+            <h3 className="text-base font-bold text-foreground mb-3 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-primary" />
+              {t("Recent Activities")}
+            </h3>
             <ActivityTimeline activities={stats?.recentActivities || []} />
           </div>
         </div>

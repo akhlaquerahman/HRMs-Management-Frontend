@@ -24,14 +24,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
     syncPermissions();
     fetchAndSyncRolePagePermissions();
-    const interval = setInterval(fetchAndSyncRolePagePermissions, 3000);
 
     if (typeof window !== 'undefined') {
       window.addEventListener('hrms_permissions_updated', syncPermissions);
       window.addEventListener('storage', syncPermissions);
     }
     return () => {
-      clearInterval(interval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('hrms_permissions_updated', syncPermissions);
         window.removeEventListener('storage', syncPermissions);

@@ -20,7 +20,9 @@ import {
   MoreVertical,
   Eye,
   Power,
+  FileSpreadsheet,
 } from "lucide-react";
+import { GoogleSheetsIntegrationTab } from "@/components/organization/GoogleSheetsIntegrationTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -115,11 +117,9 @@ export default function OrganizationPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [overviewRes, desigRes, empListRes, companyRes] = await Promise.all([
+      const [overviewRes, desigRes] = await Promise.all([
         api.get("/departments/overview"),
         api.get("/designations"),
-        api.get("/employees?all=true&limit=5000"), // Complete list for manager dropdowns including HR Admins
-        api.get("/company").catch(() => null),
       ]);
 
       if (overviewRes.data?.data) {
@@ -127,12 +127,8 @@ export default function OrganizationPage() {
         setSummary(overview.summary || { departments: 0, designations: 0, employees: 0, managers: 0 });
         setDepartments(overview.departments || []);
 
-        const resolvedCompanyName = overview.companyName || companyRes?.data?.data?.companyName || companyRes?.data?.companyName;
-        if (resolvedCompanyName) {
-          setCompanyName(resolvedCompanyName);
-          if (resolvedCompanyName !== user?.companyName) {
-            updateUser({ companyName: resolvedCompanyName });
-          }
+        if (overview.companyName) {
+          setCompanyName(overview.companyName);
         }
       }
 
@@ -140,15 +136,22 @@ export default function OrganizationPage() {
         setAllDesignations(desigRes.data.data);
       }
 
-      if (empListRes.data?.data) {
-        setAllEmployeesList(empListRes.data.data);
-      }
+      // Unblock loading state immediately so UI renders in < 100ms
+      setLoading(false);
+
+      // Fetch complete employee list asynchronously for modal dropdowns without blocking initial render
+      api.get("/employees?all=true&limit=5000").then((empListRes) => {
+        if (empListRes.data?.data) {
+          setAllEmployeesList(empListRes.data.data);
+        }
+      }).catch((err) => {
+        console.warn("Background employee dropdown fetch warning:", err);
+      });
     } catch (err: any) {
       setMessage({ type: "error", text: err.response?.data?.message || "Failed to load organization data." });
-    } finally {
       setLoading(false);
     }
-  }, [user?.companyName, updateUser]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -310,12 +313,6 @@ export default function OrganizationPage() {
 
         {/* Top Action Bar */}
         <div className="flex items-center gap-2.5 flex-wrap">
-
-          <Button variant="outline" onClick={() => handleOpenAssignModal()} size="sm" className="h-9">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Assign
-          </Button>
-
           <Button variant="outline" onClick={() => handleOpenCreateDesig()} size="sm" className="h-9">
             <Briefcase className="h-4 w-4 mr-2" />
             Add Designation
@@ -359,7 +356,9 @@ export default function OrganizationPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.departments}</div>
+            <div className="text-2xl font-bold flex items-center h-8">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.departments}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Active organizational units</p>
           </CardContent>
         </Card>
@@ -374,7 +373,9 @@ export default function OrganizationPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.designations}</div>
+            <div className="text-2xl font-bold flex items-center h-8">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.designations}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Across all departments</p>
           </CardContent>
         </Card>
@@ -389,7 +390,9 @@ export default function OrganizationPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.employees}</div>
+            <div className="text-2xl font-bold flex items-center h-8">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.employees}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Assigned with company role</p>
           </CardContent>
         </Card>
@@ -404,7 +407,9 @@ export default function OrganizationPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.managers}</div>
+            <div className="text-2xl font-bold flex items-center h-8">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.managers}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Assigned department heads</p>
           </CardContent>
         </Card>
@@ -426,6 +431,12 @@ export default function OrganizationPage() {
               <Briefcase className="h-4 w-4" />
               Designations ({allDesignations.length})
             </TabsTrigger>
+            {(user?.role === "SUPER_ADMIN" || user?.role === "HR_ADMIN" || !user?.role) && (
+              <TabsTrigger value="google-sheets" className="flex items-center gap-2 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                Google Sheets Integration
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Organization Search Input */}
@@ -702,6 +713,9 @@ export default function OrganizationPage() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="google-sheets" className="mt-0">
+          <GoogleSheetsIntegrationTab />
         </TabsContent>
       </Tabs>
 

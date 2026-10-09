@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { useAuthStore } from '@/store/authStore';
 import { BREAK_TYPES, getBreakTypeConfig } from '@/lib/breakTypes';
 
 interface AttendancePunchWidgetProps {
@@ -26,9 +27,17 @@ interface AttendancePunchWidgetProps {
 }
 
 export function AttendancePunchWidget({ compact = false }: AttendancePunchWidgetProps) {
+  const { user } = useAuthStore();
+  const role = typeof user?.role === 'string' ? user.role.toUpperCase().trim().replace(/\s+/g, '_') : '';
+  const isSuperAdmin = role === 'SUPER_ADMIN' || user?.role === 'SUPER_ADMIN';
+
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [breakTimer, setBreakTimer] = useState("00:00:00");
+
+  if (isSuperAdmin) {
+    return null;
+  }
 
   const { data: statusData, isLoading: statusLoading } = useQuery({
     queryKey: ['attendance_status'],

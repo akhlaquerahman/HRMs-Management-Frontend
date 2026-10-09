@@ -113,7 +113,6 @@ export function AssignEmployeeOrgModal({
       await api.patch(`/employees/${selectedEmployeeId}/organization`, {
         departmentId: departmentId || null,
         designationId: designationId || null,
-        managerId: managerId || null,
       });
 
       onSuccess();
@@ -124,6 +123,11 @@ export function AssignEmployeeOrgModal({
       setLoading(false);
     }
   };
+
+  const selectedDept = departments.find((d: any) => d.id === departmentId) as any;
+  const deptManagerName = selectedDept?.manager 
+    ? (selectedDept.manager.name || `${selectedDept.manager.firstName || ''} ${selectedDept.manager.lastName || ''}`.trim())
+    : (selectedDept?.managerId ? "Assigned Department Head" : null);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -210,14 +214,13 @@ export function AssignEmployeeOrgModal({
             </select>
           </div>
 
-          <ManagerSearchSelect
-            employees={employees}
-            value={managerId}
-            onChange={(id) => setManagerId(id)}
-            excludeEmployeeId={selectedEmployeeId}
-            label="Reporting Manager"
-            placeholder="Search manager by name, email or employee ID..."
-          />
+          {/* Read-only derived reporting manager display */}
+          <div className="p-3 rounded-lg border bg-muted/40 flex items-center justify-between text-xs">
+            <span className="font-semibold text-muted-foreground">Effective Reporting Manager:</span>
+            <span className="font-bold text-foreground">
+              {departmentId ? (deptManagerName || "Unassigned (No Department Manager)") : "None"}
+            </span>
+          </div>
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>

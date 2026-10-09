@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EmployeeRowExpanded } from './EmployeeRowExpanded';
 import { AssignManagerModal } from './AssignManagerModal';
+import { AssignRoleModal } from './AssignRoleModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
@@ -25,6 +26,9 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
   // Modals
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [selectedEmpForManager, setSelectedEmpForManager] = useState<string[]>([]);
+  const [roleModalOpen, setRoleModalOpen] = useState(false);
+  const [selectedEmpForRole, setSelectedEmpForRole] = useState<any>(null);
+
   // Sorting State
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
@@ -42,6 +46,11 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
   const openAssignManager = (id: string) => {
     setSelectedEmpForManager([id]);
     setManagerModalOpen(true);
+  };
+
+  const openChangeRole = (emp: any) => {
+    setSelectedEmpForRole(emp);
+    setRoleModalOpen(true);
   };
 
   const deactivateEmployee = useMutation({
@@ -229,9 +238,9 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
         </div>
       )}
       <div className="border rounded-xl bg-card shadow-sm flex flex-col overflow-hidden">
-        <div className="overflow-x-auto flex-1">
+        <div className="overflow-x-auto overflow-y-auto max-h-[550px] flex-1 relative">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-background/95 backdrop-blur-md z-10 border-b shadow-xs">
               <TableRow className="bg-muted/50 border-b-border/50 hover:bg-muted/50">
                 <TableHead className="w-12 py-3 px-4">
                   <Checkbox 
@@ -352,8 +361,6 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
                           <DropdownMenuItem onSelect={() => onOpenProfile(emp.id)}><Eye className="w-4 h-4 mr-2" /> {t("View Profile")}</DropdownMenuItem>
                           <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onEditEmployee(emp); }}><Edit className="w-4 h-4 mr-2" /> {t("Edit Details")}</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onSelect={(e) => { e.preventDefault(); openAssignManager(emp.id); }}><UserPlus className="w-4 h-4 mr-2" /> {t("Assign Manager")}</DropdownMenuItem>
-                          <DropdownMenuSeparator />
                           {emp.status === 'ACTIVE' ? (
                             <DropdownMenuItem onSelect={() => handleToggleStatus(emp.id, emp.status)} className="text-destructive focus:bg-destructive/10 focus:text-destructive"><Shield className="w-4 h-4 mr-2" /> {t("Deactivate")}</DropdownMenuItem>
                           ) : (
@@ -378,12 +385,6 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
           </Table>
         </div>
       </div>
-
-      <AssignManagerModal 
-        isOpen={managerModalOpen} 
-        onClose={() => setManagerModalOpen(false)} 
-        employeeIds={selectedEmpForManager} 
-      />
     </>
   );
 }

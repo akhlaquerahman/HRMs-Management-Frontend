@@ -3,8 +3,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Users, Building, ShieldCheck, Activity, HardDrive, Database, 
-  Server, Cpu, Zap, UserPlus, Shield, Settings, ArrowUpRight, CheckCircle2, Lock
+  Users, Building, ShieldCheck, Activity, HardDrive, 
+  UserPlus, Shield, Settings, ArrowUpRight, CheckCircle2, Lock
 } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { DashboardDataTable } from '@/components/dashboard/DashboardDataTable';
@@ -20,6 +20,17 @@ const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
 export function SuperAdminDashboard({ stats }: { stats: any }) {
   const { t } = useTranslation();
   const router = useRouter();
+
+  const getKPICardDestination = (title: string) => {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('users')) return '/dashboard/users';
+    if (titleLower.includes('hrs') || titleLower.includes('hr admins')) return '/dashboard/users?role=HR_ADMIN';
+    if (titleLower.includes('organization') || titleLower.includes('tenant')) return '/dashboard/tenant-employees';
+    if (titleLower.includes('storage')) return '/dashboard/documents';
+    if (titleLower.includes('security') || titleLower.includes('alert')) return '/dashboard/audit-logs?type=SECURITY';
+    if (titleLower.includes('login') || titleLower.includes('today')) return '/dashboard/audit-logs?action=USER_LOGIN';
+    return '/dashboard/users';
+  };
 
   const userColumns = [
     { 
@@ -78,6 +89,8 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
             icon = Activity; color = "text-emerald-600 dark:text-emerald-400"; bg = "bg-emerald-500/10"; 
           }
 
+          const destination = getKPICardDestination(metric.title);
+
           return (
             <KPICard 
               key={i} 
@@ -88,6 +101,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
               colorClass={color}
               bgClass={bg}
               cardBgClass={cardBg}
+              onClick={() => router.push(destination)}
             />
           );
         })}
@@ -99,68 +113,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
         {/* ================= LEFT SECTION (8 COLUMNS) ================= */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           
-          {/* Infrastructure Health Status Panel */}
-          <div className="rounded-2xl border bg-card shadow-xs p-5 transition-all duration-200 hover:shadow-md">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <Server className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-foreground tracking-tight">{t("System Infrastructure Health")}</h3>
-                  <p className="text-xs text-muted-foreground">{t("Real-time telemetry and database cluster metrics")}</p>
-                </div>
-              </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200/50">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                {t("Operational")}
-              </span>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Database Status */}
-              <div className="flex items-center gap-3.5 p-3.5 rounded-xl border bg-muted/10 hover:bg-muted/20 transition-colors">
-                <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <Database className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase">{t("Database Cluster")}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-foreground">{stats?.systemStatus?.database || 'HEALTHY'}</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">12ms</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* API Uptime */}
-              <div className="flex items-center gap-3.5 p-3.5 rounded-xl border bg-muted/10 hover:bg-muted/20 transition-colors">
-                <div className="p-2.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase">{t("API Gateway")}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-foreground">{stats?.systemStatus?.api || '99.9%'}</span>
-                    <span className="text-[10px] text-blue-600 font-semibold">{t("0 Errors")}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Server CPU & Memory */}
-              <div className="flex items-center gap-3.5 p-3.5 rounded-xl border bg-muted/10 hover:bg-muted/20 transition-colors">
-                <div className="p-2.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
-                  <Cpu className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase">{t("CPU & RAM Load")}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-foreground">{stats?.systemStatus?.cpu || '12'}%</span>
-                    <span className="text-[10px] text-purple-600 font-semibold">4.2GB / 16GB</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Analytics Visualizations Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,7 +122,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
             <div className="rounded-2xl border bg-card shadow-xs p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-md min-h-[320px]">
               <div>
                 <h3 className="text-base font-bold text-foreground tracking-tight">{t("Roles Distribution")}</h3>
-                <p className="text-xs text-muted-foreground">{t("Active user breakdown across system roles")}</p>
+                <p className="text-xs text-muted-foreground">{t("Active user breakdown across 4 canonical roles")}</p>
               </div>
 
               <div className="w-full h-[220px] mt-2">
@@ -182,6 +135,8 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
                       outerRadius={80}
                       paddingAngle={4}
                       dataKey="value"
+                      onClick={(entry) => router.push(`/dashboard/users?role=${entry.name}`)}
+                      className="cursor-pointer"
                     >
                       {(stats?.pieChartData || [{ name: 'SUPER_ADMIN', value: 1 }]).map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -194,14 +149,19 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
                 </ResponsiveContainer>
               </div>
 
-              {/* Legend pills */}
+              {/* Legend pills (Clickable) */}
               <div className="flex flex-wrap items-center justify-center gap-2 pt-2 border-t text-xs">
                 {(stats?.pieChartData || [{ name: 'SUPER_ADMIN', value: 1 }]).map((entry: any, index: number) => (
-                  <div key={index} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <button 
+                    key={index} 
+                    onClick={() => router.push(`/dashboard/users?role=${entry.name}`)}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-0.5 rounded-md hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                    title={`Filter by ${entry.name}`}
+                  >
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
                     <span className="font-semibold text-foreground">{entry.name}:</span>
                     <span>{entry.value}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -210,7 +170,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
             <div className="rounded-2xl border bg-card shadow-xs p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-md min-h-[320px]">
               <div>
                 <h3 className="text-base font-bold text-foreground tracking-tight">{t("System Activity Trend")}</h3>
-                <p className="text-xs text-muted-foreground">{t("API request volume over time")}</p>
+                <p className="text-xs text-muted-foreground">{t("Audit log event volume over the past 7 days")}</p>
               </div>
 
               <div className="w-full h-[220px] mt-2">
@@ -235,14 +195,18 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
               </div>
 
               <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                <span>{t("Peak Load: Wednesday")}</span>
-                <span className="text-emerald-600 font-semibold">{t("+14% vs last week")}</span>
+                <span>{t(`Peak Load: ${stats?.peakDay || 'Today'}`)}</span>
+                <span className="text-emerald-600 font-semibold">
+                  {stats?.trendPercent !== undefined 
+                    ? (stats.trendPercent >= 0 ? `+${stats.trendPercent}% vs last week` : `${stats.trendPercent}% vs last week`) 
+                    : '+0% vs last week'}
+                </span>
               </div>
             </div>
 
           </div>
 
-          {/* Recent System Users Table (Single Clean Instance) */}
+          {/* Recent System Users Table */}
           <div className="h-[380px]">
             <DashboardDataTable 
               title={t("Recent System Users")} 
@@ -273,7 +237,7 @@ export function SuperAdminDashboard({ stats }: { stats: any }) {
               <Button 
                 variant="outline" 
                 className="h-20 flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all text-xs font-semibold"
-                onClick={() => router.push('/dashboard/users')}
+                onClick={() => router.push('/dashboard/users?action=new')}
               >
                 <UserPlus className="w-5 h-5 text-blue-600" />
                 <span>{t("Add User")}</span>

@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
-import { UserPlus, UploadCloud, Download, FileBarChart, FileText, Plus } from 'lucide-react';
+import { UserPlus, UploadCloud, Download } from 'lucide-react';
 
 import { WorkforceKPICards } from './WorkforceKPICards';
 import { AdvancedFilterToolbar } from './AdvancedFilterToolbar';
@@ -25,7 +25,7 @@ export function WorkforceManagementClient() {
 
   const [filters, setFilters] = useState({ search: '', department: 'ALL', designation: 'ALL', status: 'ALL', employmentType: 'ALL' });
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(10);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -48,14 +48,15 @@ export function WorkforceManagementClient() {
     placeholderData: keepPreviousData,
   });
 
-  const handleFilterChange = (key: string, val: string) => {
+  const handleFilterChange = useCallback((key: string, val: string) => {
     setFilters(p => ({ ...p, [key]: val }));
     setPage(1); // Reset to page 1 on filter change
-  };
-  const handleResetFilters = () => {
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
     setFilters({ search: '', department: 'ALL', designation: 'ALL', status: 'ALL', employmentType: 'ALL' });
     setPage(1);
-  };
+  }, []);
 
   const handleOpenProfile = (employeeId: string) => {
     setSelectedEmployeeId(employeeId);
@@ -65,6 +66,11 @@ export function WorkforceManagementClient() {
   const employeesList = Array.isArray(employeesData) 
     ? employeesData 
     : (Array.isArray(employeesData?.data) ? employeesData.data : []);
+
+  const totalEmployees = employeesData?.total ?? employeesList.length;
+  const totalPages = employeesData?.totalPages ?? Math.ceil(totalEmployees / limit) ?? 1;
+  const startIdx = totalEmployees > 0 ? (page - 1) * limit + 1 : 0;
+  const endIdx = Math.min(page * limit, totalEmployees);
 
   return (
     <div className="space-y-6">
@@ -112,44 +118,61 @@ export function WorkforceManagementClient() {
 
       <AdvancedFilterToolbar filters={filters} onFilterChange={handleFilterChange} onReset={handleResetFilters} />
 
-      <div className="grid grid-cols-1 gap-6">
-        <div className="lg:col-span-9 space-y-6">
-          <EmployeeTable 
-            data={employeesList} 
-            loading={isTableLoading} 
-            onOpenProfile={handleOpenProfile} 
-            onEditEmployee={(emp: any) => {
-              setEmployeeToEdit(emp);
-              setIsEditModalOpen(true);
-            }}
-          />
-          {employeesData?.totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4 p-4 border rounded-lg bg-white dark:bg-slate-900">
-              <span className="text-sm text-muted-foreground">Showing {employeesData.data?.length} of {employeesData.total} employees</span>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Rows per page:</span>
-                  <select 
-                    className="border rounded p-1 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 outline-none"
-                    value={limit}
-                    onChange={(e) => {
-                      setLimit(Number(e.target.value));
-                      setPage(1);
-                    }}
-                  >
-                    {[20, 50, 100, 200, 500].map(val => (
-                      <option key={val} value={val}>{val}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</Button>
-                  <Button variant="outline" disabled={page === employeesData.totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
-                </div>
+      <div className="w-full space-y-6">
+        <EmployeeTable 
+          data={employeesList} 
+          loading={isTableLoading} 
+          onOpenProfile={handleOpenProfile} 
+          onEditEmployee={(emp: any) => {
+            setEmployeeToEdit(emp);
+            setIsEditModalOpen(true);
+          }}
+        />
+        {totalEmployees > 0 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 p-4 border rounded-xl bg-card shadow-sm">
+            <span className="text-sm text-muted-foreground">
+              {t("Showing")} <span className="font-semibold text-foreground">{startIdx}-{endIdx}</span> {t("of")} <span className="font-semibold text-foreground">{totalEmployees}</span> {t("employees")}
+            </span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">{t("Rows per page")}:</span>
+                <select 
+                  className="border rounded-md px-2 py-1 text-sm bg-background border-input outline-none cursor-pointer"
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                  }}
+                >
+                  {[10, 20, 50, 100].map(val => (
+                    <option key={val} value={val}>{val}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={page <= 1} 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                >
+                  {t("Previous")}
+                </Button>
+                <span className="text-xs text-muted-foreground font-medium px-1">
+                  {page} / {totalPages}
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={page >= totalPages} 
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  {t("Next")}
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {selectedEmployeeId && (

@@ -24,34 +24,39 @@ export function PendingTasks({ tasks, loading }: PendingTasksProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-xl border bg-card shadow-sm p-6 flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-primary" />
+    <div className="rounded-2xl border bg-card shadow-xs p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-md">
+      <div className="flex items-center justify-between pb-3 border-b mb-3">
+        <h3 className="text-sm font-bold flex items-center gap-2 text-foreground tracking-tight">
+          <ClipboardList className="w-4 h-4 text-primary" />
           {t('Pending Approvals')}
         </h3>
-        {tasks?.length > 0 && (
-          <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">
+        {tasks?.length > 0 ? (
+          <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full border border-primary/20">
             {tasks.length}
+          </span>
+        ) : (
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            {t('Caught up')}
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-3 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar flex-1">
+      <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[220px] pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1">
         {loading ? (
           [1, 2, 3].map(i => (
-            <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-muted/20 animate-pulse border">
-              <div className="w-10 h-10 rounded-full bg-muted"></div>
+            <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20 animate-pulse border">
+              <div className="w-8 h-8 rounded-full bg-muted"></div>
               <div className="flex-1">
-                <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-3/4"></div>
+                <div className="h-3 bg-muted rounded w-1/2 mb-1.5"></div>
+                <div className="h-2 bg-muted rounded w-3/4"></div>
               </div>
             </div>
           ))
         ) : tasks?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground h-full">
-            <CheckCircle2 className="w-8 h-8 mb-2 text-green-500/50" />
-            <p className="text-sm">{t("You're all caught up!")}</p>
+          <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground h-full">
+            <CheckCircle2 className="w-8 h-8 mb-1.5 text-emerald-500/70" />
+            <p className="text-xs font-medium text-foreground">{t("You're all caught up!")}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t("No pending leave or attendance requests.")}</p>
           </div>
         ) : (
           tasks?.map(task => {

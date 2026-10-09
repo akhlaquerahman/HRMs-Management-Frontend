@@ -11,19 +11,34 @@ interface KPICardProps {
   cardBgClass?: string;
   trend?: string;
   subtitle?: string;
+  onClick?: () => void;
 }
 
-export function KPICard({ title, value, icon: Icon, colorClass, bgClass, cardBgClass = "bg-card", trend, subtitle }: KPICardProps) {
-  const isPositiveTrend = trend?.includes('+') || trend?.toLowerCase().includes('active') || trend?.toLowerCase().includes('healthy');
+export function KPICard({ title, value, icon: Icon, colorClass, bgClass, cardBgClass = "bg-card", trend, subtitle, onClick }: KPICardProps) {
+  const isPositiveTrend = trend?.includes('+') || trend?.toLowerCase().includes('active') || trend?.toLowerCase().includes('healthy') || trend?.toLowerCase().includes('verified');
   
   const stringVal = String(value ?? '');
   const isStatusBadge = stringVal.length > 7 || stringVal.includes('PUNCHED') || stringVal.includes('CHECKED') || stringVal.includes('WORKING') || stringVal.includes('BREAK');
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <div className={cn(
-      "relative rounded-2xl border p-3.5 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group overflow-hidden min-w-0 min-h-[115px] sm:min-h-[125px]",
-      cardBgClass
-    )}>
+    <div 
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? handleKeyDown : undefined}
+      className={cn(
+        "relative rounded-2xl border p-3.5 sm:p-4 flex flex-col justify-between shadow-xs transition-all duration-200 group overflow-hidden min-w-0 min-h-[115px] sm:min-h-[125px]",
+        onClick ? "cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" : "cursor-default",
+        cardBgClass
+      )}
+    >
       {/* Top Section */}
       <div className="flex items-center justify-between gap-2 min-w-0">
         <span 

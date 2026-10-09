@@ -263,7 +263,9 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             onChange={e => setDepartmentId(e.target.value)}
             className="w-full h-8 text-xs rounded-md border border-input bg-background px-2.5 py-1 font-medium shadow-xs"
           >
-            <option value="ALL">All Departments</option>
+            {departments.length !== 1 && (
+              <option value="ALL">All Departments</option>
+            )}
             {departments.map(dept => (
               <option key={dept.id} value={dept.id}>{dept.name}</option>
             ))}

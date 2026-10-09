@@ -73,6 +73,7 @@ interface EmployeeGridRow {
   lastName: string;
   email: string;
   photo?: string;
+  shift?: Shift | null;
   department?: { id: string; name: string };
   designation?: { id: string; name: string };
   days: DaySchedule[];
@@ -168,8 +169,12 @@ export function WeeklyRosterTab() {
       try {
         const res = await api.get('/departments');
         if (res.data?.success) {
-          const depts = res.data.data || [];
+          const raw = res.data.data;
+          const depts = Array.isArray(raw) ? raw : (Array.isArray(raw?.departments) ? raw.departments : []);
           setDepartments(depts);
+          if (depts.length === 1) {
+            setSelectedDeptId(depts[0].id);
+          }
         }
       } catch (e) {
         console.warn('Departments load notice:', e);
@@ -225,8 +230,8 @@ export function WeeklyRosterTab() {
       const weekStartStr = getWeekStartStr(currentWeekSunday);
       const res = await api.get('/roster', {
         params: {
-          departmentId: 'ALL',
-          designationId: 'ALL',
+          departmentId: selectedDeptId,
+          designationId: selectedDesigId,
           weekStart: weekStartStr
         }
       });
@@ -250,7 +255,7 @@ export function WeeklyRosterTab() {
 
   useEffect(() => {
     loadRoster();
-  }, [currentWeekSunday]);
+  }, [currentWeekSunday, selectedDeptId, selectedDesigId]);
 
   // Unsaved changes window listener
   useEffect(() => {
@@ -745,9 +750,10 @@ export function WeeklyRosterTab() {
               setSelectedDeptId(e.target.value);
               setSelectedDesigId('ALL');
             }}
-            className="h-8 px-2.5 rounded-lg border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shrink-0 min-w-[140px]"
+            disabled={departments.length === 1}
+            className="h-8 px-2.5 rounded-lg border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shrink-0 min-w-[140px] disabled:opacity-80 disabled:cursor-not-allowed"
           >
-            <option value="ALL">All Departments</option>
+            {departments.length !== 1 && <option value="ALL">All Departments</option>}
             {departments.map(d => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}

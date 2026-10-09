@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, RotateCcw } from 'lucide-react';
+import { Search, RotateCcw } from 'lucide-react';
 import api from '@/lib/axios';
 
 interface AdvancedFilterToolbarProps {
@@ -16,7 +16,8 @@ export function AdvancedFilterToolbar({ filters, onFilterChange, onReset }: Adva
   const { t } = useTranslation();
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
-  
+  const [localSearch, setLocalSearch] = useState(filters.search || '');
+
   useEffect(() => {
     const fetchSelectOptions = async () => {
       try {
@@ -31,23 +32,20 @@ export function AdvancedFilterToolbar({ filters, onFilterChange, onReset }: Adva
     fetchSelectOptions();
   }, []);
 
-  const [localSearch, setLocalSearch] = useState(filters.search || '');
-  
+  // Sync local search when filters are reset externally
+  useEffect(() => {
+    setLocalSearch(filters.search || '');
+  }, [filters.search]);
+
+  // Debounced search trigger
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (filters.search !== localSearch) {
+      if ((filters.search || '') !== localSearch) {
         onFilterChange('search', localSearch);
       }
-    }, 400); // 400ms debounce
+    }, 300);
     return () => clearTimeout(timer);
-  }, [localSearch, onFilterChange, filters.search]);
-
-  useEffect(() => {
-    // Sync if filters reset externally
-    if (filters.search === '') {
-      setLocalSearch('');
-    }
-  }, [filters.search]);
+  }, [localSearch, filters.search, onFilterChange]);
 
   return (
     <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-sm space-y-3 sm:space-y-4">
@@ -57,8 +55,8 @@ export function AdvancedFilterToolbar({ filters, onFilterChange, onReset }: Adva
           <Input 
             placeholder={t("Search by Name, Email, or ID...")} 
             className="pl-9 bg-background w-full h-9 sm:h-10 text-xs sm:text-sm"
-            value={filters.search}
-            onChange={(e) => onFilterChange('search', e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
           />
         </div>
         

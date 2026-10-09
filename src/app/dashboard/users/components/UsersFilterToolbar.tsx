@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Search, Plus, RotateCcw } from 'lucide-react';
+import { Search, RotateCcw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,18 +14,24 @@ import {
 import { useTranslation } from 'react-i18next';
 
 interface UsersFilterToolbarProps {
-  onSearch: (value: string) => void;
-  onFilterChange: (value: string) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  roleValue: string;
+  onRoleChange: (value: string) => void;
+  statusValue: string;
+  onStatusChange: (value: string) => void;
   onReset: () => void;
-  onCreateClick: () => void;
   roles: any[];
 }
 
 export function UsersFilterToolbar({
-  onSearch,
-  onFilterChange,
+  searchValue,
+  onSearchChange,
+  roleValue,
+  onRoleChange,
+  statusValue,
+  onStatusChange,
   onReset,
-  onCreateClick,
   roles
 }: UsersFilterToolbarProps) {
   const { t } = useTranslation();
@@ -36,14 +42,15 @@ export function UsersFilterToolbar({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input 
+            value={searchValue}
             placeholder={t("Search by Name or Email...")} 
             className="pl-9 bg-background w-full"
-            onChange={(e) => onSearch(e.target.value)}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
         
         <div className="flex flex-wrap md:flex-nowrap gap-2 items-center">
-          <Select defaultValue="ALL" onValueChange={onFilterChange}>
+          <Select value={roleValue} onValueChange={onRoleChange}>
             <SelectTrigger className="w-[160px] bg-background">
               <SelectValue placeholder={t("All Roles")} />
             </SelectTrigger>
@@ -52,6 +59,17 @@ export function UsersFilterToolbar({
               {roles.map((r: any) => (
                 <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={statusValue} onValueChange={onStatusChange}>
+            <SelectTrigger className="w-[140px] bg-background">
+              <SelectValue placeholder={t("All Status")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{t("All Status")}</SelectItem>
+              <SelectItem value="ACTIVE">{t("Active")}</SelectItem>
+              <SelectItem value="INACTIVE">{t("Inactive")}</SelectItem>
             </SelectContent>
           </Select>
 

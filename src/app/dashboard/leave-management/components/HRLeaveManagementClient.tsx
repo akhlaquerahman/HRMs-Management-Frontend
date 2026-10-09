@@ -136,10 +136,29 @@ export function HRLeaveManagementClient() {
     queryFn: async () => (await api.get("/leaves/summary")).data.data,
   });
 
-  const { data: departments = [] } = useQuery({
+  const { data: rawDepartments } = useQuery({
     queryKey: ["departments"],
-    queryFn: async () => (await api.get("/departments")).data.data || [],
+    queryFn: async () => {
+      try {
+        const res = await api.get("/departments");
+        const data = res.data?.data;
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.departments)) return data.departments;
+        return [];
+      } catch (e) {
+        return [];
+      }
+    },
   });
+
+  const departments = Array.isArray(rawDepartments) ? rawDepartments : [];
+
+  React.useEffect(() => {
+    if (departments.length === 1) {
+      setRequestDeptFilter(departments[0].id);
+      setBalanceDeptFilter(departments[0].id);
+    }
+  }, [departments]);
 
   const { data: designationsList = [] } = useQuery({
     queryKey: ["designationsList", requestDeptFilter],
@@ -373,7 +392,7 @@ export function HRLeaveManagementClient() {
   });
 
   const kpis = hrSummary?.summary || {
-    totalEmployees: 2022,
+    totalEmployees: 0,
     pendingRequests: 0,
     approvedThisMonth: 0,
     onLeaveToday: 0,
@@ -760,9 +779,10 @@ export function HRLeaveManagementClient() {
                         setRequestDeptFilter(e.target.value);
                         setRequestDesigFilter("ALL");
                       }}
-                      className="text-[11px] font-semibold bg-transparent border-0 focus:outline-hidden text-foreground cursor-pointer"
+                      disabled={departments.length === 1}
+                      className="text-[11px] font-semibold bg-transparent border-0 focus:outline-hidden text-foreground cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
                     >
-                      <option value="ALL">All Departments</option>
+                      {departments.length !== 1 && <option value="ALL">All Departments</option>}
                       {departments.map((d: any) => (
                         <option key={d.id} value={d.id}>
                           {d.name}
@@ -1040,14 +1060,15 @@ export function HRLeaveManagementClient() {
               </select>
 
               <select
-                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium"
+                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium disabled:opacity-80 disabled:cursor-not-allowed"
                 value={requestDeptFilter}
                 onChange={(e) => {
                   setRequestDeptFilter(e.target.value);
                   setRequestDesigFilter("ALL");
                 }}
+                disabled={departments.length === 1}
               >
-                <option value="ALL">All Departments</option>
+                {departments.length !== 1 && <option value="ALL">All Departments</option>}
                 {departments.map((d: any) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
@@ -1198,11 +1219,12 @@ export function HRLeaveManagementClient() {
         <TabsContent value="balances" className="space-y-4 mt-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <select
-              className="h-9 px-3 py-1 border rounded-lg text-xs bg-background"
+              className="h-9 px-3 py-1 border rounded-lg text-xs bg-background disabled:opacity-80 disabled:cursor-not-allowed"
               value={balanceDeptFilter}
               onChange={(e) => setBalanceDeptFilter(e.target.value)}
+              disabled={departments.length === 1}
             >
-              <option value="ALL">All Departments</option>
+              {departments.length !== 1 && <option value="ALL">All Departments</option>}
               {departments.map((d: any) => (
                 <option key={d.id} value={d.id}>
                   {d.name}

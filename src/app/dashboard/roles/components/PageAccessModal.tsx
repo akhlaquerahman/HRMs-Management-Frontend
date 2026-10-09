@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Check, Lock, Building2, Users, Building, Clock, CalendarCheck, DollarSign, UserPlus, FolderOpen, FileText, User } from "lucide-react";
+import { Shield, Check, Lock, Building2, Users, Building, Clock, CalendarCheck, DollarSign, UserPlus, FolderOpen, FileText, User, Loader2 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ALL_MANAGEABLE_PAGES, getRolePagePermissions, setRolePagePermissions, DEFAULT_HR_PAGES } from '@/lib/pagePermissions';
@@ -35,6 +35,7 @@ const pageIconsMap: Record<string, React.ElementType> = {
 export function PageAccessModal({ isOpen, onClose, role }: PageAccessModalProps) {
   const { t } = useTranslation();
   const [selectedHrefs, setSelectedHrefs] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   useEffect(() => {
     if (role?.name) {
@@ -62,7 +63,7 @@ export function PageAccessModal({ isOpen, onClose, role }: PageAccessModalProps)
   const handleResetDefaults = () => {
     const rawRole = role?.name || '';
     const normalizedRole = rawRole.toUpperCase().trim().replace(/[\s\_]+/g, '_');
-    if (normalizedRole === 'EMPLOYEE') {
+    if (normalizedRole === 'EMPLOYEE' || normalizedRole === 'EMPLOYEES') {
       setSelectedHrefs([
         '/dashboard',
         '/dashboard/my-attendance',
@@ -76,10 +77,17 @@ export function PageAccessModal({ isOpen, onClose, role }: PageAccessModalProps)
     }
   };
 
-  const handleSave = () => {
-    setRolePagePermissions(role.name, selectedHrefs);
-    toast.success(t(`Page permissions updated for ${role.name}`));
-    onClose();
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await setRolePagePermissions(role.name, selectedHrefs);
+      toast.success(t(`Page permissions updated for ${role.name}`));
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message || t("Failed to save page permissions"));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const categories = ['HR Management', 'Employee Self-Service', 'Core'] as const;
@@ -163,9 +171,9 @@ export function PageAccessModal({ isOpen, onClose, role }: PageAccessModalProps)
         </div>
 
         <DialogFooter className="border-t pt-4 shrink-0">
-          <Button type="button" variant="outline" onClick={onClose}>{t("Cancel")}</Button>
-          <Button type="button" onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 font-semibold">
-            <Shield className="w-4 h-4 mr-2" />
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>{t("Cancel")}</Button>
+          <Button type="button" onClick={handleSave} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 font-semibold">
+            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Shield className="w-4 h-4 mr-2" />}
             {t("Save Page Permissions")}
           </Button>
         </DialogFooter>

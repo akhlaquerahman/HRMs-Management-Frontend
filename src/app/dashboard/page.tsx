@@ -35,6 +35,7 @@ import {
 import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { HRManagerDashboard } from './components/HRManagerDashboard';
 import { SuperAdminDashboard } from './components/SuperAdminDashboard';
+import { ManagerDashboard } from './components/ManagerDashboard';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -127,6 +128,29 @@ export default function DashboardPage() {
             </>
           )}
 
+          {role === 'MANAGER' && (
+            <>
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/dashboard/employee-management" className="flex items-center gap-2 py-1.5">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span>My Team</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/dashboard/leave-management" className="flex items-center gap-2 py-1.5">
+                  <CalendarCheck className="w-4 h-4 text-amber-600" />
+                  <span>Approve Leaves</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/dashboard/attendance" className="flex items-center gap-2 py-1.5">
+                  <Clock className="w-4 h-4 text-emerald-600" />
+                  <span>Team Attendance</span>
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )}
+
           {(role === 'HR_MANAGER' || role === 'HR_ADMIN') && (
             <>
               <DropdownMenuItem asChild className="cursor-pointer">
@@ -192,8 +216,9 @@ export default function DashboardPage() {
       
       {role === 'EMPLOYEE' && <EmployeeDashboard stats={stats} />}
       {(role === 'HR_MANAGER' || role === 'HR_ADMIN') && <HRManagerDashboard stats={stats} trendFilter={trendFilter} setTrendFilter={setTrendFilter} />}
+      {role === 'MANAGER' && <ManagerDashboard stats={stats} />}
       {role === 'SUPER_ADMIN' && <SuperAdminDashboard stats={stats} />}
-      {!['EMPLOYEE', 'HR_MANAGER', 'HR_ADMIN', 'SUPER_ADMIN'].includes(role) && (
+      {!['EMPLOYEE', 'HR_MANAGER', 'HR_ADMIN', 'MANAGER', 'SUPER_ADMIN'].includes(role) && (
         <div className="p-8 text-center text-muted-foreground">No dashboard available for your role ({user?.role}).</div>
       )}
     </div>

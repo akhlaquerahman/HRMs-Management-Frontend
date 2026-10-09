@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -57,6 +57,7 @@ export default function AttendancePage() {
   const [status, setStatus] = useState("ALL");
   const [breakType, setBreakType] = useState("ALL");
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [sortKey, setSortKey] = useState("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -117,7 +118,8 @@ export default function AttendancePage() {
       shiftId,
       status,
       breakType,
-      page
+      page,
+      limit
     ],
     queryFn: async () => {
       const res = await api.get("/attendance/admin/records", {
@@ -133,7 +135,7 @@ export default function AttendancePage() {
           status,
           breakType,
           page,
-          limit: 50
+          limit
         }
       });
       return res.data;
@@ -169,6 +171,13 @@ export default function AttendancePage() {
   const employees = employeesRes?.data || [];
   const shifts = shiftsRes?.data || [];
 
+  // Automatically select single department if manager has access to only 1 department
+  useEffect(() => {
+    if (departments.length === 1 && departmentId === "ALL") {
+      setDepartmentId(departments[0].id);
+    }
+  }, [departments, departmentId]);
+
   // Reset Filters
   const handleResetFilters = () => {
     setSearch("");
@@ -176,12 +185,13 @@ export default function AttendancePage() {
     setSingleDate(new Date().toISOString().split('T')[0]);
     setStartDate("");
     setEndDate("");
-    setDepartmentId("ALL");
+    setDepartmentId(departments.length === 1 ? departments[0].id : "ALL");
     setDesignationId("ALL");
     setShiftId("ALL");
     setStatus("ALL");
     setBreakType("ALL");
     setPage(1);
+    setLimit(10);
   };
 
   // Refresh All Data
@@ -391,30 +401,47 @@ export default function AttendancePage() {
 
         {/* Pagination Footer */}
         {pagination.total > 0 && (
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 px-1">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground pt-3 px-1 border-t border-border/50">
             <span>
-              Showing <strong>{((pagination.page - 1) * pagination.limit) + 1}</strong> to <strong>{Math.min(pagination.page * pagination.limit, pagination.total)}</strong> of <strong>{pagination.total}</strong> records
+              Showing <strong className="text-foreground">{((pagination.page - 1) * pagination.limit) + 1}</strong> to <strong className="text-foreground">{Math.min(pagination.page * pagination.limit, pagination.total)}</strong> of <strong className="text-foreground">{pagination.total}</strong> records
             </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page <= 1}
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="h-8 px-3 text-xs"
-              >
-                Previous
-              </Button>
-              <span className="font-semibold text-foreground">Page {pagination.page} of {pagination.totalPages}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() => setPage(p => p + 1)}
-                className="h-8 px-3 text-xs"
-              >
-                Next
-              </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span>Rows per page:</span>
+                <select 
+                  className="border rounded-md px-2 py-1 text-xs bg-background border-input outline-none cursor-pointer"
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                  }}
+                >
+                  {[10, 20, 50, 100].map(val => (
+                    <option key={val} value={val}>{val}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page <= 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="h-8 px-3 text-xs"
+                >
+                  Previous
+                </Button>
+                <span className="font-semibold text-foreground px-1">Page {pagination.page} of {pagination.totalPages}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => setPage(p => p + 1)}
+                  className="h-8 px-3 text-xs"
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </div>
         )}

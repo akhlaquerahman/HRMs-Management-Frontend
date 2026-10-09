@@ -126,7 +126,6 @@ const menuConfig: MenuItem[] = [
     href: '/dashboard/roles',
     icon: Settings,
   },
-
   {
     title: 'Audit Logs',
     href: '/dashboard/audit-logs',
@@ -138,8 +137,6 @@ const menuConfig: MenuItem[] = [
     icon: User,
   },
 ];
-
-
 
 interface SidebarProps {
   isMobileOpen?: boolean;
@@ -183,7 +180,7 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
   const roleNameRaw = extractRoleName(user?.role);
   const normalizedRole = roleNameRaw.toUpperCase().trim().replace(/[\s\_]+/g, '_');
   const isSuperAdmin = normalizedRole === 'SUPER_ADMIN' || normalizedRole === 'SUPER_ADMINISTRATOR';
-  const isHrAdmin = normalizedRole.includes('HR') || normalizedRole === 'HR_MANAGER' || normalizedRole === 'HR_ADMIN';
+  const isManager = normalizedRole === 'MANAGER' || normalizedRole === 'DEPT_MANAGER';
 
   const [allowedPages, setAllowedPages] = useState<string[]>([]);
 
@@ -194,14 +191,12 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
     };
     syncPermissions();
     fetchAndSyncRolePagePermissions();
-    const interval = setInterval(fetchAndSyncRolePagePermissions, 3000);
 
     if (typeof window !== 'undefined') {
       window.addEventListener('hrms_permissions_updated', syncPermissions);
       window.addEventListener('storage', syncPermissions);
     }
     return () => {
-      clearInterval(interval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('hrms_permissions_updated', syncPermissions);
         window.removeEventListener('storage', syncPermissions);
@@ -210,33 +205,6 @@ export default function Sidebar({ isMobileOpen = false, onClose }: SidebarProps)
   }, [user?.role]);
   
   const filteredLinks = menuConfig.filter(link => {
-    const superAdminOnlyRoutes = [
-      '/dashboard/tenant-employees',
-      '/dashboard/users',
-      '/dashboard/roles',
-      '/dashboard/audit-logs'
-    ];
-
-    // Non-Super Admin users MUST NEVER see Super Admin only links
-    if (!isSuperAdmin && superAdminOnlyRoutes.includes(link.href)) {
-      return false;
-    }
-
-    // Dedicated clean Admin sidebar for Super Admin
-    if (isSuperAdmin) {
-      const superAdminPages = [
-        '/dashboard',
-        '/dashboard/tenant-employees',
-        '/dashboard/my-attendance',
-        '/dashboard/users',
-        '/dashboard/roles',
-        '/dashboard/audit-logs',
-        '/dashboard/profile'
-      ];
-      return superAdminPages.includes(link.href);
-    }
-
-    // Dynamic permission check for all other roles (HR_MANAGER, HR_ADMIN, EMPLOYEE, etc.)
     return allowedPages.includes(link.href);
   });
 

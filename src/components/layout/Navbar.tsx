@@ -74,6 +74,9 @@ export default function Navbar({ onOpenMobileSidebar }: NavbarProps) {
     .filter(Boolean)
     .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '));
 
+  const role = typeof user?.role === 'string' ? user.role.toUpperCase().trim().replace(/\s+/g, '_') : '';
+  const isSuperAdmin = role === 'SUPER_ADMIN' || user?.role === 'SUPER_ADMIN';
+
   return (
     <header className="flex h-14 sm:h-16 items-center justify-between px-1.5 sm:px-6 bg-card border-b shadow-xs shrink-0 z-20 gap-1">
       {/* Left */}
@@ -104,7 +107,7 @@ export default function Navbar({ onOpenMobileSidebar }: NavbarProps) {
 
       {/* Right */}
       <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
-        <AttendancePunchWidget />
+        {!isSuperAdmin && <AttendancePunchWidget />}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

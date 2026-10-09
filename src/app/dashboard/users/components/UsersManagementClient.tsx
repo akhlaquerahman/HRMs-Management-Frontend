@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { useTranslation } from 'react-i18next';
@@ -11,36 +12,100 @@ import { UsersTable } from './UsersTable';
 import { UserModal } from './UserModal';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Plus, Loader2 } from 'lucide-react';
 
-export function UsersManagementClient() {
+function UsersManagementContent() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
 
-  const { data: usersRes, isLoading: isLoadingUsers } = useQuery({ 
-    queryKey: ["admin_users"], 
-    queryFn: async () => (await api.get("/admin/users")).data 
-  });
-  
   const { data: rolesRes } = useQuery({ 
     queryKey: ["admin_roles"], 
     queryFn: async () => (await api.get("/admin/roles")).data 
   });
-
-  const users = usersRes?.data || [];
   const roles = rolesRes?.data || [];
 
-  const filteredUsers = users.filter((u: any) => {
-    const matchesSearch = 
-      `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "ALL" || u.roleId === roleFilter;
-    return matchesSearch && matchesRole;
+  // Parse initial search params (e.g. ?role=HR_ADMIN or ?action=new)
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    const actionParam = searchParams.get('action');
+
+    if (roleParam && roles.length > 0) {
+      const matchedRole = roles.find((r: any) => 
+        r.name.toUpperCase() === roleParam.toUpperCase() ||
+        r.id === roleParam ||
+        r.name.toUpperCase().includes(roleParam.toUpperCase())
+      );
+      if (matchedRole) {
+        setRoleFilter(matchedRole.id);
+      }
+    }
+
+    if (actionParam === 'new') {
+      setIsModalOpen(true);
+    }
+  }, [searchParams, roles]);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const handleRoleFilterChange = (val: string) => {
+    setRoleFilter(val);
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setPage(1);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(1);
+  };
+
+  const { data: usersRes, isLoading: isLoadingUsers } = useQuery({ 
+    queryKey: ["admin_users", { page, pageSize, search: debouncedSearch, role: roleFilter, status: statusFilter }], 
+    queryFn: async () => {
+      const res = await api.get("/admin/users", {
+        params: {
+          page,
+          pageSize,
+          search: debouncedSearch,
+          roleId: roleFilter !== 'ALL' ? roleFilter : undefined,
+          status: statusFilter !== 'ALL' ? statusFilter : undefined
+        }
+      });
+      return res.data;
+    }
   });
+
+  const responseData = usersRes?.data || {};
+  const items = responseData.items || [];
+  const pagination = responseData.pagination || { page: 1, pageSize: 10, total: 0, totalPages: 1 };
+  const counts = responseData.counts || {};
+
+  useEffect(() => {
+    if (pagination.totalPages > 0 && page > pagination.totalPages) {
+      setPage(pagination.totalPages);
+    }
+  }, [pagination.totalPages, page]);
 
   const handleDelete = async (id: string) => {
     if (confirm(t("Are you sure you want to delete this user? This action cannot be undone."))) {
@@ -66,7 +131,10 @@ export function UsersManagementClient() {
 
   const handleResetFilters = () => {
     setSearchTerm("");
+    setDebouncedSearch("");
     setRoleFilter("ALL");
+    setStatusFilter("ALL");
+    setPage(1);
   };
 
   return (
@@ -78,31 +146,37 @@ export function UsersManagementClient() {
         showSearch={false}
         actionButton={
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={handleCreateClick} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
-              <span className="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus w-4 h-4 mr-2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+            <Button onClick={handleCreateClick} className="bg-blue-600 hover:bg-blue-700 shadow-sm font-medium">
+              <Plus className="w-4 h-4 mr-2" />
               {t("Add User")}
             </Button>
           </div>
         }
       />
 
-      <UsersKPICards users={users} loading={isLoadingUsers} />
+      <UsersKPICards counts={counts} loading={isLoadingUsers} />
 
       <div className="grid grid-cols-1 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <UsersFilterToolbar 
-            onSearch={setSearchTerm}
-            onFilterChange={setRoleFilter}
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            roleValue={roleFilter}
+            onRoleChange={handleRoleFilterChange}
+            statusValue={statusFilter}
+            onStatusChange={handleStatusFilterChange}
             onReset={handleResetFilters}
-            onCreateClick={handleCreateClick}
             roles={roles}
           />
           
           <UsersTable 
-            data={filteredUsers} 
+            data={items} 
+            pagination={pagination}
             loading={isLoadingUsers} 
             onEdit={handleEditClick}
             onDelete={handleDelete}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
           />
         </div>
       </div>
@@ -114,5 +188,17 @@ export function UsersManagementClient() {
         roles={roles}
       />
     </div>
+  );
+}
+
+export function UsersManagementClient() {
+  return (
+    <Suspense fallback={
+      <div className="p-12 flex justify-center items-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <UsersManagementContent />
+    </Suspense>
   );
 }

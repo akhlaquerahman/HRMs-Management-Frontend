@@ -191,6 +191,24 @@ export function EditEmployeeModal({ isOpen, onClose, employee }: { isOpen: boole
             </div>
           </div>
 
+          {/* Read-only Effective Reporting Manager Info */}
+          {formData.departmentId && (
+            <div className="p-3 bg-muted/40 rounded-xl border flex items-center justify-between text-xs">
+              <span className="text-muted-foreground font-semibold">{t("Effective Reporting Manager:")}</span>
+              <span className="font-bold text-foreground">
+                {(() => {
+                  const selDept = departments.find((d: any) => d.id === formData.departmentId);
+                  if (!selDept) return t("None");
+                  if (selDept.manager) {
+                    const mName = selDept.manager.name || `${selDept.manager.firstName || ''} ${selDept.manager.lastName || ''}`.trim();
+                    return mName || t("Unassigned (No Department Manager)");
+                  }
+                  return t("Unassigned (No Department Manager)");
+                })()}
+              </span>
+            </div>
+          )}
+
           <DialogFooter className="pt-4 flex flex-row justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={updateEmployee.isPending} className="h-9 text-xs sm:text-sm px-4">{t("Cancel")}</Button>
             <Button type="submit" disabled={updateEmployee.isPending} className="h-9 text-xs sm:text-sm px-4">

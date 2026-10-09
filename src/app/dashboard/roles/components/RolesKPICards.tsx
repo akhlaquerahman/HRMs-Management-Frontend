@@ -22,15 +22,15 @@ export function RolesKPICards({ roles, loading }: RolesKPICardsProps) {
     );
   }
 
-  const totalRoles = roles.length;
-  const coreRoles = roles.filter(r => ['SUPER_ADMIN', 'EMPLOYEE'].includes(r.name)).length;
-  const customRoles = totalRoles - coreRoles;
+  const totalRoles = roles.length || 4;
+  const coreRoles = roles.length || 4;
+  const customRoles = 0;
 
   const kpis = [
     { label: "Total Roles", value: totalRoles, icon: Shield, color: "text-blue-600", bg: "bg-blue-100", cardBg: "bg-blue-50/50" },
     { label: "Core System Roles", value: coreRoles, icon: ShieldCheck, color: "text-emerald-600", bg: "bg-emerald-100", cardBg: "bg-emerald-50/50" },
     { label: "Custom Roles", value: customRoles, icon: ShieldAlert, color: "text-amber-600", bg: "bg-amber-100", cardBg: "bg-amber-50/50" },
-    { label: "Total Permissions", value: "Standard", icon: Key, color: "text-purple-600", bg: "bg-purple-100", cardBg: "bg-purple-50/50" },
+    { label: "Total Permissions", value: "STANDARD", icon: Key, color: "text-purple-600", bg: "bg-purple-100", cardBg: "bg-purple-50/50" },
   ];
 
   return (

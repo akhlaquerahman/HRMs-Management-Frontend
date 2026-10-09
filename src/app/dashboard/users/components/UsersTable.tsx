@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Users, MoreVertical, Edit, Trash2, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, ChevronLeft, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -24,17 +24,29 @@ import {
 
 interface UsersTableProps {
   data: any[];
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
   loading?: boolean;
   onEdit: (user: any) => void;
   onDelete: (id: string) => void;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
-export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps) {
+export function UsersTable({
+  data = [],
+  pagination = { page: 1, pageSize: 10, total: 0, totalPages: 1 },
+  loading = false,
+  onEdit,
+  onDelete,
+  onPageChange,
+  onPageSizeChange
+}: UsersTableProps) {
   const { t } = useTranslation();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
-  
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
@@ -49,33 +61,6 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
     }
   };
 
-  const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
-    setSortConfig({ key, direction });
-  };
-
-  const sortedData = React.useMemo(() => {
-    if (!data || !sortConfig) return data || [];
-    return [...data].sort((a, b) => {
-      let valA = a[sortConfig.key];
-      let valB = b[sortConfig.key];
-      
-      if (sortConfig.key === 'name') {
-        valA = `${a.firstName} ${a.lastName}`.toLowerCase();
-        valB = `${b.firstName} ${b.lastName}`.toLowerCase();
-      }
-      if (sortConfig.key === 'role') {
-        valA = a.role?.name || "";
-        valB = b.role?.name || "";
-      }
-      
-      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [data, sortConfig]);
-
   if (loading) {
     return (
       <div className="rounded-xl border bg-card shadow-sm p-12">
@@ -87,19 +72,14 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
     );
   }
 
-  // Calculate pagination
-  const totalItems = sortedData.length;
-  const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = sortedData.slice(startIndex, startIndex + rowsPerPage);
-
-  const handleNextPage = () => { if (currentPage < totalPages) setCurrentPage(p => p + 1); };
-  const handlePrevPage = () => { if (currentPage > 1) setCurrentPage(p => p - 1); };
+  const { page, pageSize, total, totalPages } = pagination;
+  const startRange = total > 0 ? (page - 1) * pageSize + 1 : 0;
+  const endRange = Math.min(page * pageSize, total);
 
   const toggleSelectAll = (checked: boolean) => {
     const newSelected: Record<string, boolean> = {};
     if (checked) {
-      paginatedData.forEach(u => newSelected[u.id] = true);
+      data.forEach(u => newSelected[u.id] = true);
     }
     setSelectedRows(newSelected);
   };
@@ -112,20 +92,11 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const getRoleBadge = (roleName: string) => {
-    if (!roleName) return null;
-    const upper = roleName.toUpperCase();
-    if (upper.includes('ADMIN')) {
-      return <span className="font-semibold text-gray-900 dark:text-slate-100 block">{roleName}</span>;
-    }
-    return <span className="font-semibold text-gray-900 dark:text-slate-100 block">{roleName}</span>;
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between px-1">
         <h3 className="text-sm font-semibold text-foreground">
-          Showing <span className="text-blue-600 font-bold">{data?.length || 0}</span> Users
+          {t("Showing")} <span className="text-blue-600 font-bold">{data.length}</span> {t("Users")} ({t("Total")} {total})
         </h3>
       </div>
       {selectedCount > 0 && (
@@ -145,37 +116,37 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
               <TableRow className="bg-muted/50 border-b-border/50 hover:bg-muted/50">
                 <TableHead className="w-12 py-3 px-4">
                   <Checkbox 
-                    checked={paginatedData.length > 0 && paginatedData.every(u => selectedRows[u.id])}
+                    checked={data.length > 0 && data.every(u => selectedRows[u.id])}
                     onCheckedChange={toggleSelectAll} 
                   />
                 </TableHead>
                 <TableHead className="w-12"></TableHead>
-                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('id')}>
-                  {t("User ID")} {sortConfig?.key === 'id' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap">
+                  {t("User ID")}
                 </TableHead>
-                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('name')}>
-                  {t("User Details")} {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap">
+                  {t("User Details")}
                 </TableHead>
-                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('role')}>
-                  {t("Role & Company")} {sortConfig?.key === 'role' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap">
+                  {t("Role & Company")}
                 </TableHead>
-                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('createdAt')}>
-                  {t("Joined")} {sortConfig?.key === 'createdAt' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap">
+                  {t("Joined")}
                 </TableHead>
-                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => handleSort('status')}>
-                  {t("Status")} {sortConfig?.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                <TableHead className="py-3 font-semibold text-muted-foreground whitespace-nowrap">
+                  {t("Status")}
                 </TableHead>
                 <TableHead className="py-3 w-12 text-center"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedData.length === 0 ? (
+              {data.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                     {t("No users found matching the filters.")}
                   </TableCell>
                 </TableRow>
-              ) : paginatedData.map((user) => (
+              ) : data.map((user) => (
                 <React.Fragment key={user.id}>
                   <TableRow className={`border-b-border/50 hover:bg-muted/20 transition-colors ${expandedRows[user.id] ? 'bg-muted/10' : ''}`}>
                     <TableCell className="px-4">
@@ -187,7 +158,7 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-medium whitespace-nowrap text-muted-foreground">
+                      <span className="text-xs font-mono font-medium whitespace-nowrap text-muted-foreground bg-muted/60 px-2 py-1 rounded">
                         USR-{user.id.slice(0, 4).toUpperCase()}
                       </span>
                     </TableCell>
@@ -204,7 +175,7 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
                     </TableCell>
                     <TableCell>
                       <div>
-                        {getRoleBadge(user.role?.name)}
+                        <span className="font-semibold text-gray-900 dark:text-slate-100 block">{user.role?.name || "EMPLOYEES"}</span>
                         <p className="text-xs text-muted-foreground">{user.companyName || "No Company"}</p>
                       </div>
                     </TableCell>
@@ -214,7 +185,9 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge className="bg-emerald-100/50 text-emerald-700 hover:bg-emerald-100/50 border-emerald-200">ACTIVE</Badge>
+                      <Badge className={user.isDeleted ? "bg-rose-100 text-rose-700 border-rose-200" : "bg-emerald-100/50 text-emerald-700 border-emerald-200"}>
+                        {user.isDeleted ? "INACTIVE" : "ACTIVE"}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -239,15 +212,15 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
                       <TableCell colSpan={8} className="p-0">
                         <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top-2">
                           <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Contact</p>
-                            <p className="text-sm font-medium">{user.companyPhone || "N/A"}</p>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Contact Phone</p>
+                            <p className="text-sm font-medium">{user.phone || user.companyPhone || "N/A"}</p>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Address</p>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Company Address</p>
                             <p className="text-sm font-medium">{user.companyAddress || "N/A"}</p>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Website</p>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Company Website</p>
                             <p className="text-sm font-medium">{user.companyWebsite || "N/A"}</p>
                           </div>
                         </div>
@@ -261,11 +234,11 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
         </div>
       </div>
       
-      {/* Footer / Pagination matching EmployeeTable */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground p-4 bg-muted/10 border-t">
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between text-sm text-muted-foreground p-4 bg-muted/10 border-t rounded-xl">
         <div className="flex items-center gap-2">
           <span>{t("Rows per page")}:</span>
-          <Select value={rowsPerPage.toString()} onValueChange={(v) => { setRowsPerPage(Number(v)); setCurrentPage(1); }}>
+          <Select value={pageSize.toString()} onValueChange={(v) => onPageSizeChange?.(Number(v))}>
             <SelectTrigger className="h-8 w-[70px]">
               <SelectValue />
             </SelectTrigger>
@@ -280,15 +253,16 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
 
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">
-            {startIndex + 1}-{Math.min(startIndex + rowsPerPage, totalItems)} {t("of")} {totalItems}
+            {startRange}–{endRange} {t("of")} {total}
           </span>
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
+              onClick={() => onPageChange?.(page - 1)}
+              disabled={page <= 1}
+              title={t("Previous Page")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -296,8 +270,9 @@ export function UsersTable({ data, loading, onEdit, onDelete }: UsersTableProps)
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() => onPageChange?.(page + 1)}
+              disabled={page >= totalPages || totalPages === 0}
+              title={t("Next Page")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
