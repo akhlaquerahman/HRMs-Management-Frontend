@@ -59,8 +59,13 @@ import {
   Check,
   X,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Send,
+  Mail
 } from "lucide-react";
+import { toast } from "sonner";
+import { useAuthStore } from "@/store/authStore";
 import { PayslipPdfViewer } from "../payslips/components/PayslipPdfViewer";
 import { format } from "date-fns";
 import {
@@ -77,7 +82,7 @@ import {
   Cell
 } from "recharts";
 
-export default function PayrollPage() {
+function HRPayrollDashboard() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("records");
@@ -96,6 +101,8 @@ export default function PayrollPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [viewPayslipRecord, setViewPayslipRecord] = useState<any>(null);
   const [createError, setCreateError] = useState("");
+  const [isAutoCalculating, setIsAutoCalculating] = useState(false);
+  const [autoCalculationNote, setAutoCalculationNote] = useState<string | null>(null);
 
   // Create Form State
   const [formData, setFormData] = useState({
@@ -137,6 +144,72 @@ export default function PayrollPage() {
   const payrolls = payrollRes?.data || [];
   const employees = employeesRes?.data || [];
   const companyData = companyRes?.data;
+
+  // Auto-populate employee salary, working days & details
+  const autoPopulateEmployeePayroll = async (emp: any, targetMonth?: number, targetYear?: number) => {
+    if (!emp) return;
+    const m = targetMonth || formData.month || (new Date().getMonth() + 1);
+    const y = targetYear || formData.year || (new Date().getFullYear());
+
+    // 1. Instant Zero-Latency Calculation (Client-side math from shift & calendar)
+    const totalDays = new Date(y, m, 0).getDate();
+    const weeklyOffs: string[] = emp?.shift?.weeklyOff?.length
+      ? emp.shift.weeklyOff.map((d: string) => d.toLowerCase())
+      : ['sunday'];
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    let offCount = 0;
+    for (let d = 1; d <= totalDays; d++) {
+      const curDate = new Date(y, m - 1, d);
+      if (weeklyOffs.includes(dayNames[curDate.getDay()])) {
+        offCount++;
+      }
+    }
+    const localWorkingDays = Math.max(1, totalDays - offCount);
+    const localBaseSalary = emp.baseSalary !== undefined && emp.baseSalary !== null ? String(emp.baseSalary) : "0";
+    const localTxn = `TXN-${y}${String(m).padStart(2, '0')}-${emp.employeeId || 'EMP'}`;
+
+    setFormData(prev => ({
+      ...prev,
+      employeeId: emp.id,
+      month: m,
+      year: y,
+      basicSalary: localBaseSalary,
+      workingDays: String(localWorkingDays),
+      paidDays: String(localWorkingDays),
+      bankName: emp.bankName || prev.bankName || "",
+      accountNumber: emp.accountNumber || prev.accountNumber || "",
+      transactionId: localTxn
+    }));
+    setAutoCalculationNote(`Auto-calculated: Basic Salary ₹${Number(localBaseSalary).toLocaleString('en-IN')}, Working Days: ${localWorkingDays}`);
+
+    // 2. Fetch refined enterprise calculation preview from backend
+    try {
+      setIsAutoCalculating(true);
+      const res = await api.get('/payroll/preview-calculation', {
+        params: { employeeId: emp.id, month: m, year: y }
+      });
+      if (res.data?.success && res.data.data) {
+        const p = res.data.data;
+        setFormData(prev => ({
+          ...prev,
+          employeeId: emp.id,
+          month: m,
+          year: y,
+          basicSalary: String(p.basicSalary !== undefined ? p.basicSalary : localBaseSalary),
+          workingDays: String(p.workingDays || localWorkingDays),
+          paidDays: String(p.paidDays || p.workingDays || localWorkingDays),
+          bankName: p.bankName || emp.bankName || prev.bankName || "",
+          accountNumber: p.accountNumber || emp.accountNumber || prev.accountNumber || "",
+          transactionId: p.transactionId || localTxn
+        }));
+        setAutoCalculationNote(`Enterprise Verified: Basic Salary ₹${Number(p.basicSalary || localBaseSalary).toLocaleString('en-IN')}, Working Days: ${p.workingDays || localWorkingDays} (${p.totalDaysInMonth} total - ${p.weeklyOffCount} off)`);
+      }
+    } catch (err) {
+      console.warn("Backend preview calculation fallback:", err);
+    } finally {
+      setIsAutoCalculating(false);
+    }
+  };
 
   // Pre-indexed search keys for 60fps instant typing performance
   const indexedEmployees = useMemo(() => {
@@ -185,9 +258,13 @@ export default function PayrollPage() {
       const res = await api.post("/payroll", payload);
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ["payrollRecords"] });
+      queryClient.invalidateQueries({ queryKey: ["payrollSummary"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
+      toast.success(res?.message || "Payroll issued successfully! Salary slip PDF has been emailed to the employee.");
       setIsCreateModalOpen(false);
+      setAutoCalculationNote(null);
       setFormData({
         employeeId: "",
         month: new Date().getMonth() + 1,
@@ -208,7 +285,9 @@ export default function PayrollPage() {
       setIsEmpDropdownOpen(false);
     },
     onError: (err: any) => {
-      setCreateError(err.response?.data?.message || "Failed to create payroll record.");
+      const msg = err.response?.data?.message || "Failed to create payroll record.";
+      setCreateError(msg);
+      toast.error(msg);
     }
   });
 
@@ -312,8 +391,7 @@ export default function PayrollPage() {
   // Computed Form Preview Values
   const basicVal = parseFloat(formData.basicSalary) || 0;
   const bonusVal = parseFloat(formData.bonus) || 0;
-  const hraVal = basicVal * 0.4;
-  const grossVal = basicVal + hraVal + bonusVal;
+  const grossVal = basicVal + bonusVal;
   const dedVal = parseFloat(formData.deductions) || 0;
   const netVal = Math.max(0, grossVal - dedVal);
 
@@ -887,14 +965,9 @@ export default function PayrollPage() {
                             <div
                               key={emp.id}
                               onClick={() => {
-                                setFormData({
-                                  ...formData,
-                                  employeeId: emp.id,
-                                  bankName: emp.bankName || formData.bankName || "",
-                                  accountNumber: emp.accountNumber || formData.accountNumber || ""
-                                });
                                 setEmpSearchQuery(`${emp.firstName} ${emp.lastName} (${emp.email})`);
                                 setIsEmpDropdownOpen(false);
+                                autoPopulateEmployeePayroll(emp, formData.month, formData.year);
                               }}
                               className={`p-2.5 flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors ${
                                 isSelected ? "bg-primary/10 font-bold text-primary" : ""
@@ -913,9 +986,16 @@ export default function PayrollPage() {
                                   </div>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="text-[10px] font-mono shrink-0">
-                                {emp.employeeId || "NO ID"}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                {emp.baseSalary ? (
+                                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                    ₹{Number(emp.baseSalary).toLocaleString('en-IN')}
+                                  </span>
+                                ) : null}
+                                <Badge variant="outline" className="text-[10px] font-mono shrink-0">
+                                  {emp.employeeId || "NO ID"}
+                                </Badge>
+                              </div>
                             </div>
                           );
                         })
@@ -924,13 +1004,46 @@ export default function PayrollPage() {
                   )}
                 </div>
 
+                {/* Auto Calculation Banner */}
+                {isAutoCalculating ? (
+                  <div className="md:col-span-2 p-3 rounded-lg bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs flex items-center gap-2 animate-pulse">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600 shrink-0" />
+                    <span>Analyzing employee shift weekly offs, holidays & profile base salary...</span>
+                  </div>
+                ) : autoCalculationNote ? (
+                  <div className="md:col-span-2 p-3 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="font-medium">{autoCalculationNote}</span>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 shrink-0">
+                      Auto-Populated (Editable)
+                    </Badge>
+                  </div>
+                ) : null}
+
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Pay Month *</Label>
                   <select
                     required
                     className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
                     value={formData.month}
-                    onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
+                    onChange={(e) => {
+                      const newMonth = parseInt(e.target.value);
+                      setFormData(prev => ({ ...prev, month: newMonth }));
+                      const selectedEmp = employees.find((emp: any) => emp.id === formData.employeeId);
+                      if (selectedEmp) {
+                        autoPopulateEmployeePayroll(selectedEmp, newMonth, formData.year);
+                      } else {
+                        const totalDays = new Date(formData.year, newMonth, 0).getDate();
+                        let sundays = 0;
+                        for (let d = 1; d <= totalDays; d++) {
+                          if (new Date(formData.year, newMonth - 1, d).getDay() === 0) sundays++;
+                        }
+                        const wDays = Math.max(1, totalDays - sundays);
+                        setFormData(prev => ({ ...prev, month: newMonth, workingDays: String(wDays), paidDays: String(wDays) }));
+                      }
+                    }}
                   >
                     <option value={1}>January (01)</option>
                     <option value={2}>February (02)</option>
@@ -953,7 +1066,22 @@ export default function PayrollPage() {
                     required
                     className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
                     value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                    onChange={(e) => {
+                      const newYear = parseInt(e.target.value);
+                      setFormData(prev => ({ ...prev, year: newYear }));
+                      const selectedEmp = employees.find((emp: any) => emp.id === formData.employeeId);
+                      if (selectedEmp) {
+                        autoPopulateEmployeePayroll(selectedEmp, formData.month, newYear);
+                      } else {
+                        const totalDays = new Date(newYear, formData.month, 0).getDate();
+                        let sundays = 0;
+                        for (let d = 1; d <= totalDays; d++) {
+                          if (new Date(newYear, formData.month - 1, d).getDay() === 0) sundays++;
+                        }
+                        const wDays = Math.max(1, totalDays - sundays);
+                        setFormData(prev => ({ ...prev, year: newYear, workingDays: String(wDays), paidDays: String(wDays) }));
+                      }
+                    }}
                   >
                     <option value={2027}>2027</option>
                     <option value={2026}>2026</option>
@@ -965,7 +1093,12 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Basic Salary (₹) *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold">Basic Salary (₹) *</Label>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> Auto-filled (Editable)
+                    </span>
+                  </div>
                   <Input
                     required
                     type="number"
@@ -978,7 +1111,10 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Bonus & Allowances (₹)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold">Bonus & Allowances (₹)</Label>
+                    <span className="text-[10px] text-muted-foreground">Discretionary (Editable)</span>
+                  </div>
                   <Input
                     type="number"
                     step="0.01"
@@ -989,7 +1125,10 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Total Deductions / TDS (₹)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold">Total Deductions / TDS (₹)</Label>
+                    <span className="text-[10px] text-rose-500 font-medium">TDS / PF (Editable)</span>
+                  </div>
                   <Input
                     type="number"
                     step="0.01"
@@ -1000,18 +1139,21 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Working Days</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold">Working Days</Label>
+                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Shift Counted (Editable)</span>
+                  </div>
                   <Input
                     required
                     type="number"
                     value={formData.workingDays}
-                    onChange={(e) => setFormData({ ...formData, workingDays: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, workingDays: e.target.value, paidDays: e.target.value })}
                     className="h-9 text-xs"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Payment Date *</Label>
+                  <Label className="text-xs font-semibold">Payment Date *</Label>
                   <Input
                     required
                     type="date"
@@ -1022,7 +1164,7 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Disbursal Status</Label>
+                  <Label className="text-xs font-semibold">Disbursal Status</Label>
                   <select
                     className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
                     value={formData.status}
@@ -1035,7 +1177,7 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Bank Name</Label>
+                  <Label className="text-xs font-semibold">Bank Name</Label>
                   <Input
                     placeholder="e.g. State Bank of India"
                     value={formData.bankName}
@@ -1045,7 +1187,7 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs">Account Number</Label>
+                  <Label className="text-xs font-semibold">Account Number</Label>
                   <Input
                     placeholder="Account / IFSC Ref"
                     value={formData.accountNumber}
@@ -1055,7 +1197,7 @@ export default function PayrollPage() {
                 </div>
 
                 <div className="md:col-span-2 space-y-1">
-                  <Label className="text-xs">Transaction Ref / ID</Label>
+                  <Label className="text-xs font-semibold">Transaction Ref / ID</Label>
                   <Input
                     placeholder="Bank Reference Number (TXN-...)"
                     value={formData.transactionId}
@@ -1077,14 +1219,29 @@ export default function PayrollPage() {
               </div>
             </div>
 
-            <DialogFooter className="p-4 px-6 border-t bg-muted/20 shrink-0">
-              <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={createPayrollMutation.isPending}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createPayrollMutation.isPending} className="bg-primary hover:bg-primary/90">
-                {createPayrollMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Issue Payroll
-              </Button>
+            <DialogFooter className="p-4 px-6 border-t bg-muted/20 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Mail className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span>PDF payslip will be generated & emailed immediately with attachment.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={createPayrollMutation.isPending}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createPayrollMutation.isPending || isAutoCalculating} className="bg-primary hover:bg-primary/90 font-medium">
+                  {createPayrollMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Issuing & Emailing PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Issue Payroll
+                    </>
+                  )}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -1098,4 +1255,15 @@ export default function PayrollPage() {
       />
     </div>
   );
+}
+
+export default function PayrollPage() {
+  const user = useAuthStore((state) => state.user);
+  const isHR = user?.role === 'HR_MANAGER' || user?.role === 'SUPER_ADMIN' || user?.role === 'HR Admin' || user?.role === 'HR_ADMIN';
+
+  if (user && !isHR) {
+    return <PayrollManagementClient />;
+  }
+
+  return <HRPayrollDashboard />;
 }

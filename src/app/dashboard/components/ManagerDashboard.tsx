@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { PendingTasks } from '@/components/dashboard/PendingTasks';
-import { TeamActivityCard } from '@/components/dashboard/TeamActivityCard';
+import { CompanyAnnouncements } from '@/components/dashboard/CompanyAnnouncements';
+import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,9 @@ export function ManagerDashboard({ stats }: { stats: any }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [attendanceFilter, setAttendanceFilter] = useState("ALL");
 
-  // Pagination state - Default 5 rows per page
+  // Pagination state - Default 10 rows per page
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   // Reset to page 1 when search or status filter changes
   useEffect(() => {
@@ -313,7 +314,6 @@ export function ManagerDashboard({ stats }: { stats: any }) {
                     }}
                     className="h-7 px-2 py-0 border rounded-lg bg-card text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary border-input cursor-pointer"
                   >
-                    <option value={5}>5</option>
                     <option value={10}>10</option>
                     <option value={20}>20</option>
                     <option value={50}>50</option>
@@ -356,10 +356,14 @@ export function ManagerDashboard({ stats }: { stats: any }) {
 
         </div>
 
-        {/* Right Column (4 Columns) - Pending Approvals & Recent Team Activity */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
+        {/* Right Column (4 Columns) - Pending Approvals, Company Announcements & Upcoming Celebrations */}
+        <div className="lg:col-span-4 flex flex-col gap-5">
           <PendingTasks tasks={stats?.pendingTasks || []} />
-          <TeamActivityCard activities={stats?.recentActivities || []} />
+          <CompanyAnnouncements announcements={stats?.announcements || []} />
+          <CelebrationsCard
+            upcomingBirthdays={stats?.upcomingBirthdays || []}
+            workAnniversaries={stats?.workAnniversaries || []}
+          />
         </div>
       </div>
     </div>

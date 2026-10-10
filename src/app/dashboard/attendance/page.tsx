@@ -19,7 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddAttendanceModal } from "./components/AddAttendanceModal";
 import { EditAttendanceModal } from "./components/EditAttendanceModal";
-import { BulkUploadModal } from "./components/BulkUploadModal";
+import { BulkImportModal } from "./components/BulkImportModal";
 import { CorrectionsTab } from "./components/CorrectionsTab";
 import { HolidaysTab } from "./components/HolidaysTab";
 import { ShiftsTab } from "./components/ShiftsTab";
@@ -27,9 +27,11 @@ import { AnalyticsTab } from "./components/AnalyticsTab";
 import { 
   UserCheck, UserX, Clock, AlarmClock, Plus, RefreshCw,
   CalendarDays, Download, ChevronRight, ChevronDown, MoreHorizontal, 
-  AlertCircle, FileText, CheckCircle2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, ArrowUpDown, UploadCloud, Loader2
+  AlertCircle, FileText, CheckCircle2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, ArrowUpDown, UploadCloud, Loader2,
+  FileSpreadsheet
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/authStore";
 
 import { AttendancePunchWidget } from "@/components/shared/AttendancePunchWidget";
 
@@ -90,9 +92,12 @@ export default function AttendancePage() {
   });
 
   // Modal / Drawer States
+  const { user } = useAuthStore();
+  const isStaff = user?.role === 'SUPER_ADMIN' || user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_ADMIN' || user?.role === 'MANAGER';
   const [viewRecord, setViewRecord] = useState<AttendanceRecordDto | null>(null);
   const [correctRecord, setCorrectRecord] = useState<AttendanceRecordDto | null>(null);
   const [isPunchModalOpen, setIsPunchModalOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   // 1. Fetch Summary KPI Metrics (updated according to selected date/range)
@@ -319,23 +324,12 @@ export default function AttendancePage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleRefresh}
-              title="Refresh"
-              className="h-9 px-2.5 sm:px-3 gap-1.5 text-xs font-medium shrink-0"
+              onClick={() => setIsBulkImportOpen(true)}
+              title="Bulk Import Attendance"
+              className="h-9 px-2.5 sm:px-3 gap-1.5 text-xs font-semibold border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 hover:bg-indigo-100/90 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 dark:hover:bg-indigo-900/60 shadow-xs shrink-0"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportExcel}
-              disabled={isExporting}
-              title="Export"
-              className="h-9 px-2.5 sm:px-3 gap-1.5 text-xs font-medium border-emerald-300 dark:border-emerald-800 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 shrink-0"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Export"}</span>
+              <UploadCloud className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>Import Attendance</span>
             </Button>
             <Button
               size="sm"
@@ -468,6 +462,13 @@ export default function AttendancePage() {
         onClose={() => setIsPunchModalOpen(false)}
         employees={employees}
         onSubmitPunchIn={handleHRPunchIn}
+      />
+
+      {/* Bulk Attendance Import & Correction Modal */}
+      <BulkImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        onSuccess={handleRefresh}
       />
     </div>
   );

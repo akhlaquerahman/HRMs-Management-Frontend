@@ -27,8 +27,27 @@ interface CelebrationsCardProps {
 export function CelebrationsCard({ upcomingBirthdays = [], workAnniversaries = [] }: CelebrationsCardProps) {
   const { t } = useTranslation();
 
-  const hasBirthdays = upcomingBirthdays.length > 0;
-  const hasAnniversaries = workAnniversaries.length > 0;
+  const isSuperAdmin = (emp: CelebrationEmployee) => {
+    const fullName = `${emp.firstName || ''} ${emp.lastName || ''}`.trim().toLowerCase();
+    const email = (emp.email || '').toLowerCase();
+    const dept = (emp.department?.name || '').toLowerCase();
+    const desig = (emp.designation?.name || '').toLowerCase();
+    return (
+      fullName === 'super admin' ||
+      fullName.includes('super admin') ||
+      (emp.firstName?.trim().toLowerCase() === 'super' && emp.lastName?.trim().toLowerCase() === 'admin') ||
+      email.includes('superadmin') ||
+      email === 'akhlaquerahman18@gmail.com' ||
+      dept.includes('super admin') ||
+      desig.includes('super admin')
+    );
+  };
+
+  const filteredBirthdays = (upcomingBirthdays || []).filter((emp) => !isSuperAdmin(emp));
+  const filteredAnniversaries = (workAnniversaries || []).filter((emp) => !isSuperAdmin(emp));
+
+  const hasBirthdays = filteredBirthdays.length > 0;
+  const hasAnniversaries = filteredAnniversaries.length > 0;
   const hasAny = hasBirthdays || hasAnniversaries;
 
   const formatCountdown = (days?: number) => {
@@ -66,11 +85,11 @@ export function CelebrationsCard({ upcomingBirthdays = [], workAnniversaries = [
                   <Sparkles className="w-3 h-3 text-pink-500" />
                   Upcoming Birthdays
                 </span>
-                <span className="text-[10px] text-muted-foreground font-mono font-semibold">({upcomingBirthdays.length})</span>
+                <span className="text-[10px] text-muted-foreground font-mono font-semibold">({filteredBirthdays.length})</span>
               </div>
 
               <div className="space-y-2">
-                {upcomingBirthdays.map((emp) => {
+                {filteredBirthdays.map((emp) => {
                   const bdayStr = emp.dob ? format(new Date(emp.dob), 'dd MMM') : '';
                   const isToday = emp.daysRemaining === 0;
 
@@ -126,11 +145,11 @@ export function CelebrationsCard({ upcomingBirthdays = [], workAnniversaries = [
                   <Award className="w-3.5 h-3.5 text-amber-500" />
                   Work Anniversaries
                 </span>
-                <span className="text-[10px] text-muted-foreground font-mono font-semibold">({workAnniversaries.length})</span>
+                <span className="text-[10px] text-muted-foreground font-mono font-semibold">({filteredAnniversaries.length})</span>
               </div>
 
               <div className="space-y-2">
-                {workAnniversaries.map((emp) => {
+                {filteredAnniversaries.map((emp) => {
                   const joinStr = emp.joiningDate ? format(new Date(emp.joiningDate), 'dd MMM yyyy') : '';
                   const years = emp.yearsCompleted || 1;
                   const isToday = emp.daysRemaining === 0;
