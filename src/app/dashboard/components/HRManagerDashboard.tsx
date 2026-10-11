@@ -3,13 +3,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { Users, UserCheck, CalendarDays, AlertCircle, Briefcase, Percent, Activity } from 'lucide-react';
+import { Users, UserCheck, CalendarDays, AlertCircle, Briefcase, Percent } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
-import { ActivityTimeline } from '@/components/dashboard/ActivityTimeline';
 import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { PendingTasks } from '@/components/dashboard/PendingTasks';
 import { DashboardDataTable } from '@/components/dashboard/DashboardDataTable';
 import { RecruitmentPipelineCard } from '@/components/dashboard/RecruitmentPipelineCard';
+import { CompanyAnnouncements } from '@/components/dashboard/CompanyAnnouncements';
 
 export function HRManagerDashboard({ stats }: { stats: any, trendFilter?: string, setTrendFilter?: (val: string) => void }) {
   const { t } = useTranslation();
@@ -117,16 +117,10 @@ export function HRManagerDashboard({ stats }: { stats: any, trendFilter?: string
             workAnniversaries={stats?.workAnniversaries || []}
           />
 
-          <div className="rounded-xl border bg-card shadow-xs p-5">
-            <h3 className="text-base font-bold text-foreground mb-3 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-primary" />
-              {t("Recent Activities")}
-            </h3>
-            <ActivityTimeline activities={stats?.recentActivities || []} />
-          </div>
+          {/* Enterprise Company Announcements (In place of Recent Activities) */}
+          <CompanyAnnouncements announcements={stats?.announcements || []} />
         </div>
       </div>
     </div>
   );
 }
-

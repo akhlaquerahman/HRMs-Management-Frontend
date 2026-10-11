@@ -34,6 +34,7 @@ import {
   FolderOpen,
   Loader2,
   Building2,
+  Megaphone,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -90,6 +91,11 @@ const menuConfig: MenuItem[] = [
     title: 'Documents',
     href: '/dashboard/documents',
     icon: FolderOpen,
+  },
+  {
+    title: 'Announcements',
+    href: '/dashboard/announcements',
+    icon: Megaphone,
   },
   {
     title: 'My Attendance',

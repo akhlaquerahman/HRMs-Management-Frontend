@@ -17,6 +17,7 @@ export const ALL_MANAGEABLE_PAGES: PagePermissionItem[] = [
   { id: 'payroll', title: 'Payroll', href: '/dashboard/payroll', category: 'HR Management' },
   { id: 'recruitment', title: 'Recruitment', href: '/dashboard/recruitment', category: 'HR Management' },
   { id: 'documents', title: 'Documents Management', href: '/dashboard/documents', category: 'HR Management' },
+  { id: 'announcements', title: 'Announcements', href: '/dashboard/announcements', category: 'HR Management' },
   { id: 'roles', title: 'Roles', href: '/dashboard/roles', category: 'HR Management' },
   { id: 'tenant-employees', title: 'Tenant Employees', href: '/dashboard/tenant-employees', category: 'Administration' },
   { id: 'users', title: 'Users', href: '/dashboard/users', category: 'Administration' },

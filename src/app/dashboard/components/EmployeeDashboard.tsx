@@ -6,7 +6,6 @@ import {
   LogIn, CalendarCheck, Clock, FileText, CalendarDays, TrendingUp, Briefcase 
 } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
-import { ActivityTimeline } from '@/components/dashboard/ActivityTimeline';
 import { CompanyAnnouncements } from '@/components/dashboard/CompanyAnnouncements';
 import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { UpcomingHolidays } from '@/components/dashboard/UpcomingHolidays';
@@ -134,9 +133,15 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
         {/* Right Sidebar Column (4 of 12) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
 
-          {/* Company Announcements */}
-          <CompanyAnnouncements announcements={stats?.announcements || []} />
-          
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <ShiftCard shift={stats?.todayShift} />
+            <HolidayCard nextHoliday={stats?.nextHoliday} />
+          </div>
+
+          {/* Quick Clock In/Out Widget */}
+          <AttendanceWidget attendance={stats?.todayAttendance} />
+
           {/* Celebrations Widget */}
           <CelebrationsCard
             upcomingBirthdays={stats?.upcomingBirthdays || []}
@@ -146,11 +151,8 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
           {/* Upcoming Holidays */}
           <UpcomingHolidays holidays={stats?.holidays || []} />
 
-          {/* Recent Activities Feed */}
-          <div className="rounded-xl border bg-card shadow-sm p-5">
-            <h3 className="text-base font-semibold mb-4 text-foreground">Recent Activities</h3>
-            <ActivityTimeline activities={stats?.recentActivities || []} />
-          </div>
+          {/* Enterprise Company Announcements (In place of Recent Activities) */}
+          <CompanyAnnouncements announcements={stats?.announcements || []} />
 
         </div>
 
