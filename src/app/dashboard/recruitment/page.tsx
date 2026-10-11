@@ -41,8 +41,13 @@ import {
   Sparkles,
   Download,
   Building2,
-  Calendar
+  Calendar,
+  Globe,
+  ExternalLink,
+  History,
+  MapPin
 } from "lucide-react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
@@ -89,8 +94,24 @@ export default function RecruitmentPage() {
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
+  const initialRoleData = {
+    title: "",
+    description: "",
+    departmentId: "",
+    workLocation: "Headquarters",
+    workMode: "HYBRID",
+    employmentType: "FULL_TIME",
+    minExperience: 2,
+    maxExperience: 5,
+    minSalary: 800000,
+    maxSalary: 1600000,
+    openings: 1,
+    skills: "",
+    status: "PUBLISHED"
+  };
+
   const [isCreatingRoleModalOpen, setIsCreatingRoleModalOpen] = useState(false);
-  const [roleData, setRoleData] = useState({ title: "", description: "", departmentId: "" });
+  const [roleData, setRoleData] = useState(initialRoleData);
 
   // Fetch Candidates
   const { data: candidatesRes, isLoading } = useQuery({
@@ -104,8 +125,25 @@ export default function RecruitmentPage() {
     queryFn: async () => (await api.get("/recruitment/job-roles")).data,
   });
 
+  // Fetch Departments
+  const { data: deptsRes } = useQuery({
+    queryKey: ["departments"],
+    queryFn: async () => (await api.get("/departments")).data,
+  });
+
   const candidates = candidatesRes?.data || [];
   const roles = rolesRes?.data || [];
+  const departments = deptsRes?.data || [];
+
+  // Update Job Role Mutation
+  const updateJobRoleMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      return (await api.put(`/recruitment/job-roles/${id}`, { status })).data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobRoles"] });
+    }
+  });
 
   // Filtered Candidates
   const filteredCandidates = useMemo(() => {
@@ -188,7 +226,7 @@ export default function RecruitmentPage() {
       setIsCreating(false);
       setFormData({ firstName: "", lastName: "", email: "", jobRoleId: "" });
       setResumeFile(null);
-      setRoleData({ title: "", description: "", departmentId: "" });
+      setRoleData(initialRoleData);
     } catch (error: any) {
       alert(error?.response?.data?.message || "Failed to create candidate");
     } finally {
@@ -204,7 +242,7 @@ export default function RecruitmentPage() {
       await api.post("/recruitment/job-roles", roleData);
       queryClient.invalidateQueries({ queryKey: ["jobRoles"] });
       setIsCreatingRoleModalOpen(false);
-      setRoleData({ title: "", description: "", departmentId: "" });
+      setRoleData(initialRoleData);
     } catch (error: any) {
       alert(error?.response?.data?.message || "Failed to create job role");
     } finally {
@@ -219,6 +257,8 @@ export default function RecruitmentPage() {
       await api.put(`/recruitment/candidates/${editCandidate.id}`, {
         interviewStatus: editCandidate.interviewStatus,
         status: editCandidate.status,
+        screeningNotes: editCandidate.screeningNotes,
+        reason: editCandidate.reason,
       });
       queryClient.invalidateQueries({ queryKey: ["candidates"] });
       setEditCandidate(null);
@@ -270,6 +310,13 @@ export default function RecruitmentPage() {
         showCreate={false}
         actionButton={
           <div className="flex items-center gap-2 flex-wrap">
+            <Link href="/careers" target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline" className="h-9 border-blue-500/40 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 gap-1.5 font-semibold">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Public Career Portal</span>
+                <ExternalLink className="w-3 h-3 text-muted-foreground" />
+              </Button>
+            </Link>
             <Button size="sm" variant="outline" onClick={() => setIsCreatingRoleModalOpen(true)} className="h-9">
               <Briefcase className="w-4 h-4 mr-2 text-primary" />
               Add Job Role
@@ -458,6 +505,7 @@ export default function RecruitmentPage() {
               <TableHeader className="bg-muted/60">
                 <TableRow>
                   <TableHead className="font-semibold">Candidate Name</TableHead>
+                  <TableHead className="font-semibold">Source</TableHead>
                   <TableHead className="font-semibold">Email & Contact</TableHead>
                   <TableHead className="font-semibold">Applied Job Role</TableHead>
                   <TableHead className="font-semibold">Interview Status</TableHead>
@@ -469,7 +517,7 @@ export default function RecruitmentPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-primary" />
                         Loading candidates...
@@ -478,61 +526,79 @@ export default function RecruitmentPage() {
                   </TableRow>
                 ) : paginatedCandidates.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                       No candidate profiles found matching your search.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedCandidates.map((c: any) => (
-                    <TableRow key={c.id} className="hover:bg-muted/20">
-                      <TableCell>
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                            {c.firstName?.[0]}{c.lastName?.[0]}
-                          </div>
-                          <div>
-                            <div className="font-bold text-foreground">
-                              {c.firstName} {c.lastName}
+                  paginatedCandidates.map((c: any) => {
+                    const isCareerPortal = c.source === 'CAREER_PORTAL' || c.applications?.some((a: any) => a.source === 'CAREER_PORTAL');
+                    const resumeUrl = c.resumeLink || c.resumeUrl;
+                    return (
+                      <TableRow key={c.id} className="hover:bg-muted/20">
+                        <TableCell>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                              {c.firstName?.[0]}{c.lastName?.[0]}
                             </div>
-                            <div className="text-[11px] text-muted-foreground">Ref: #{c.id.slice(0, 8).toUpperCase()}</div>
+                            <div>
+                              <div className="font-bold text-foreground">
+                                {c.firstName} {c.lastName}
+                              </div>
+                              <div className="text-[11px] text-muted-foreground">
+                                {c.applications?.[0]?.applicationNumber || `Ref: #${c.id.slice(0, 8).toUpperCase()}`}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
+                        </TableCell>
 
-                      <TableCell>
-                        <div className="font-medium text-foreground">{c.email}</div>
-                        <div className="text-[11px] text-muted-foreground">Applied online</div>
-                      </TableCell>
+                        <TableCell>
+                          {isCareerPortal ? (
+                            <Badge className="bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-300/60 font-bold text-[10px] gap-1">
+                              <Globe className="w-2.5 h-2.5" />
+                              CAREER PORTAL
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground text-[10px] font-semibold">
+                              MANUAL HR
+                            </Badge>
+                          )}
+                        </TableCell>
 
-                      <TableCell>
-                        <Badge variant="outline" className="font-medium text-xs bg-muted/40">
-                          {c.jobRole?.title || "General Application"}
-                        </Badge>
-                      </TableCell>
+                        <TableCell>
+                          <div className="font-medium text-foreground">{c.email}</div>
+                          <div className="text-[11px] text-muted-foreground">{c.phone || "No phone"}</div>
+                        </TableCell>
 
-                      <TableCell>
-                        <span className="inline-block font-semibold text-[11px] px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                          {c.interviewStatus || "PENDING"}
-                        </span>
-                      </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-medium text-xs bg-muted/40">
+                            {c.jobRole?.title || "General Application"}
+                          </Badge>
+                        </TableCell>
 
-                      <TableCell>{getStatusBadge(c.status || c.interviewStatus)}</TableCell>
+                        <TableCell>
+                          <span className="inline-block font-semibold text-[11px] px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                            {c.interviewStatus || "PENDING"}
+                          </span>
+                        </TableCell>
 
-                      <TableCell>
-                        {c.resumeUrl ? (
-                          <a
-                            href={c.resumeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold hover:underline"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            View Resume
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground italic text-[11px]">No Resume</span>
-                        )}
-                      </TableCell>
+                        <TableCell>{getStatusBadge(c.status || c.interviewStatus)}</TableCell>
+
+                        <TableCell>
+                          {resumeUrl ? (
+                            <a
+                              href={resumeUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 font-semibold hover:underline"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              View Resume
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground italic text-[11px]">No Resume</span>
+                          )}
+                        </TableCell>
 
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -570,8 +636,9 @@ export default function RecruitmentPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
+                  );
+                })
+              )}
               </TableBody>
             </Table>
           </div>
@@ -617,12 +684,17 @@ export default function RecruitmentPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {roles.map((r: any) => {
               const roleCandidates = candidates.filter((c: any) => c.jobRoleId === r.id);
+              const status = r.status || "PUBLISHED";
               return (
-                <Card key={r.id} className="border shadow-xs hover:border-primary/50 transition-colors">
-                  <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-                    <div>
-                      <CardTitle className="text-base font-bold text-foreground">{r.title}</CardTitle>
-                      <p className="text-xs text-muted-foreground mt-0.5">Department Position</p>
+                <Card key={r.id} className="border shadow-xs hover:border-primary/50 transition-colors flex flex-col justify-between">
+                  <CardHeader className="pb-3 flex flex-row items-start justify-between space-y-0 gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base font-bold text-foreground line-clamp-1">{r.title}</CardTitle>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {r.department?.name || "General Department"} • {r.workLocation || "Headquarters"} ({r.workMode || "ONSITE"})
+                      </p>
                     </div>
                     <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                       <Briefcase className="w-4 h-4" />
@@ -632,14 +704,42 @@ export default function RecruitmentPage() {
                     {r.description && (
                       <p className="text-muted-foreground line-clamp-2">{r.description}</p>
                     )}
+
                     <div className="p-3 border rounded-lg bg-muted/20 flex items-center justify-between">
                       <span className="text-muted-foreground font-medium">Applied Applicants</span>
                       <span className="font-extrabold text-foreground text-sm">{roleCandidates.length} Candidates</span>
                     </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-300">
-                        ACTIVE OPENING
-                      </Badge>
+
+                    {/* Status & Public Portal Controls */}
+                    <div className="flex items-center justify-between pt-1 gap-2">
+                      <select
+                        value={status}
+                        onChange={(e) => updateJobRoleMutation.mutate({ id: r.id, status: e.target.value })}
+                        className="h-8 px-2 rounded-md border bg-background text-[11px] font-bold text-foreground focus:outline-none"
+                      >
+                        <option value="PUBLISHED">🟢 PUBLISHED (OPEN)</option>
+                        <option value="PAUSED">⏸️ PAUSED</option>
+                        <option value="CLOSED">🔴 CLOSED</option>
+                        <option value="DRAFT">📝 DRAFT</option>
+                      </select>
+
+                      {r.slug && (
+                        <Link 
+                          href={`/careers/jobs/${r.slug}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          <span>Public Page</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">
+                        {r.openings ? `${r.openings} Openings` : '1 Opening'}
+                      </span>
                       <Button variant="ghost" size="sm" onClick={() => { setRoleFilter(r.id); setActiveTab("candidates"); }} className="h-7 text-xs text-primary font-semibold">
                         View Applicants →
                       </Button>
@@ -857,23 +957,109 @@ export default function RecruitmentPage() {
 
       {/* Add Job Role Modal */}
       <Dialog open={isCreatingRoleModalOpen} onOpenChange={setIsCreatingRoleModalOpen}>
-        <DialogContent className="max-w-md p-6">
+        <DialogContent className="max-w-lg p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2 text-primary">
               <Briefcase className="w-5 h-5" />
-              Create New Job Opening Role
+              Create & Publish Job Opening
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreateRoleOnly} className="space-y-4 text-xs mt-2">
+          <form onSubmit={handleCreateRoleOnly} className="space-y-3.5 text-xs mt-2">
             <div className="space-y-1">
               <Label className="text-xs font-semibold">Role Title *</Label>
               <Input
                 required
-                placeholder="e.g. Lead DevOps Specialist"
+                placeholder="e.g. Senior Frontend Engineer"
                 className="h-9 text-xs"
                 value={roleData.title}
                 onChange={(e) => setRoleData({ ...roleData, title: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Department</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
+                  value={roleData.departmentId}
+                  onChange={(e) => setRoleData({ ...roleData, departmentId: e.target.value })}
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((d: any) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Workplace Mode</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
+                  value={roleData.workMode}
+                  onChange={(e) => setRoleData({ ...roleData, workMode: e.target.value })}
+                >
+                  <option value="HYBRID">Hybrid</option>
+                  <option value="REMOTE">Remote</option>
+                  <option value="ONSITE">Onsite</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Work Location</Label>
+                <Input
+                  placeholder="e.g. Noida / Hybrid"
+                  className="h-9 text-xs"
+                  value={roleData.workLocation}
+                  onChange={(e) => setRoleData({ ...roleData, workLocation: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Available Openings</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  className="h-9 text-xs"
+                  value={roleData.openings}
+                  onChange={(e) => setRoleData({ ...roleData, openings: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Min CTC (INR)</Label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 1200000"
+                  className="h-9 text-xs"
+                  value={roleData.minSalary}
+                  onChange={(e) => setRoleData({ ...roleData, minSalary: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Max CTC (INR)</Label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 2000000"
+                  className="h-9 text-xs"
+                  value={roleData.maxSalary}
+                  onChange={(e) => setRoleData({ ...roleData, maxSalary: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Key Skills (Comma separated)</Label>
+              <Input
+                placeholder="e.g. React, Next.js, TypeScript, PostgreSQL"
+                className="h-9 text-xs"
+                value={roleData.skills}
+                onChange={(e) => setRoleData({ ...roleData, skills: e.target.value })}
               />
             </div>
 
@@ -888,12 +1074,24 @@ export default function RecruitmentPage() {
               />
             </div>
 
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Publication Status</Label>
+              <select
+                className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
+                value={roleData.status}
+                onChange={(e) => setRoleData({ ...roleData, status: e.target.value })}
+              >
+                <option value="PUBLISHED">🟢 PUBLISHED (Accepts Applications Online)</option>
+                <option value="DRAFT">📝 DRAFT (Internal only)</option>
+              </select>
+            </div>
+
             <DialogFooter className="pt-2">
               <Button type="button" variant="outline" onClick={() => setIsCreatingRoleModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
-                Create Opening
+              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 font-bold">
+                {isSubmitting ? "Creating..." : "Save & Create Opening"}
               </Button>
             </DialogFooter>
           </form>
@@ -932,24 +1130,39 @@ export default function RecruitmentPage() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-semibold">Selection Status</Label>
+                <Label className="text-xs font-semibold">Pipeline Selection Stage</Label>
                 <select
                   className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
                   value={editCandidate.status || "IN_PROGRESS"}
                   onChange={(e) => setEditCandidate({ ...editCandidate, status: e.target.value })}
                 >
+                  <option value="APPLIED">APPLIED</option>
+                  <option value="UNDER_REVIEW">UNDER REVIEW</option>
+                  <option value="SHORTLISTED">SHORTLISTED</option>
+                  <option value="INTERVIEW_SCHEDULED">INTERVIEW SCHEDULED</option>
                   <option value="IN_PROGRESS">IN PROGRESS</option>
-                  <option value="OFFERED">OFFERED</option>
+                  <option value="OFFERED">OFFER EXTENDED</option>
                   <option value="SELECTED">SELECTED / HIRED</option>
                   <option value="REJECTED">REJECTED</option>
                 </select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Screening / Evaluation Notes</Label>
+                <Textarea
+                  rows={2}
+                  placeholder="Notes from interview or reason for status update..."
+                  className="text-xs resize-none"
+                  value={editCandidate.screeningNotes || ""}
+                  onChange={(e) => setEditCandidate({ ...editCandidate, screeningNotes: e.target.value })}
+                />
               </div>
 
               <DialogFooter className="pt-2">
                 <Button type="button" variant="outline" onClick={() => setEditCandidate(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
+                <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 font-bold">
                   Save Changes
                 </Button>
               </DialogFooter>
@@ -961,7 +1174,7 @@ export default function RecruitmentPage() {
       {/* View Candidate Profile Viewer Modal */}
       {viewCandidate && (
         <Dialog open={!!viewCandidate} onOpenChange={() => setViewCandidate(null)}>
-          <DialogContent className="max-w-xl p-6">
+          <DialogContent className="max-w-2xl p-6 max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-base font-bold flex items-center gap-2 text-primary">
                 <Users className="w-5 h-5" />
@@ -974,36 +1187,85 @@ export default function RecruitmentPage() {
                 <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-lg flex items-center justify-center shrink-0">
                   {viewCandidate.firstName?.[0]}{viewCandidate.lastName?.[0]}
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">{viewCandidate.firstName} {viewCandidate.lastName}</h3>
-                  <p className="text-muted-foreground">{viewCandidate.email}</p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-bold text-foreground">{viewCandidate.firstName} {viewCandidate.lastName}</h3>
+                    {viewCandidate.source === 'CAREER_PORTAL' ? (
+                      <Badge className="bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-300 font-bold text-[10px]">
+                        CAREER PORTAL
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground text-[10px]">MANUAL HR</Badge>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground">{viewCandidate.email} • {viewCandidate.phone || "No phone"}</p>
                   <Badge variant="outline" className="mt-1 font-semibold">{viewCandidate.jobRole?.title || "Candidate"}</Badge>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 p-4 border rounded-xl bg-card">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border rounded-xl bg-card">
                 <div>
-                  <span className="text-muted-foreground">Interview Status:</span>
-                  <p className="font-bold text-foreground mt-0.5">{viewCandidate.interviewStatus || "PENDING"}</p>
+                  <span className="text-muted-foreground block text-[11px]">Experience</span>
+                  <p className="font-bold text-foreground mt-0.5">{viewCandidate.experienceYears ? `${viewCandidate.experienceYears} Years` : "N/A"}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Selection Status:</span>
-                  <p className="font-bold text-emerald-600 mt-0.5">{viewCandidate.status || "IN_PROGRESS"}</p>
+                  <span className="text-muted-foreground block text-[11px]">Current Company</span>
+                  <p className="font-bold text-foreground mt-0.5 truncate">{viewCandidate.currentCompany || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[11px]">Expected CTC</span>
+                  <p className="font-bold text-foreground mt-0.5">{viewCandidate.expectedCtc || "N/A"}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[11px]">Notice Period</span>
+                  <p className="font-bold text-foreground mt-0.5">{viewCandidate.noticePeriod?.replace('_', ' ') || "N/A"}</p>
                 </div>
               </div>
 
-              {viewCandidate.resumeUrl && (
-                <div className="p-4 border rounded-xl bg-blue-50/50 flex items-center justify-between">
+              {viewCandidate.skills && (
+                <div className="p-3 border rounded-xl bg-card space-y-1">
+                  <span className="text-muted-foreground font-semibold block text-[11px]">Skills & Competencies:</span>
+                  <p className="font-medium text-foreground">{viewCandidate.skills}</p>
+                </div>
+              )}
+
+              {/* Application Status History Audit Trail */}
+              {viewCandidate.applications?.[0]?.statusHistory && viewCandidate.applications[0].statusHistory.length > 0 && (
+                <div className="p-4 border rounded-xl bg-muted/20 space-y-2">
+                  <span className="font-bold text-foreground text-xs flex items-center gap-1.5">
+                    <History className="w-3.5 h-3.5 text-primary" />
+                    Application Audit Trail & History
+                  </span>
+                  <div className="space-y-2 pt-1">
+                    {viewCandidate.applications[0].statusHistory.map((hist: any, hIdx: number) => (
+                      <div key={hIdx} className="text-[11px] p-2 rounded-lg bg-card border flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-foreground">Stage: {hist.newStatus}</span>
+                          {hist.reason && <p className="text-muted-foreground mt-0.5">{hist.reason}</p>}
+                        </div>
+                        <div className="text-right text-muted-foreground">
+                          <span className="font-semibold block">{hist.actorName || "System"}</span>
+                          <span className="text-[10px]">{new Date(hist.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Resume Download */}
+              {(viewCandidate.resumeLink || viewCandidate.resumeUrl) && (
+                <div className="p-4 border rounded-xl bg-blue-50/50 dark:bg-blue-950/30 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
+                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     <div>
-                      <span className="font-bold text-blue-900 block">Candidate Resume Document</span>
-                      <span className="text-[11px] text-blue-700">Uploaded for evaluation</span>
+                      <span className="font-bold text-blue-900 dark:text-blue-300 block">Candidate Resume Dossier</span>
+                      <span className="text-[11px] text-blue-700 dark:text-blue-400">PDF / DOCX document</span>
                     </div>
                   </div>
-                  <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-500 text-white">
-                    <a href={viewCandidate.resumeUrl} target="_blank" rel="noopener noreferrer">
-                      Download PDF
+                  <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-500 text-white font-bold">
+                    <a href={viewCandidate.resumeLink || viewCandidate.resumeUrl} target="_blank" rel="noopener noreferrer">
+                      Download / View
                     </a>
                   </Button>
                 </div>

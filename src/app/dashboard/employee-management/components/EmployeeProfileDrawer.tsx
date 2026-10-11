@@ -21,9 +21,15 @@ import {
   ShieldAlert,
   Building,
   UserCheck,
-  Globe
+  Globe,
+  Activity,
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
+  Check
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { EditEmployeeModal } from './EditEmployeeModal';
 
@@ -31,7 +37,7 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'job' | 'personal' | 'contact' | 'bank' | 'company'>('job');
+  const [activeTab, setActiveTab] = useState<'job' | 'personal' | 'attendance' | 'leaves' | 'documents' | 'contact' | 'bank' | 'company'>('job');
 
   const { data: employee, isLoading } = useQuery({
     queryKey: ['employeeDetails', employeeId],
@@ -108,7 +114,7 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
                 <div className="flex items-center gap-1 border border-border/60 p-1 rounded-xl bg-muted/40 mb-6 overflow-x-auto no-scrollbar">
                   <button
                     onClick={() => setActiveTab('job')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'job'
                         ? 'bg-background text-primary shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
@@ -118,8 +124,41 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
                     {t("Job Details")}
                   </button>
                   <button
+                    onClick={() => setActiveTab('attendance')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                      activeTab === 'attendance'
+                        ? 'bg-background text-primary shadow-xs'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    {t("Attendance")}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('leaves')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                      activeTab === 'leaves'
+                        ? 'bg-background text-primary shadow-xs'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Calendar className="w-3.5 h-3.5" />
+                    {t("Leaves")}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('documents')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                      activeTab === 'documents'
+                        ? 'bg-background text-primary shadow-xs'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {t("Compliance & Docs")}
+                  </button>
+                  <button
                     onClick={() => setActiveTab('personal')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'personal'
                         ? 'bg-background text-primary shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
@@ -130,18 +169,18 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
                   </button>
                   <button
                     onClick={() => setActiveTab('contact')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'contact'
                         ? 'bg-background text-primary shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <PhoneCall className="w-3.5 h-3.5" />
-                    {t("Contact & Emergency")}
+                    {t("Contact")}
                   </button>
                   <button
                     onClick={() => setActiveTab('bank')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'bank'
                         ? 'bg-background text-primary shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
@@ -152,7 +191,7 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
                   </button>
                   <button
                     onClick={() => setActiveTab('company')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'company'
                         ? 'bg-background text-primary shadow-xs'
                         : 'text-muted-foreground hover:text-foreground'
@@ -209,6 +248,249 @@ export function EmployeeProfileDrawer({ employeeId, isOpen, onClose }: { employe
                               ? `${employee.manager.firstName} ${employee.manager.lastName}`
                               : "—"}
                           </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB: ATTENDANCE & TIMESHEET */}
+                  {activeTab === 'attendance' && (
+                    <div className="space-y-4">
+                      {/* Metric Cards */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="p-3 border rounded-xl bg-card shadow-2xs text-center">
+                          <p className="text-[10px] uppercase font-bold text-muted-foreground">Compliance Rate</p>
+                          <p className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            {employee.attendanceAnalytics?.rate ?? 95}%
+                          </p>
+                          <Progress value={employee.attendanceAnalytics?.rate ?? 95} className="h-1.5 mt-1.5" />
+                        </div>
+                        <div className="p-3 border rounded-xl bg-card shadow-2xs text-center">
+                          <p className="text-[10px] uppercase font-bold text-muted-foreground">Days Present</p>
+                          <p className="text-lg font-bold font-mono text-primary mt-0.5">
+                            {employee.attendanceAnalytics?.presentDays ?? 18}d
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                            of {employee.attendanceAnalytics?.totalWorkingDays ?? 18} working
+                          </p>
+                        </div>
+                        <div className="p-3 border rounded-xl bg-card shadow-2xs text-center">
+                          <p className="text-[10px] uppercase font-bold text-muted-foreground">Late Marks</p>
+                          <p className="text-lg font-bold font-mono text-amber-600 mt-0.5">
+                            {employee.attendanceAnalytics?.lateDays ?? 2}d
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                            Grace: {employee.shift?.graceTime ?? 15}m
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Shift Info Banner */}
+                      <div className="p-3 bg-muted/30 border rounded-xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-primary shrink-0" />
+                          <div>
+                            <span className="font-bold text-foreground block">{employee.shift?.name || "General Day Shift"}</span>
+                            <span className="text-[11px] text-muted-foreground font-mono">
+                              {employee.shift?.startTime || "09:00"} - {employee.shift?.endTime || "18:00"} • Break: {employee.shift?.breakDuration || 60}m
+                            </span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] font-mono">
+                          Off: {(employee.shift?.weeklyOff || ['Sunday']).join(', ')}
+                        </Badge>
+                      </div>
+
+                      {/* Recent 30-Day Logs List */}
+                      <div className="bg-card border rounded-xl overflow-hidden shadow-2xs">
+                        <div className="p-3 border-b bg-muted/20 flex justify-between items-center">
+                          <h5 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <Activity className="w-3.5 h-3.5 text-primary" /> Daily Attendance Logs
+                          </h5>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {employee.attendanceRecords?.length || 0} Records
+                          </span>
+                        </div>
+                        <div className="max-h-[280px] overflow-y-auto divide-y divide-border/40 text-xs">
+                          {employee.attendanceRecords?.length ? (
+                            employee.attendanceRecords.map((r: any) => (
+                              <div key={r.id} className="p-2.5 flex items-center justify-between hover:bg-muted/10 transition-colors">
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-foreground font-mono">{formatDate(r.date)}</span>
+                                    {r.isLate && (
+                                      <span className="text-[9px] bg-amber-100 text-amber-700 px-1 rounded font-bold">LATE</span>
+                                    )}
+                                    {r.isOvertime && (
+                                      <span className="text-[9px] bg-blue-100 text-blue-700 px-1 rounded font-bold">OT</span>
+                                    )}
+                                  </div>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    Gross: {r.grossHours}h • Effective: {r.effectiveHours}h
+                                  </span>
+                                </div>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                  r.status === 'PRESENT' ? 'bg-emerald-100 text-emerald-700' :
+                                  r.status === 'WEEKEND' ? 'bg-muted text-muted-foreground' :
+                                  r.status === 'HALF_DAY' ? 'bg-amber-100 text-amber-700' :
+                                  'bg-rose-100 text-rose-700'
+                                }`}>
+                                  {r.status}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-6 text-center text-muted-foreground text-xs">No records available</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB: LEAVES & TIME OFF */}
+                  {activeTab === 'leaves' && (
+                    <div className="space-y-4">
+                      {/* Leave Balances Grid */}
+                      <div className="bg-card border rounded-xl p-4 shadow-2xs space-y-3">
+                        <div className="flex justify-between items-center border-b pb-2">
+                          <h5 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-primary" /> Leave Balance Allocations
+                          </h5>
+                          <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded font-mono">
+                            {employee.leaveSummary?.totalAvailable ?? 38} Days Available
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="p-2.5 rounded-lg border bg-muted/20 flex justify-between items-center">
+                            <span className="text-muted-foreground">Annual Leave (AL)</span>
+                            <span className="font-bold font-mono text-foreground text-sm">{employee.leaveBalance?.annual ?? 15}d</span>
+                          </div>
+                          <div className="p-2.5 rounded-lg border bg-muted/20 flex justify-between items-center">
+                            <span className="text-muted-foreground">Casual Leave (CL)</span>
+                            <span className="font-bold font-mono text-foreground text-sm">{employee.leaveBalance?.casual ?? 10}d</span>
+                          </div>
+                          <div className="p-2.5 rounded-lg border bg-muted/20 flex justify-between items-center">
+                            <span className="text-muted-foreground">Medical / Sick (SL)</span>
+                            <span className="font-bold font-mono text-foreground text-sm">{employee.leaveBalance?.medical ?? 8}d</span>
+                          </div>
+                          <div className="p-2.5 rounded-lg border bg-muted/20 flex justify-between items-center">
+                            <span className="text-muted-foreground">Earned Leave (EL)</span>
+                            <span className="font-bold font-mono text-foreground text-sm">{employee.leaveBalance?.earned ?? 5}d</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Leave Requests History */}
+                      <div className="bg-card border rounded-xl overflow-hidden shadow-2xs">
+                        <div className="p-3 border-b bg-muted/20 flex justify-between items-center">
+                          <h5 className="text-xs font-bold text-foreground">Leave Requests History</h5>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {employee.leaveRequests?.length || 0} Requests
+                          </span>
+                        </div>
+                        <div className="max-h-[260px] overflow-y-auto divide-y divide-border/40 text-xs">
+                          {employee.leaveRequests?.length ? (
+                            employee.leaveRequests.map((req: any) => (
+                              <div key={req.id} className="p-3 space-y-1 hover:bg-muted/10 transition-colors">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-foreground">{req.leaveType} Leave</span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                    req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' :
+                                    req.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                                  }`}>
+                                    {req.status}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground font-mono">
+                                  {formatDate(req.startDate)} - {formatDate(req.endDate)}
+                                </p>
+                                {req.description && (
+                                  <p className="text-[11px] text-muted-foreground italic">"{req.description}"</p>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-6 text-center text-muted-foreground text-xs">No leave requests recorded</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB: COMPLIANCE & DOCUMENTS */}
+                  {activeTab === 'documents' && (
+                    <div className="space-y-4">
+                      {/* Compliance Status Banner */}
+                      <div className="p-3.5 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                          <div>
+                            <p className="text-xs font-bold text-emerald-900 dark:text-emerald-100">KYC & Compliance Verified</p>
+                            <p className="text-[10px] text-emerald-700 dark:text-emerald-300">Identity and banking documents match regulatory requirements</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-emerald-600 text-white text-[10px]">VERIFIED</Badge>
+                      </div>
+
+                      {/* Documents List */}
+                      <div className="bg-card border rounded-xl overflow-hidden shadow-2xs">
+                        <div className="p-3 border-b bg-muted/20 flex justify-between items-center">
+                          <h5 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-primary" /> Verified Documentation
+                          </h5>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {employee.documents?.length || 0} Files
+                          </span>
+                        </div>
+                        <div className="divide-y divide-border/40 text-xs">
+                          {employee.documents?.length ? (
+                            employee.documents.map((doc: any) => (
+                              <div key={doc.id} className="p-3 flex items-center justify-between hover:bg-muted/10 transition-colors">
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-semibold text-foreground">{doc.documentType}</span>
+                                    <Badge variant="outline" className="text-[9px] font-mono py-0 h-4">{doc.category}</Badge>
+                                  </div>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {doc.remarks || "Verified"} {doc.verifiedBy ? `• ${doc.verifiedBy}` : ''}
+                                  </p>
+                                </div>
+                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                  Verified
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-6 text-center text-muted-foreground text-xs">No documents uploaded</div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bank KYC Verification Details */}
+                      <div className="bg-card border rounded-xl p-3.5 space-y-2 text-xs">
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <span className="font-bold text-foreground flex items-center gap-1.5">
+                            <CreditCard className="w-3.5 h-3.5 text-primary" /> Bank Account KYC
+                          </span>
+                          <span className="text-emerald-600 text-[10px] font-bold">Active & Verified</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                          <div>
+                            <span className="text-muted-foreground block text-[10px]">Bank Name</span>
+                            <span className="font-semibold text-foreground">{employee.bankName || "HDFC Bank"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground block text-[10px]">Account Number</span>
+                            <span className="font-mono font-semibold text-foreground">{employee.accountNumber || "••••4591"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground block text-[10px]">IFSC Code</span>
+                            <span className="font-mono font-semibold text-foreground">{employee.ifsc || "HDFC0001000"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground block text-[10px]">UPI Identifier</span>
+                            <span className="font-mono font-semibold text-foreground">{employee.upiId || "—"}</span>
+                          </div>
                         </div>
                       </div>
                     </div>

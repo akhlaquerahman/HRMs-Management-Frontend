@@ -375,7 +375,7 @@ export function EmployeeTable({ data, loading, onOpenProfile, onEditEmployee }: 
                   {expandedRows[emp.id] && (
                     <TableRow className="bg-muted/5 border-b-border/50 hover:bg-muted/5">
                       <TableCell colSpan={9} className="p-0 border-b-0">
-                        <EmployeeRowExpanded employee={emp} />
+                        <EmployeeRowExpanded employee={emp} onOpenProfile={onOpenProfile} />
                       </TableCell>
                     </TableRow>
                   )}

@@ -64,9 +64,54 @@ export function PayslipPdfViewer({ isOpen, onClose, record }: PayslipPdfViewerPr
 
   const monthName = getMonthName(record.month || 2);
   const yearName = record.year || 2026;
-  const companyName = record.companyName || record.company?.companyName || record.employee?.createdById?.companyName || record.employee?.companyName || 'Company';
-  const companyAddress = record.companyAddress || record.company?.companyAddress || record.employee?.createdById?.companyAddress || record.employee?.companyAddress || '';
-  const companyContact = record.companyContact || record.company?.companyContact || [record.company?.companyWebsite || record.employee?.createdById?.companyWebsite, record.company?.companyPhone || record.employee?.createdById?.companyPhone].filter(Boolean).join(' | ');
+
+  const isGeneric = (str?: string | null) => !str || str.trim() === '' || str.trim() === 'HRMs Admin' || str.trim() === 'Company';
+  const isGenericAddr = (str?: string | null) => !str || str.trim() === '' || str.trim() === 'Siwan, Bihar';
+
+  const companyName = 
+    (record.employee?.company?.name && !isGeneric(record.employee.company.name) ? record.employee.company.name.trim() : null) ||
+    (record.employee?.user?.companyName && !isGeneric(record.employee.user.companyName) ? record.employee.user.companyName.trim() : null) ||
+    (record.company?.name && !isGeneric(record.company.name) ? record.company.name.trim() : null) ||
+    (record.company?.companyName && !isGeneric(record.company.companyName) ? record.company.companyName.trim() : null) ||
+    (!isGeneric(record.companyName) ? record.companyName.trim() : null) ||
+    (record.employee?.createdById?.companyName && !isGeneric(record.employee.createdById.companyName) ? record.employee.createdById.companyName.trim() : null) ||
+    record.employee?.company?.name ||
+    record.employee?.user?.companyName ||
+    record.companyName ||
+    record.company?.companyName ||
+    'Enterprise HRMS';
+
+  const companyAddress = 
+    (record.employee?.company?.address && !isGenericAddr(record.employee.company.address) ? record.employee.company.address.trim() : null) ||
+    (record.employee?.user?.companyAddress && !isGenericAddr(record.employee.user.companyAddress) ? record.employee.user.companyAddress.trim() : null) ||
+    (record.company?.address && !isGenericAddr(record.company.address) ? record.company.address.trim() : null) ||
+    (record.company?.companyAddress && !isGenericAddr(record.company.companyAddress) ? record.company.companyAddress.trim() : null) ||
+    (!isGenericAddr(record.companyAddress) ? record.companyAddress.trim() : null) ||
+    (companyName === 'HRMs Admin' ? (record.companyAddress || record.company?.companyAddress || '') : '');
+
+  const rawPhone = 
+    record.employee?.company?.phone ||
+    record.employee?.user?.companyPhone ||
+    record.company?.phone ||
+    record.company?.companyPhone ||
+    record.companyPhone ||
+    (companyName === 'HRMs Admin' ? (record.companyContact || '') : '');
+
+  const cleanPhone = (rawPhone && (companyName === 'HRMs Admin' || rawPhone !== '9631901329')) ? rawPhone.trim() : '';
+
+  const rawWebsite = 
+    record.employee?.company?.website ||
+    record.employee?.user?.companyWebsite ||
+    record.company?.website ||
+    record.company?.companyWebsite ||
+    record.companyWebsite ||
+    '';
+
+  const cleanWebsite = (rawWebsite && (companyName === 'HRMs Admin' || rawWebsite !== 'https://hrmsakhlaque.vercel.app/')) ? rawWebsite.trim() : '';
+
+  const companyContact = 
+    [cleanWebsite, cleanPhone].filter(Boolean).join(' | ') ||
+    (companyName === 'HRMs Admin' ? (record.companyContact || '') : '');
 
   const employeeName = record.employeeName || (record.employee ? `${record.employee.firstName} ${record.employee.lastName}` : 'Employee');
   const employeeId = record.employee?.employeeId || (record.employeeId && record.employeeId.startsWith('EMP') ? record.employeeId : '—');

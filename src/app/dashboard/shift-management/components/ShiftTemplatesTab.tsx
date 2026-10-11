@@ -12,7 +12,8 @@ import {
   Edit, 
   Trash2, 
   UserCheck, 
-  RefreshCw 
+  RefreshCw,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,7 @@ import {
   DialogDescription,
   DialogFooter 
 } from "@/components/ui/dialog";
+import { BulkShiftAssignModal } from './BulkShiftAssignModal';
 
 interface Shift {
   id: string;
@@ -71,11 +73,13 @@ export function ShiftTemplatesTab() {
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDept, setSelectedDept] = useState('ALL');
+  const [selectedDesignation, setSelectedDesignation] = useState('ALL');
   const [selectedShiftFilter, setSelectedShiftFilter] = useState('ALL');
 
   // Modals state
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
   const [editingShift, setEditingShift] = useState<Partial<Shift> | null>(null);
+  const [isBulkAssignModalOpen, setIsBulkAssignModalOpen] = useState(false);
   
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
@@ -125,6 +129,9 @@ export function ShiftTemplatesTab() {
                           emp.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDept = selectedDept === 'ALL' || emp.department?.id === selectedDept;
+    const matchesDesignation = selectedDesignation === 'ALL' || 
+                               emp.designation?.id === selectedDesignation || 
+                               emp.designation?.name === selectedDesignation;
     
     let matchesShift = true;
     if (selectedShiftFilter === 'UNASSIGNED') {
@@ -133,7 +140,7 @@ export function ShiftTemplatesTab() {
       matchesShift = emp.shiftId === selectedShiftFilter;
     }
 
-    return matchesSearch && matchesDept && matchesShift;
+    return matchesSearch && matchesDept && matchesDesignation && matchesShift;
   });
 
   // Department List
@@ -144,6 +151,15 @@ export function ShiftTemplatesTab() {
     }
   });
   const departments = Array.from(departmentsMap.entries()).map(([id, name]) => ({ id, name }));
+
+  // Designation List
+  const designationsMap = new Map<string, string>();
+  roster.forEach(e => {
+    if (e.designation && e.designation.name) {
+      designationsMap.set(e.designation.id || e.designation.name, e.designation.name);
+    }
+  });
+  const designations = Array.from(designationsMap.entries()).map(([id, name]) => ({ id, name }));
 
   // Handle Save Shift (Create / Edit)
   const handleSaveShift = async (e: React.FormEvent) => {
@@ -420,7 +436,7 @@ export function ShiftTemplatesTab() {
           <div>
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
-              <span>Default Employee Shift Assignment</span>
+              <span>Employee Shift Assignment</span>
             </h3>
             <p className="text-xs text-muted-foreground">
               Assign primary default shift profiles to employees.
@@ -441,6 +457,16 @@ export function ShiftTemplatesTab() {
               </Button>
             )}
 
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsBulkAssignModalOpen(true)}
+              className="h-9 text-xs font-semibold border-emerald-500/40 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-emerald-400 dark:border-emerald-500/40 dark:hover:bg-emerald-950/30 shadow-xs flex items-center gap-1.5 transition-all"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Bulk Shift Import (Excel)</span>
+            </Button>
+
             <div className="relative min-w-[200px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -458,6 +484,17 @@ export function ShiftTemplatesTab() {
             >
               <option value="ALL">All Departments</option>
               {departments.map(d => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+
+            <select
+              value={selectedDesignation}
+              onChange={(e) => setSelectedDesignation(e.target.value)}
+              className="h-9 px-3 rounded-lg border bg-background text-xs font-medium text-foreground focus:outline-none"
+            >
+              <option value="ALL">All Designations</option>
+              {designations.map(d => (
                 <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </select>
@@ -745,6 +782,18 @@ export function ShiftTemplatesTab() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk Shift Assign Modal */}
+      <BulkShiftAssignModal
+        isOpen={isBulkAssignModalOpen}
+        onClose={() => setIsBulkAssignModalOpen(false)}
+        shifts={shifts}
+        roster={roster}
+        onSuccess={() => {
+          fetchRoster();
+          fetchShifts();
+        }}
+      />
     </div>
   );
 }
