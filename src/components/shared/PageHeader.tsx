@@ -30,11 +30,11 @@ export function PageHeader({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-4 mb-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col gap-2 sm:gap-4 mb-2 sm:mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t(title)}</h1>
-          {description && <p className="text-muted-foreground mt-1">{t(description)}</p>}
+          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">{t(title)}</h1>
+          {description && <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">{t(description)}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
           {showImport && (

@@ -55,10 +55,10 @@ export function DashboardDataTable<T>({
   return (
     <div className="flex flex-col h-full bg-card border rounded-2xl shadow-xs overflow-hidden transition-all duration-200 hover:shadow-md">
       {/* Header */}
-      <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-muted/10">
+      <div className="p-3 sm:p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 bg-muted/10">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-primary shrink-0" />
-          <h3 className="font-bold text-base text-foreground tracking-tight">{t(title)}</h3>
+          <h3 className="font-bold text-sm sm:text-base text-foreground tracking-tight">{t(title)}</h3>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {searchable && (
@@ -90,7 +90,7 @@ export function DashboardDataTable<T>({
           <thead className="text-[11px] text-muted-foreground uppercase font-semibold bg-muted/30 border-b">
             <tr>
               {columns.map((col, idx) => (
-                <th key={idx} className={`px-4 py-3 font-semibold tracking-wider ${col.className || ''}`}>
+                <th key={idx} className={`px-3 sm:px-4 py-2 sm:py-3 font-semibold tracking-wider text-[10px] sm:text-[11px] ${col.className || ''}`}>
                   {t(col.header)}
                 </th>
               ))}
@@ -101,7 +101,7 @@ export function DashboardDataTable<T>({
               Array.from({ length: itemsPerPage }).map((_, idx) => (
                 <tr key={idx}>
                   {columns.map((_, cIdx) => (
-                    <td key={cIdx} className="px-4 py-3">
+                    <td key={cIdx} className="px-3 sm:px-4 py-2 sm:py-3">
                       <div className="h-4 bg-muted/60 animate-pulse rounded-md w-3/4"></div>
                     </td>
                   ))}
@@ -109,7 +109,7 @@ export function DashboardDataTable<T>({
               ))
             ) : paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-muted-foreground text-xs">
+                <td colSpan={columns.length} className="px-3 sm:px-4 py-6 sm:py-8 text-center text-muted-foreground text-xs">
                   {t('No data available')}
                 </td>
               </tr>
@@ -124,7 +124,7 @@ export function DashboardDataTable<T>({
                     }
                     
                     return (
-                      <td key={cIdx} className={`px-4 py-3.5 max-w-[220px] truncate ${col.className || ''}`}>
+                      <td key={cIdx} className={`px-3 sm:px-4 py-2.5 sm:py-3.5 max-w-[220px] truncate text-xs sm:text-sm ${col.className || ''}`}>
                         {content as React.ReactNode}
                       </td>
                     );
@@ -137,7 +137,7 @@ export function DashboardDataTable<T>({
       </div>
 
       {/* Footer Pagination */}
-      <div className="p-3 border-t bg-muted/10 flex items-center justify-between text-xs text-muted-foreground">
+      <div className="p-2.5 sm:p-3 border-t bg-muted/10 flex items-center justify-between text-[11px] sm:text-xs text-muted-foreground">
         <span>
           {t('Showing')} <strong className="font-semibold text-foreground">{filteredData.length > 0 ? Math.min((currentPage - 1) * itemsPerPage + 1, filteredData.length) : 0}</strong> {t('to')} <strong className="font-semibold text-foreground">{Math.min(currentPage * itemsPerPage, filteredData.length)}</strong> {t('of')} <strong className="font-semibold text-foreground">{filteredData.length}</strong>
         </span>

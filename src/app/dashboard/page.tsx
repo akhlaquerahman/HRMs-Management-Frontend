@@ -82,7 +82,7 @@ export default function DashboardPage() {
   const todayFormatted = format(new Date(), 'EEEE, dd MMM yyyy');
 
   const actionButton = (
-    <div className="flex items-center gap-2.5">
+    <div className="hidden sm:flex items-center gap-2.5">
       {/* Live Date Badge */}
       <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border bg-card text-xs font-semibold text-foreground shadow-2xs">
         <Calendar className="w-3.5 h-3.5 text-primary" />
@@ -207,7 +207,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1600px] mx-auto pt-2 sm:pt-4 pb-10">
+    <div className="flex flex-col gap-3.5 sm:gap-6 max-w-[1600px] mx-auto pt-1 sm:pt-4 pb-20 lg:pb-10">
       <PageHeader 
         title="Overview" 
         description={`${t('Welcome back,')} ${displayName}!`}

@@ -68,9 +68,9 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
   ];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       {/* 6-Column Responsive KPI Grid */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-2 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         {stats?.metrics?.map((metric: any, i: number) => {
           let icon = CalendarCheck;
           let color = "text-blue-600";
@@ -100,10 +100,10 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
       </div>
 
       {/* Main Content Grid: 8 Cols Main Content + 4 Cols Sidebar */}
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
         
         {/* Main Left Column (8 of 12) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
 
           {/* Enterprise Shift & Attendance Calendar Card */}
           <WorkforceCalendarCard 
@@ -116,7 +116,7 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
           />
 
           {/* Assigned Documents & Payslips */}
-          <div className="grid gap-6 md:grid-cols-2 min-h-[340px]">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 min-h-0 sm:min-h-[340px]">
             <DashboardDataTable 
               title="Assigned Documents" 
               data={stats?.assignedDocuments || []} 
@@ -132,7 +132,7 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
         </div>
 
         {/* Right Sidebar Column (4 of 12) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+        <div className="lg:col-span-4 flex flex-col gap-4 sm:gap-6">
 
           {/* Celebrations Widget */}
           <CelebrationsCard
