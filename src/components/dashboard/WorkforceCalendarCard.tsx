@@ -215,19 +215,19 @@ export function WorkforceCalendarCard({
   });
 
   return (
-    <div className="rounded-2xl border bg-card shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+    <div className="rounded-xl sm:rounded-2xl border bg-card shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden w-full max-w-full min-w-0">
       
       {/* Top Banner: Header + Shift Policy Bar */}
-      <div className="p-3 sm:p-5 border-b bg-muted/10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
+      <div className="p-2.5 sm:p-5 border-b bg-muted/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-primary/10 text-primary shrink-0">
               <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-lg font-bold text-foreground tracking-tight flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span>{t("Shift & Attendance Calendar")}</span>
-                <Badge variant="outline" className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 ${
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-lg font-bold text-foreground tracking-tight flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="truncate">{t("Shift & Attendance Calendar")}</span>
+                <Badge variant="outline" className={`text-[8.5px] sm:text-[10px] font-bold px-1 sm:px-2 py-0.2 shrink-0 ${
                   isLiveConnected 
                     ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800' 
                     : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-300'
@@ -243,8 +243,8 @@ export function WorkforceCalendarCard({
           </div>
 
           {/* Month Navigation Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 self-start sm:self-center">
-            <Button size="sm" variant="outline" onClick={resetToToday} className="h-7 sm:h-8 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5">
+          <div className="flex items-center gap-1 sm:gap-2 self-start sm:self-center">
+            <Button size="sm" variant="outline" onClick={resetToToday} className="h-6 sm:h-8 text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2.5">
               {t("Today")}
             </Button>
             <div className="flex items-center rounded-lg border bg-background p-0.5 shadow-2xs">
@@ -255,7 +255,7 @@ export function WorkforceCalendarCard({
               >
                 <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
-              <span className="px-2 sm:px-3 text-[11px] sm:text-xs font-bold font-mono text-foreground min-w-[90px] sm:min-w-[110px] text-center">
+              <span className="px-1.5 sm:px-3 text-[10px] sm:text-xs font-bold font-mono text-foreground min-w-[76px] sm:min-w-[110px] text-center">
                 {format(currentMonth, 'MMMM yyyy')}
               </span>
               <button
@@ -297,17 +297,17 @@ export function WorkforceCalendarCard({
         </div>
 
         {/* Mobile: Ultra-Clean Compact Shift Chip */}
-        <div className="sm:hidden mt-2 pt-2 border-t flex items-center justify-between text-[11px] bg-muted/30 px-2.5 py-1.5 rounded-lg border">
-          <div className="flex items-center gap-1.5 truncate">
-            <Briefcase className="w-3.5 h-3.5 text-primary shrink-0" />
+        <div className="sm:hidden mt-2 pt-1.5 border-t flex items-center justify-between text-[10px] bg-muted/30 px-2 py-1 rounded-md border min-w-0 max-w-full">
+          <div className="flex items-center gap-1 min-w-0 truncate">
+            <Briefcase className="w-3 h-3 text-primary shrink-0" />
             <span className="font-bold text-foreground truncate">{shiftInfo.name}</span>
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground shrink-0">{shiftInfo.timing}</span>
+          <span className="text-[9px] font-mono text-muted-foreground shrink-0 ml-2">{shiftInfo.timing}</span>
         </div>
       </div>
 
       {/* Enterprise Legend Header */}
-      <div className="px-3 sm:px-5 py-2 sm:py-2.5 border-b bg-muted/20 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] font-medium overflow-x-auto no-scrollbar custom-scrollbar">
+      <div className="px-2 sm:px-5 py-1.5 sm:py-2.5 border-b bg-muted/20 flex items-center justify-between gap-2 text-[9px] sm:text-[11px] font-medium overflow-x-auto no-scrollbar custom-scrollbar w-full min-w-0 max-w-full">
         <div className="flex items-center gap-2 sm:gap-4 shrink-0 whitespace-nowrap">
           <span className="flex items-center gap-1 sm:gap-1.5">
             <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-900" />
@@ -339,18 +339,18 @@ export function WorkforceCalendarCard({
           </span>
         </div>
 
-        <div className="text-muted-foreground font-mono text-[10px] sm:text-[11px] shrink-0 hidden md:block">
+        <div className="text-muted-foreground font-mono text-[9px] sm:text-[11px] shrink-0 hidden md:block">
           Target: <strong className="text-foreground">{totalWorkDays} Working Days</strong>
         </div>
       </div>
 
       {/* Calendar Grid Container */}
-      <div className="p-1.5 sm:p-4 w-full">
-        <div className="w-full">
+      <div className="p-1 sm:p-4 w-full min-w-0 max-w-full overflow-hidden">
+        <div className="w-full min-w-0">
           {/* Days Header */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-1 sm:mb-2 text-center text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1.5 mb-1 sm:mb-2 text-center text-[9px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider w-full min-w-0">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => (
-              <div key={d} className={`py-0.5 sm:py-1 ${i >= 5 ? 'text-amber-600/90 font-extrabold' : ''}`}>
+              <div key={d} className={`min-w-0 py-0.5 sm:py-1 ${i >= 5 ? 'text-amber-600/90 font-extrabold' : ''}`}>
                 <span className="sm:hidden">{d.charAt(0)}</span>
                 <span className="hidden sm:inline">{d}</span>
               </div>
@@ -358,9 +358,9 @@ export function WorkforceCalendarCard({
           </div>
 
           {/* Month Days Matrix */}
-          <div className="space-y-1 sm:space-y-1.5">
+          <div className="space-y-0.5 sm:space-y-1.5 w-full min-w-0">
             {rows.map((week, idx) => (
-              <div key={idx} className="grid grid-cols-7 gap-1 sm:gap-1.5">
+              <div key={idx} className="grid grid-cols-7 gap-0.5 sm:gap-1.5 w-full min-w-0">
                 {week.map((d, dIdx) => {
                   const isCurrentMonth = isSameMonth(d, currentMonth);
                   const isCurrentDay = isToday(d);
@@ -426,8 +426,8 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = 'Present';
                     bgClass = "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100/70 hover:border-emerald-500 shadow-2xs";
                     statusBadge = (
-                      <span className="px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-black bg-emerald-600 text-white flex items-center gap-0.5 sm:gap-1 shadow-2xs">
-                        <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white inline-block animate-pulse" />
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-emerald-600 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
+                        <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                         <span>P</span>
                         <span className="hidden sm:inline font-semibold">Present</span>
                       </span>
@@ -443,7 +443,7 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7.5px] font-black text-emerald-800 dark:text-emerald-300 block text-center truncate leading-none">
+                      <span className="text-[6.5px] font-black text-emerald-800 dark:text-emerald-300 block text-center truncate leading-none min-w-0">
                         {record?.effectiveHours ? `${Number(record.effectiveHours).toFixed(1)}h` : 'In'}
                       </span>
                     );
@@ -452,7 +452,7 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = 'Half Day';
                     bgClass = "bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700 hover:border-amber-500 shadow-2xs";
                     statusBadge = (
-                      <span className="px-0.5 sm:px-1.5 py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-amber-600 text-white flex items-center gap-0.5 sm:gap-1 shadow-2xs">
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[6.5px] sm:text-[10px] font-black bg-amber-600 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
                         <span>HD</span>
                         <span className="hidden sm:inline font-semibold">Half Day</span>
                       </span>
@@ -468,7 +468,7 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7.5px] font-bold text-amber-700 dark:text-amber-300 block text-center truncate leading-none">
+                      <span className="text-[6.5px] font-bold text-amber-700 dark:text-amber-300 block text-center truncate leading-none min-w-0">
                         {record?.effectiveHours ? `${Number(record.effectiveHours).toFixed(1)}h` : 'Half'}
                       </span>
                     );
@@ -477,7 +477,7 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = leaveItem?.leaveType ? `${leaveItem.leaveType} Leave` : 'Approved Leave';
                     bgClass = "bg-amber-50/70 dark:bg-amber-950/25 border-amber-300 dark:border-amber-800 hover:border-amber-400 shadow-2xs";
                     statusBadge = (
-                      <span className="px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-black bg-amber-500 text-white flex items-center gap-0.5 sm:gap-1 shadow-2xs">
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-amber-500 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
                         <span>L</span>
                         <span className="hidden sm:inline font-semibold">Leave</span>
                       </span>
@@ -493,8 +493,8 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7px] font-bold text-amber-700 dark:text-amber-300 block text-center truncate leading-none">
-                        {leaveItem?.leaveType || 'Leave'}
+                      <span className="text-[6.5px] font-bold text-amber-700 dark:text-amber-300 block text-center truncate leading-none min-w-0">
+                        {leaveItem?.leaveType ? leaveItem.leaveType.slice(0, 3) : 'Leave'}
                       </span>
                     );
                   } else if (isHoliday) {
@@ -502,7 +502,7 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = holidayItem?.name || 'Public Holiday';
                     bgClass = "bg-purple-50/80 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800 hover:border-purple-400 shadow-2xs";
                     statusBadge = (
-                      <span className="px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-black bg-purple-600 text-white flex items-center gap-0.5 sm:gap-1 shadow-2xs">
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-purple-600 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
                         <span>H</span>
                         <span className="hidden sm:inline font-semibold">Holiday</span>
                       </span>
@@ -518,8 +518,8 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7px] font-bold text-purple-700 dark:text-purple-300 block text-center truncate leading-none">
-                        {holidayItem?.name || 'Holiday'}
+                      <span className="text-[6.5px] font-bold text-purple-700 dark:text-purple-300 block text-center truncate leading-none min-w-0">
+                        {holidayItem?.name ? holidayItem.name.slice(0, 4) : 'Off'}
                       </span>
                     );
                   } else if (isWeekendOrOff) {
@@ -527,8 +527,9 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = 'Weekly Off';
                     bgClass = "bg-slate-50/90 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 shadow-2xs";
                     statusBadge = (
-                      <span className="px-0.5 sm:px-1.5 py-0.5 rounded text-[7px] sm:text-[10px] font-bold bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-200 truncate max-w-full">
-                        OFF
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[6.5px] sm:text-[10px] font-bold bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
+                        <span className="sm:hidden">O</span>
+                        <span className="hidden sm:inline">OFF</span>
                       </span>
                     );
                     timeDetails = (
@@ -537,7 +538,7 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7px] text-muted-foreground block text-center truncate leading-none">
+                      <span className="text-[6.5px] text-muted-foreground block text-center truncate leading-none min-w-0">
                         Off
                       </span>
                     );
@@ -546,7 +547,7 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = 'Absent';
                     bgClass = "bg-rose-50/80 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800/80 hover:border-rose-400 shadow-2xs";
                     statusBadge = (
-                      <span className="px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-black bg-rose-600 text-white flex items-center gap-0.5 sm:gap-1 shadow-2xs">
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-rose-600 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
                         <span>A</span>
                         <span className="hidden sm:inline font-semibold">Absent</span>
                       </span>
@@ -562,8 +563,8 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7px] font-extrabold text-rose-600 dark:text-rose-400 block text-center truncate leading-none">
-                        No Punch
+                      <span className="text-[6.5px] font-extrabold text-rose-600 dark:text-rose-400 block text-center truncate leading-none min-w-0">
+                        Abs
                       </span>
                     );
                   } else if (isWFH) {
@@ -571,8 +572,9 @@ export function WorkforceCalendarCard({
                     dayStatusLabel = 'Work From Home';
                     bgClass = "bg-teal-50/80 dark:bg-teal-950/30 border-teal-300 dark:border-teal-800 hover:border-teal-400 shadow-2xs";
                     statusBadge = (
-                      <span className="px-1 sm:px-1.5 py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-teal-600 text-white flex items-center gap-0.5 sm:gap-1 shadow-2xs">
-                        WFH
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[6.5px] sm:text-[10px] font-black bg-teal-600 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
+                        <span className="sm:hidden">W</span>
+                        <span className="hidden sm:inline">WFH</span>
                       </span>
                     );
                     timeDetails = (
@@ -586,8 +588,8 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7px] text-teal-600 block text-center truncate leading-none">
-                        Remote
+                      <span className="text-[6.5px] text-teal-600 block text-center truncate leading-none min-w-0">
+                        WFH
                       </span>
                     );
                   } else {
@@ -597,7 +599,7 @@ export function WorkforceCalendarCard({
                       ? "bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 hover:border-blue-500 shadow-2xs"
                       : "bg-blue-50/40 dark:bg-blue-950/15 border-blue-200 dark:border-blue-900/50 hover:border-blue-400";
                     statusBadge = (
-                      <span className="px-0.5 sm:px-1.5 py-0.5 rounded text-[7.5px] sm:text-[9.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 truncate">
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7px] sm:text-[9.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0">
                         <span className="sm:hidden">S</span>
                         <span className="hidden sm:inline">{isCurrentDay ? 'Active' : 'Shift'}</span>
                       </span>
@@ -613,7 +615,7 @@ export function WorkforceCalendarCard({
                       </div>
                     );
                     mobileIndicator = (
-                      <span className="text-[7px] font-mono text-blue-600 dark:text-blue-400 block text-center truncate leading-none">
+                      <span className="text-[6.5px] font-mono text-blue-600 dark:text-blue-400 block text-center truncate leading-none min-w-0">
                         {shiftDisplayTiming.split(' - ')[0] || 'Shift'}
                       </span>
                     );
@@ -639,18 +641,18 @@ export function WorkforceCalendarCard({
                           note: isAbsent ? 'No punch logs were recorded on this scheduled working day.' : undefined
                         });
                       }}
-                      className={`min-h-[48px] sm:min-h-[86px] p-1 sm:p-2 rounded-lg sm:rounded-xl border flex flex-col justify-between transition-all cursor-pointer select-none ${bgClass} ${
-                        isCurrentDay ? 'ring-2 ring-primary ring-offset-1 font-bold' : ''
+                      className={`min-w-0 min-h-[42px] sm:min-h-[86px] p-0.5 sm:p-2 rounded sm:rounded-xl border flex flex-col justify-between transition-all cursor-pointer select-none overflow-hidden ${bgClass} ${
+                        isCurrentDay ? 'ring-1.5 sm:ring-2 ring-primary ring-offset-0 sm:ring-offset-1 font-bold' : ''
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full">
-                        <span className={`text-[10px] sm:text-xs font-mono font-bold leading-none ${
+                      <div className="flex items-center justify-between w-full min-w-0 gap-0.5">
+                        <span className={`text-[9px] sm:text-xs font-mono font-bold leading-none shrink-0 ${
                           isCurrentDay ? 'text-primary' : isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'
                         }`}>
                           {format(d, 'd')}
                         </span>
                         {isCurrentDay && !statusBadge ? (
-                          <span className="text-[7.5px] sm:text-[9px] font-black bg-primary text-primary-foreground px-1 sm:px-1.5 py-0.5 rounded shadow-2xs">
+                          <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7px] sm:text-[9px] font-black bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-2xs">
                             <span className="sm:hidden">T</span>
                             <span className="hidden sm:inline">TODAY</span>
                           </span>
@@ -665,7 +667,7 @@ export function WorkforceCalendarCard({
                       </div>
 
                       {/* Mobile Compact Sub-label */}
-                      <div className="sm:hidden mt-0.5 flex flex-col justify-end w-full">
+                      <div className="sm:hidden mt-0.5 flex flex-col justify-end w-full min-w-0 overflow-hidden">
                         {mobileIndicator}
                       </div>
                     </div>
@@ -678,22 +680,22 @@ export function WorkforceCalendarCard({
       </div>
 
       {/* Footer KPI Summary Bar */}
-      <div className="p-2.5 sm:p-4 border-t bg-muted/10 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center text-xs">
-        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs">
-          <span className="text-muted-foreground text-[10px] sm:text-[11px] block">{t("Present Days")}</span>
-          <span className="text-sm sm:text-base font-extrabold text-emerald-600 font-mono">{presentCount} Days</span>
+      <div className="p-2 sm:p-4 border-t bg-muted/10 grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-3 text-center text-xs min-w-0">
+        <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs min-w-0">
+          <span className="text-muted-foreground text-[9.5px] sm:text-[11px] block truncate">{t("Present Days")}</span>
+          <span className="text-xs sm:text-base font-extrabold text-emerald-600 font-mono block truncate">{presentCount} Days</span>
         </div>
-        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs">
-          <span className="text-muted-foreground text-[10px] sm:text-[11px] block">{t("Absent Days")}</span>
-          <span className="text-sm sm:text-base font-extrabold text-rose-600 font-mono">{absentCount} Days</span>
+        <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs min-w-0">
+          <span className="text-muted-foreground text-[9.5px] sm:text-[11px] block truncate">{t("Absent Days")}</span>
+          <span className="text-xs sm:text-base font-extrabold text-rose-600 font-mono block truncate">{absentCount} Days</span>
         </div>
-        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs">
-          <span className="text-muted-foreground text-[10px] sm:text-[11px] block">{t("Leaves Taken")}</span>
-          <span className="text-sm sm:text-base font-extrabold text-amber-600 font-mono">{leaveCount} Days</span>
+        <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs min-w-0">
+          <span className="text-muted-foreground text-[9.5px] sm:text-[11px] block truncate">{t("Leaves Taken")}</span>
+          <span className="text-xs sm:text-base font-extrabold text-amber-600 font-mono block truncate">{leaveCount} Days</span>
         </div>
-        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs">
-          <span className="text-muted-foreground text-[10px] sm:text-[11px] block">{t("Assigned Shift")}</span>
-          <span className="text-xs sm:text-base font-extrabold text-blue-600 truncate block" title={shiftInfo.name}>
+        <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-card border shadow-2xs min-w-0">
+          <span className="text-muted-foreground text-[9.5px] sm:text-[11px] block truncate">{t("Assigned Shift")}</span>
+          <span className="text-[11px] sm:text-base font-extrabold text-blue-600 truncate block" title={shiftInfo.name}>
             {shiftInfo.name}
           </span>
         </div>

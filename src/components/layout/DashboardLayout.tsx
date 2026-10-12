@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       />
       <div className="flex flex-col flex-1 overflow-hidden relative w-full min-w-0">
         <Navbar onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 pb-24 lg:pb-6 bg-muted/20 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto px-1.5 py-2 sm:p-4 md:p-6 pb-24 lg:pb-6 bg-muted/20 custom-scrollbar">
           <div className="mx-auto max-w-[1600px] w-full min-w-0">
             {isAccessDenied ? (
               <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-card border rounded-2xl shadow-sm">

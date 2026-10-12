@@ -103,7 +103,7 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
         
         {/* Main Left Column (8 of 12) */}
-        <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6 min-w-0 w-full">
 
           {/* Enterprise Shift & Attendance Calendar Card */}
           <WorkforceCalendarCard 
