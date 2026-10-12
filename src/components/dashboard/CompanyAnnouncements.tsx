@@ -245,11 +245,11 @@ export function CompanyAnnouncements({
   };
 
   const activeCount = useMemo(() => {
-    return (announcements || []).filter(a => !isAnnouncementExpired(a)).length;
+    return (announcements || []).filter((a: any) => !isAnnouncementExpired(a)).length;
   }, [announcements]);
 
   const expiredCount = useMemo(() => {
-    return (announcements || []).filter(a => isAnnouncementExpired(a)).length;
+    return (announcements || []).filter((a: any) => isAnnouncementExpired(a)).length;
   }, [announcements]);
 
   const filteredAnnouncements = useMemo(() => {

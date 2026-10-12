@@ -36,6 +36,7 @@ import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { HRManagerDashboard } from './components/HRManagerDashboard';
 import { SuperAdminDashboard } from './components/SuperAdminDashboard';
 import { ManagerDashboard } from './components/ManagerDashboard';
+import { extractRoleName } from '@/lib/pagePermissions';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -66,7 +67,11 @@ export default function DashboardPage() {
     );
   }
 
-  const role = typeof user?.role === 'string' ? user.role.toUpperCase().trim().replace(/\s+/g, '_') : '';
+  const rawRole = extractRoleName(user?.role).toUpperCase().trim().replace(/[\s\_]+/g, '_');
+  const isEmployee = rawRole === 'EMPLOYEE' || rawRole === 'EMPLOYEES';
+  const isHR = rawRole === 'HR_ADMIN' || rawRole === 'HR_MANAGER' || rawRole === 'HR' || rawRole === 'TENANT_ADMIN';
+  const isManager = rawRole === 'MANAGER' || rawRole === 'DEPT_MANAGER' || rawRole === 'TEAM_LEAD';
+  const isSuperAdmin = rawRole === 'SUPER_ADMIN' || rawRole === 'SUPER_ADMINISTRATOR' || rawRole === 'SUPERADMIN';
 
   const displayName = profileRes?.data?.firstName 
     ? `${profileRes.data.firstName} ${profileRes.data.lastName || ''}`.trim() 
@@ -99,7 +104,7 @@ export default function DashboardPage() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          {role === 'EMPLOYEE' && (
+          {isEmployee && (
             <>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/dashboard/leave-request" className="flex items-center gap-2 py-1.5">
@@ -128,7 +133,7 @@ export default function DashboardPage() {
             </>
           )}
 
-          {role === 'MANAGER' && (
+          {isManager && (
             <>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/dashboard/employee-management" className="flex items-center gap-2 py-1.5">
@@ -151,7 +156,7 @@ export default function DashboardPage() {
             </>
           )}
 
-          {(role === 'HR_MANAGER' || role === 'HR_ADMIN') && (
+          {isHR && (
             <>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/dashboard/employee-management" className="flex items-center gap-2 py-1.5">
@@ -174,7 +179,7 @@ export default function DashboardPage() {
             </>
           )}
 
-          {role === 'SUPER_ADMIN' && (
+          {isSuperAdmin && (
             <>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/dashboard/tenant-employees" className="flex items-center gap-2 py-1.5">
@@ -214,11 +219,11 @@ export default function DashboardPage() {
         actionButton={actionButton}
       />
       
-      {role === 'EMPLOYEE' && <EmployeeDashboard stats={stats} />}
-      {(role === 'HR_MANAGER' || role === 'HR_ADMIN') && <HRManagerDashboard stats={stats} trendFilter={trendFilter} setTrendFilter={setTrendFilter} />}
-      {role === 'MANAGER' && <ManagerDashboard stats={stats} />}
-      {role === 'SUPER_ADMIN' && <SuperAdminDashboard stats={stats} />}
-      {!['EMPLOYEE', 'HR_MANAGER', 'HR_ADMIN', 'MANAGER', 'SUPER_ADMIN'].includes(role) && (
+      {isEmployee && <EmployeeDashboard stats={stats} />}
+      {isHR && <HRManagerDashboard stats={stats} trendFilter={trendFilter} setTrendFilter={setTrendFilter} />}
+      {isManager && <ManagerDashboard stats={stats} />}
+      {isSuperAdmin && <SuperAdminDashboard stats={stats} />}
+      {!isEmployee && !isHR && !isManager && !isSuperAdmin && (
         <div className="p-8 text-center text-muted-foreground">No dashboard available for your role ({user?.role}).</div>
       )}
     </div>

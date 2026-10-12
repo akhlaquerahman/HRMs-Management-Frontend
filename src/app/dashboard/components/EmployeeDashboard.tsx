@@ -77,11 +77,12 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
           let bg = "bg-blue-100/80";
           let cardBg = "bg-card";
           
-          if (metric.title.includes('Status')) { icon = LogIn; color = "text-emerald-600"; bg = "bg-emerald-100/80"; }
-          if (metric.title.includes('Leave')) { icon = CalendarDays; color = "text-amber-600"; bg = "bg-amber-100/80"; }
-          if (metric.title.includes('Holiday')) { icon = Clock; color = "text-purple-600"; bg = "bg-purple-100/80"; }
-          if (metric.title.includes('%')) { icon = TrendingUp; color = "text-teal-600"; bg = "bg-teal-100/80"; }
-          if (metric.title.includes('Shift') || metric.title.includes('Hours')) { icon = Briefcase; color = "text-indigo-600"; bg = "bg-indigo-100/80"; }
+          const title = metric?.title || '';
+          if (title.includes('Status')) { icon = LogIn; color = "text-emerald-600"; bg = "bg-emerald-100/80"; }
+          if (title.includes('Leave')) { icon = CalendarDays; color = "text-amber-600"; bg = "bg-amber-100/80"; }
+          if (title.includes('Holiday')) { icon = Clock; color = "text-purple-600"; bg = "bg-purple-100/80"; }
+          if (title.includes('%')) { icon = TrendingUp; color = "text-teal-600"; bg = "bg-teal-100/80"; }
+          if (title.includes('Shift') || title.includes('Hours')) { icon = Briefcase; color = "text-indigo-600"; bg = "bg-indigo-100/80"; }
 
           return (
             <KPICard 
@@ -133,15 +134,6 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
         {/* Right Sidebar Column (4 of 12) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <ShiftCard shift={stats?.todayShift} />
-            <HolidayCard nextHoliday={stats?.nextHoliday} />
-          </div>
-
-          {/* Quick Clock In/Out Widget */}
-          <AttendanceWidget attendance={stats?.todayAttendance} />
-
           {/* Celebrations Widget */}
           <CelebrationsCard
             upcomingBirthdays={stats?.upcomingBirthdays || []}
@@ -151,7 +143,7 @@ export function EmployeeDashboard({ stats }: { stats: any }) {
           {/* Upcoming Holidays */}
           <UpcomingHolidays holidays={stats?.holidays || []} />
 
-          {/* Enterprise Company Announcements (In place of Recent Activities) */}
+          {/* Enterprise Company Announcements */}
           <CompanyAnnouncements announcements={stats?.announcements || []} />
 
         </div>
