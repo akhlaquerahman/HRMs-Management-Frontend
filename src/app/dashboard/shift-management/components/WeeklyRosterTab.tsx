@@ -99,8 +99,15 @@ export function WeeklyRosterTab() {
   // Departments & Designations
   const [departments, setDepartments] = useState<Department[]>([]);
   const [designations, setDesignations] = useState<Designation[]>([]);
-  const [selectedDeptId, setSelectedDeptId] = useState<string>('ALL');
+  const [selectedDeptId, setSelectedDeptId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hrms_roster_selected_dept') || 'ALL';
+    }
+    return 'ALL';
+  });
   const [selectedDesigId, setSelectedDesigId] = useState<string>('ALL');
+  const [isDeptsLoaded, setIsDeptsLoaded] = useState(false);
+  const loadRosterRequestIdRef = useRef<number>(0);
 
   // Date Navigation (Default current week Sunday)
   const [currentWeekSunday, setCurrentWeekSunday] = useState<Date>(() => {
@@ -172,12 +179,20 @@ export function WeeklyRosterTab() {
           const raw = res.data.data;
           const depts = Array.isArray(raw) ? raw : (Array.isArray(raw?.departments) ? raw.departments : []);
           setDepartments(depts);
-          if (depts.length === 1) {
+          const savedDept = typeof window !== 'undefined' ? localStorage.getItem('hrms_roster_selected_dept') : null;
+          if (savedDept && (savedDept === 'ALL' || depts.some((d: any) => d.id === savedDept))) {
+            setSelectedDeptId(savedDept);
+          } else if (depts.length === 1) {
             setSelectedDeptId(depts[0].id);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('hrms_roster_selected_dept', depts[0].id);
+            }
           }
         }
       } catch (e) {
         console.warn('Departments load notice:', e);
+      } finally {
+        setIsDeptsLoaded(true);
       }
     };
     loadDepartments();
@@ -221,9 +236,10 @@ export function WeeklyRosterTab() {
   // Load Roster from Backend
   const loadRoster = async () => {
     if (!selectedDeptId) {
-      alert('Please select a department to load roster.');
       return;
     }
+
+    const currentReqId = ++loadRosterRequestIdRef.current;
 
     try {
       setLoading(true);
@@ -236,6 +252,11 @@ export function WeeklyRosterTab() {
         }
       });
 
+      // Discard stale responses if a newer request was dispatched
+      if (currentReqId !== loadRosterRequestIdRef.current) {
+        return;
+      }
+
       if (res.data?.success) {
         const d = res.data.data;
         setRosterData(d.roster || { id: null, status: 'DRAFT', version: 1, publishedAt: null });
@@ -247,15 +268,20 @@ export function WeeklyRosterTab() {
         setSelectedEmployeeIds([]);
       }
     } catch (e: any) {
-      alert(e?.response?.data?.message || 'Failed to load weekly roster.');
+      if (currentReqId === loadRosterRequestIdRef.current) {
+        console.error('Failed to load weekly roster:', e);
+      }
     } finally {
-      setLoading(false);
+      if (currentReqId === loadRosterRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
+    if (!isDeptsLoaded) return;
     loadRoster();
-  }, [currentWeekSunday, selectedDeptId, selectedDesigId]);
+  }, [isDeptsLoaded, currentWeekSunday, selectedDeptId, selectedDesigId]);
 
   // Unsaved changes window listener
   useEffect(() => {
@@ -734,7 +760,7 @@ export function WeeklyRosterTab() {
   // Helper for today highlight
   const todayStr = formatDateToYYYYMMDD(new Date());
 
-  const selectedDepartmentName = departments.find(d => d.id === selectedDeptId)?.name || 'Marketing';
+  const selectedDepartmentName = departments.find(d => d.id === selectedDeptId)?.name || (departments.length === 1 ? departments[0].name : 'All Departments');
   const selectedDesignationName = designations.find(d => d.id === selectedDesigId)?.name || 'All Designations';
 
   return (
@@ -747,7 +773,11 @@ export function WeeklyRosterTab() {
           <select
             value={selectedDeptId}
             onChange={(e) => {
-              setSelectedDeptId(e.target.value);
+              const val = e.target.value;
+              setSelectedDeptId(val);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('hrms_roster_selected_dept', val);
+              }
               setSelectedDesigId('ALL');
             }}
             disabled={departments.length === 1}
