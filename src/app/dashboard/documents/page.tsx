@@ -291,7 +291,7 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto p-6">
+    <div className="space-y-4 sm:space-y-6 max-w-[1600px] mx-auto w-full min-w-0">
       {/* Page Header */}
       <PageHeader
         title="Document & KYC Verification"
@@ -305,18 +305,18 @@ export default function DocumentsPage() {
               variant="outline"
               onClick={() => setIsCreatingTypeModalOpen(true)}
               title="Add Document Type"
-              className="h-9 px-2.5 sm:px-3 text-xs font-medium gap-1.5 shrink-0"
+              className="h-8 sm:h-9 px-2.5 sm:px-3 text-xs font-medium gap-1.5 shrink-0"
             >
-              <FileCheck className="w-4 h-4 text-primary shrink-0" />
+              <FileCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
               <span className="inline sm:hidden">+ Type</span>
               <span className="hidden sm:inline">Add Document Type</span>
             </Button>
             <Button
               size="sm"
               onClick={() => setIsCreating(true)}
-              className="h-9 px-2.5 sm:px-3 text-xs font-semibold gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground flex-1 sm:flex-initial whitespace-nowrap justify-center"
+              className="h-8 sm:h-9 px-2.5 sm:px-3 text-xs font-semibold gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground flex-1 sm:flex-initial whitespace-nowrap justify-center"
             >
-              <Plus className="w-4 h-4 shrink-0" />
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>Upload Document</span>
             </Button>
           </div>
@@ -324,117 +324,117 @@ export default function DocumentsPage() {
       />
 
       {/* 6 KPI Metric Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
         <Card className="border shadow-xs">
-          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
-            <div>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Total Vault Files</p>
-              <h3 className="text-lg sm:text-xl font-bold mt-0.5 text-foreground">{totalCount}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">Documents Uploaded</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-foreground truncate">{totalCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Documents Uploaded</p>
             </div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
-              <FolderLock className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+              <FolderLock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
-            <div>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">KYC Approved</p>
-              <h3 className="text-lg sm:text-xl font-bold mt-0.5 text-emerald-600">{approvedCount}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">Verified Records</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-emerald-600 truncate">{approvedCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Verified Records</p>
             </div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
-            <div>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Pending Review</p>
-              <h3 className="text-lg sm:text-xl font-bold mt-0.5 text-amber-600">{pendingCount}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">Awaiting HR Audit</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-amber-600 truncate">{pendingCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Awaiting HR Audit</p>
             </div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+              <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
-            <div>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Defective / Rejected</p>
-              <h3 className="text-lg sm:text-xl font-bold mt-0.5 text-rose-600">{rejectedCount}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">Action Required</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-rose-600 truncate">{rejectedCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Action Required</p>
             </div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
-              <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+              <XCircle className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
-            <div>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Categories</p>
-              <h3 className="text-lg sm:text-xl font-bold mt-0.5 text-foreground">{categoriesCount}</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">Form Types</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-foreground truncate">{categoriesCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Form Types</p>
             </div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
-              <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
+              <FileText className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-3 sm:p-4 flex items-center justify-between">
-            <div>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
               <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Compliance</p>
-              <h3 className="text-lg sm:text-xl font-bold mt-0.5 text-emerald-600">{verificationRate}%</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">KYC Verified</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-emerald-600 truncate">{verificationRate}%</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">KYC Verified</p>
             </div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Enterprise Tabs Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-5">
-        <TabsList className="bg-muted/60 p-1 rounded-xl flex flex-wrap gap-1 w-fit">
-          <TabsTrigger value="vault" className="rounded-lg px-3 sm:px-4 py-2 text-xs font-semibold gap-2">
-            <FolderLock className="w-4 h-4" />
-            Document Vault ({filteredDocuments.length})
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4 sm:space-y-5">
+        <TabsList className="bg-muted/60 p-1 rounded-xl flex overflow-x-auto no-scrollbar scroll-smooth gap-1 w-full sm:w-fit justify-start">
+          <TabsTrigger value="vault" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <FolderLock className="w-3.5 h-3.5" />
+            <span>Document Vault ({filteredDocuments.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="kyc" className="rounded-lg px-3 sm:px-4 py-2 text-xs font-semibold gap-2">
-            <ShieldCheck className="w-4 h-4" />
-            KYC Verification Matrix ({pendingCount} Pending)
+          <TabsTrigger value="kyc" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>KYC Verification Matrix ({pendingCount})</span>
           </TabsTrigger>
-          <TabsTrigger value="categories" className="rounded-lg px-3 sm:px-4 py-2 text-xs font-semibold gap-2">
-            <Layers className="w-4 h-4" />
-            Document Types ({documentTypes.length})
+          <TabsTrigger value="categories" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <Layers className="w-3.5 h-3.5" />
+            <span>Document Types ({documentTypes.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-lg px-3 sm:px-4 py-2 text-xs font-semibold gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Vault Analytics
+          <TabsTrigger value="analytics" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Vault Analytics</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Document Vault Table */}
         <TabsContent value="vault" className="space-y-4">
           <Card className="border shadow-xs">
-            <CardContent className="p-3 sm:p-4 flex flex-wrap items-center gap-3 justify-between">
-              <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                <div className="relative flex-1 min-w-[180px]">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <CardContent className="p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 w-full">
+                <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by Employee Name, Email, or Document Number..."
-                    className="pl-8 h-9 text-xs"
+                    className="pl-8 h-8 sm:h-9 text-xs"
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -443,37 +443,39 @@ export default function DocumentsPage() {
                   />
                 </div>
 
-                <select
-                  className="h-9 px-3 text-xs rounded-md border bg-background"
-                  value={typeFilter}
-                  onChange={(e) => {
-                    setTypeFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="ALL">All Document Types</option>
-                  {documentTypes.map((t: any) => (
-                    <option key={t.id} value={t.name}>{t.name}</option>
-                  ))}
-                  <option value="Aadhaar Card">Aadhaar Card</option>
-                  <option value="PAN Card">PAN Card</option>
-                  <option value="Offer Letter">Offer Letter</option>
-                  <option value="Passport">Passport</option>
-                </select>
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                  <select
+                    className="h-8 sm:h-9 px-2.5 text-xs rounded-md border bg-background"
+                    value={typeFilter}
+                    onChange={(e) => {
+                      setTypeFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="ALL">All Document Types</option>
+                    {documentTypes.map((t: any) => (
+                      <option key={t.id} value={t.name}>{t.name}</option>
+                    ))}
+                    <option value="Aadhaar Card">Aadhaar Card</option>
+                    <option value="PAN Card">PAN Card</option>
+                    <option value="Offer Letter">Offer Letter</option>
+                    <option value="Passport">Passport</option>
+                  </select>
 
-                <select
-                  className="h-9 px-3 text-xs rounded-md border bg-background"
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="ALL">All KYC Statuses</option>
-                  <option value="APPROVED">APPROVED</option>
-                  <option value="PENDING">PENDING REVIEW</option>
-                  <option value="REJECTED">REJECTED</option>
-                </select>
+                  <select
+                    className="h-8 sm:h-9 px-2.5 text-xs rounded-md border bg-background"
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="ALL">All KYC Statuses</option>
+                    <option value="APPROVED">APPROVED</option>
+                    <option value="PENDING">PENDING REVIEW</option>
+                    <option value="REJECTED">REJECTED</option>
+                  </select>
+                </div>
               </div>
 
               {(searchTerm || typeFilter !== "ALL" || statusFilter !== "ALL") && (
@@ -486,7 +488,7 @@ export default function DocumentsPage() {
                     setStatusFilter("ALL");
                     setCurrentPage(1);
                   }}
-                  className="h-9 text-xs text-muted-foreground"
+                  className="h-8 sm:h-9 text-xs text-muted-foreground self-end sm:self-auto"
                 >
                   Reset Filters
                 </Button>
@@ -494,131 +496,236 @@ export default function DocumentsPage() {
             </CardContent>
           </Card>
 
-          {/* Table */}
-          <div className="border rounded-xl bg-card overflow-x-auto custom-scrollbar shadow-xs">
-            <Table className="text-xs">
-              <TableHeader className="bg-muted/60">
-                <TableRow>
-                  <TableHead className="font-semibold">Employee Name</TableHead>
-                  <TableHead className="font-semibold">Email</TableHead>
-                  <TableHead className="font-semibold">Document Type</TableHead>
-                  <TableHead className="font-semibold">Document No. / Reference</TableHead>
-                  <TableHead className="font-semibold">KYC Status</TableHead>
-                  <TableHead className="font-semibold">Document File</TableHead>
-                  <TableHead className="text-right font-semibold">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                      <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                        Loading documents vault...
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedDocuments.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                      No documents found matching the criteria.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedDocuments.map((d: any) => (
-                    <TableRow key={d.id} className="hover:bg-muted/20">
-                      <TableCell>
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                            {d.employee?.firstName?.[0]}{d.employee?.lastName?.[0]}
+          {/* Table / Mobile Cards */}
+          <div className="border rounded-xl bg-card overflow-hidden shadow-xs">
+            {/* Mobile Card List View (< md) */}
+            <div className="block md:hidden divide-y divide-border">
+              {isLoading ? (
+                <div className="h-24 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  Loading documents vault...
+                </div>
+              ) : paginatedDocuments.length === 0 ? (
+                <div className="h-24 flex items-center justify-center text-xs text-muted-foreground">
+                  No documents found matching the criteria.
+                </div>
+              ) : (
+                paginatedDocuments.map((d: any) => (
+                  <div key={d.id} className="p-3 space-y-2.5 hover:bg-muted/15 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                          {d.employee?.firstName?.[0]}{d.employee?.lastName?.[0]}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-xs text-foreground truncate">
+                            {d.employee ? `${d.employee.firstName} ${d.employee.lastName}` : "Staff Member"}
                           </div>
-                          <div>
-                            <div className="font-bold text-foreground">
-                              {d.employee ? `${d.employee.firstName} ${d.employee.lastName}` : "Staff Member"}
-                            </div>
-                            <div className="text-[11px] text-muted-foreground">{d.employee?.department?.name || "General"}</div>
+                          <div className="text-[10px] text-muted-foreground truncate">
+                            {d.employee?.email || "—"}
                           </div>
                         </div>
-                      </TableCell>
+                      </div>
+                      <div className="shrink-0 scale-90 origin-right">
+                        {getKYCBadge(d.verificationStatus)}
+                      </div>
+                    </div>
 
-                      <TableCell>
-                        <div className="font-medium text-foreground">{d.employee?.email || "—"}</div>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge variant="outline" className="font-semibold text-xs bg-blue-50/50 text-blue-700 border-blue-200">
-                          {d.documentType || "Verification Document"}
+                    <div className="grid grid-cols-2 gap-2 bg-muted/30 p-2 rounded-lg text-xs">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Type</span>
+                        <Badge variant="outline" className="font-semibold text-[10px] bg-blue-50/50 text-blue-700 border-blue-200 truncate max-w-full">
+                          {d.documentType || "Document"}
                         </Badge>
-                      </TableCell>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Ref / Number</span>
+                        <span className="font-mono text-[11px] text-foreground font-semibold truncate block">
+                          {d.documentNumber || d.encryptedDocumentNumber || "—"}
+                        </span>
+                      </div>
+                    </div>
 
-                      <TableCell className="font-mono text-xs font-semibold text-foreground">
-                        {d.documentNumber || d.encryptedDocumentNumber || "—"}
-                      </TableCell>
-
-                      <TableCell>{getKYCBadge(d.verificationStatus)}</TableCell>
-
-                      <TableCell>
+                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-border/50">
+                      <div>
                         {(d.fileUrl || (d.encryptedDocumentPath && d.encryptedDocumentPath !== 'HIDDEN')) ? (
                           <a
                             href={d.fileUrl || d.encryptedDocumentPath}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
+                            className="inline-flex items-center gap-1 text-primary hover:underline font-semibold text-xs"
                           >
                             <FileText className="w-3.5 h-3.5" />
-                            View Document
+                            File Attached
                           </a>
                         ) : (
-                          <span className="text-muted-foreground italic text-[11px]">No File Attached</span>
+                          <span className="text-muted-foreground italic text-[10px]">No File</span>
                         )}
-                      </TableCell>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs text-primary"
+                          onClick={() => setViewDocument(d)}
+                        >
+                          <Eye className="w-3.5 h-3.5 mr-1" />
+                          View
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setViewDocument(d)}>
+                              <Eye className="w-4 h-4 mr-2" /> View File Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditDocument(d)}>
+                              <ShieldCheck className="w-4 h-4 mr-2 text-emerald-600" /> Review KYC Status
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-rose-600 focus:text-rose-600"
+                              onClick={() => handleDelete(d.id)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" /> Delete Document
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
 
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-xs gap-1"
-                            onClick={() => setViewDocument(d)}
-                          >
-                            <Eye className="w-3.5 h-3.5 text-primary" />
-                            View
-                          </Button>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setViewDocument(d)}>
-                                <Eye className="w-4 h-4 mr-2" /> View File Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setEditDocument(d)}>
-                                <ShieldCheck className="w-4 h-4 mr-2 text-emerald-600" /> Review KYC Status
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-rose-600 focus:text-rose-600"
-                                onClick={() => handleDelete(d.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" /> Delete Document
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+            {/* Desktop Table View (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table className="text-xs">
+                <TableHeader className="bg-muted/60">
+                  <TableRow>
+                    <TableHead className="font-semibold">Employee Name</TableHead>
+                    <TableHead className="font-semibold">Email</TableHead>
+                    <TableHead className="font-semibold">Document Type</TableHead>
+                    <TableHead className="font-semibold">Document No. / Reference</TableHead>
+                    <TableHead className="font-semibold">KYC Status</TableHead>
+                    <TableHead className="font-semibold">Document File</TableHead>
+                    <TableHead className="text-right font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                          Loading documents vault...
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : paginatedDocuments.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                        No documents found matching the criteria.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedDocuments.map((d: any) => (
+                      <TableRow key={d.id} className="hover:bg-muted/20">
+                        <TableCell>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                              {d.employee?.firstName?.[0]}{d.employee?.lastName?.[0]}
+                            </div>
+                            <div>
+                              <div className="font-bold text-foreground">
+                                {d.employee ? `${d.employee.firstName} ${d.employee.lastName}` : "Staff Member"}
+                              </div>
+                              <div className="text-[11px] text-muted-foreground">{d.employee?.department?.name || "General"}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="font-medium text-foreground">{d.employee?.email || "—"}</div>
+                        </TableCell>
+
+                        <TableCell>
+                          <Badge variant="outline" className="font-semibold text-xs bg-blue-50/50 text-blue-700 border-blue-200">
+                            {d.documentType || "Verification Document"}
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell className="font-mono text-xs font-semibold text-foreground">
+                          {d.documentNumber || d.encryptedDocumentNumber || "—"}
+                        </TableCell>
+
+                        <TableCell>{getKYCBadge(d.verificationStatus)}</TableCell>
+
+                        <TableCell>
+                          {(d.fileUrl || (d.encryptedDocumentPath && d.encryptedDocumentPath !== 'HIDDEN')) ? (
+                            <a
+                              href={d.fileUrl || d.encryptedDocumentPath}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-primary hover:underline font-semibold"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              View Document
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground italic text-[11px]">No File Attached</span>
+                          )}
+                        </TableCell>
+
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-xs gap-1"
+                              onClick={() => setViewDocument(d)}
+                            >
+                              <Eye className="w-3.5 h-3.5 text-primary" />
+                              View
+                            </Button>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setViewDocument(d)}>
+                                  <Eye className="w-4 h-4 mr-2" /> View File Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEditDocument(d)}>
+                                  <ShieldCheck className="w-4 h-4 mr-2 text-emerald-600" /> Review KYC Status
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-rose-600 focus:text-rose-600"
+                                  onClick={() => handleDelete(d.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" /> Delete Document
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {/* Pagination */}
           {filteredDocuments.length > 0 && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-              <span>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-0 text-xs text-muted-foreground pt-2">
+              <span className="text-center sm:text-left">
                 Showing <strong>{(currentPage - 1) * itemsPerPage + 1}</strong> to{" "}
                 <strong>{Math.min(currentPage * itemsPerPage, filteredDocuments.length)}</strong> of{" "}
                 <strong>{filteredDocuments.length}</strong> vault documents
@@ -630,11 +737,11 @@ export default function DocumentsPage() {
                   size="sm"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="h-8 px-3"
+                  className="h-8 px-3 text-xs"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" /> Previous
                 </Button>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-foreground text-xs">
                   Page {currentPage} of {totalPages}
                 </span>
                 <Button
@@ -642,7 +749,7 @@ export default function DocumentsPage() {
                   size="sm"
                   disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="h-8 px-3"
+                  className="h-8 px-3 text-xs"
                 >
                   Next <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -799,146 +906,148 @@ export default function DocumentsPage() {
 
       {/* Upload Document Modal */}
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
-        <DialogContent className="max-w-lg p-6">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold flex items-center gap-2 text-primary">
-              <Plus className="w-5 h-5" />
-              Upload Employee Document to Vault
+        <DialogContent className="w-[95vw] max-w-lg max-h-[92vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl">
+          <DialogHeader className="p-3.5 sm:p-5 px-4 sm:px-6 border-b shrink-0 bg-background">
+            <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-primary">
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span>Upload Employee Document to Vault</span>
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs mt-2">
-            {/* Searchable Employee Combobox */}
-            <div className="space-y-1 relative">
-              <Label className="text-xs font-semibold">Select Employee *</Label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Type employee name or email to search..."
-                  className="pl-8 pr-8 h-9 text-xs"
-                  value={empSearchQuery}
-                  onFocus={() => setIsEmpDropdownOpen(true)}
-                  onChange={(e) => {
-                    setEmpSearchQuery(e.target.value);
-                    setIsEmpDropdownOpen(true);
-                    if (formData.employeeId) setFormData({ ...formData, employeeId: "" });
-                  }}
-                />
-                {empSearchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmpSearchQuery("");
-                      setFormData({ ...formData, employeeId: "" });
+          <form onSubmit={handleCreateSubmit} className="flex flex-col flex-1 overflow-hidden">
+            <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-4 text-xs overflow-y-auto flex-1">
+              {/* Searchable Employee Combobox */}
+              <div className="space-y-1 relative">
+                <Label className="text-xs font-semibold">Select Employee *</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Type employee name or email to search..."
+                    className="pl-8 pr-8 h-8 sm:h-9 text-xs"
+                    value={empSearchQuery}
+                    onFocus={() => setIsEmpDropdownOpen(true)}
+                    onChange={(e) => {
+                      setEmpSearchQuery(e.target.value);
                       setIsEmpDropdownOpen(true);
+                      if (formData.employeeId) setFormData({ ...formData, employeeId: "" });
                     }}
-                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                  />
+                  {empSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmpSearchQuery("");
+                        setFormData({ ...formData, employeeId: "" });
+                        setIsEmpDropdownOpen(true);
+                      }}
+                      className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {isEmpDropdownOpen && (
+                  <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-popover text-popover-foreground border rounded-lg shadow-xl max-h-52 overflow-y-auto divide-y text-xs">
+                    {filteredEmployeesForSelect.length === 0 ? (
+                      <div className="p-3 text-center text-muted-foreground">
+                        No matching employees found
+                      </div>
+                    ) : (
+                      filteredEmployeesForSelect.map((emp: any) => {
+                        const isSelected = formData.employeeId === emp.id;
+                        return (
+                          <div
+                            key={emp.id}
+                            onClick={() => {
+                              setFormData({ ...formData, employeeId: emp.id });
+                              setEmpSearchQuery(`${emp.firstName} ${emp.lastName} (${emp.email})`);
+                              setIsEmpDropdownOpen(false);
+                            }}
+                            className={`p-2.5 flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors ${
+                              isSelected ? "bg-primary/10 font-bold text-primary" : ""
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                                {emp.firstName?.[0]}{emp.lastName?.[0]}
+                              </div>
+                              <div>
+                                <div className="font-semibold">{emp.firstName} {emp.lastName}</div>
+                                <div className="text-[11px] text-muted-foreground">{emp.email}</div>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] font-mono shrink-0">
+                              {emp.employeeId || "EMP"}
+                            </Badge>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 )}
               </div>
 
-              {isEmpDropdownOpen && (
-                <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-popover text-popover-foreground border rounded-lg shadow-xl max-h-52 overflow-y-auto divide-y text-xs">
-                  {filteredEmployeesForSelect.length === 0 ? (
-                    <div className="p-3 text-center text-muted-foreground">
-                      No matching employees found
-                    </div>
-                  ) : (
-                    filteredEmployeesForSelect.map((emp: any) => {
-                      const isSelected = formData.employeeId === emp.id;
-                      return (
-                        <div
-                          key={emp.id}
-                          onClick={() => {
-                            setFormData({ ...formData, employeeId: emp.id });
-                            setEmpSearchQuery(`${emp.firstName} ${emp.lastName} (${emp.email})`);
-                            setIsEmpDropdownOpen(false);
-                          }}
-                          className={`p-2.5 flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors ${
-                            isSelected ? "bg-primary/10 font-bold text-primary" : ""
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                              {emp.firstName?.[0]}{emp.lastName?.[0]}
-                            </div>
-                            <div>
-                              <div className="font-semibold">{emp.firstName} {emp.lastName}</div>
-                              <div className="text-[11px] text-muted-foreground">{emp.email}</div>
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="text-[10px] font-mono shrink-0">
-                            {emp.employeeId || "EMP"}
-                          </Badge>
-                        </div>
-                      );
-                    })
-                  )}
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Document Type *</Label>
+                <select
+                  required
+                  className="flex h-8 sm:h-9 w-full rounded-md border bg-background px-2.5 sm:px-3 text-xs"
+                  value={formData.documentTypeId}
+                  onChange={(e) => setFormData({ ...formData, documentTypeId: e.target.value })}
+                >
+                  <option value="">Select Document Category</option>
+                  {documentTypes.map((t: any) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                  <option value="Aadhaar Card">Aadhaar Card</option>
+                  <option value="PAN Card">PAN Card</option>
+                  <option value="Offer Letter">Offer Letter</option>
+                  <option value="Passport">Passport</option>
+                  <option value="new_type">+ Create Custom Document Type</option>
+                </select>
+              </div>
+
+              {formData.documentTypeId === "new_type" && (
+                <div className="p-2.5 sm:p-3 border rounded-lg bg-purple-50/50 space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs font-bold text-purple-800">New Category Name *</Label>
+                  <Input
+                    placeholder="e.g. Medical Certificate"
+                    className="h-8 sm:h-9 text-xs bg-white"
+                    value={typeData.name}
+                    onChange={(e) => setTypeData({ name: e.target.value })}
+                  />
                 </div>
               )}
-            </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Document Type *</Label>
-              <select
-                required
-                className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
-                value={formData.documentTypeId}
-                onChange={(e) => setFormData({ ...formData, documentTypeId: e.target.value })}
-              >
-                <option value="">Select Document Category</option>
-                {documentTypes.map((t: any) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-                <option value="Aadhaar Card">Aadhaar Card</option>
-                <option value="PAN Card">PAN Card</option>
-                <option value="Offer Letter">Offer Letter</option>
-                <option value="Passport">Passport</option>
-                <option value="new_type">+ Create Custom Document Type</option>
-              </select>
-            </div>
-
-            {formData.documentTypeId === "new_type" && (
-              <div className="p-3 border rounded-lg bg-purple-50/50 space-y-2">
-                <Label className="text-xs font-bold text-purple-800">New Category Name *</Label>
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Document Number / ID (Optional)</Label>
                 <Input
-                  placeholder="e.g. Medical Certificate"
-                  className="h-9 text-xs bg-white"
-                  value={typeData.name}
-                  onChange={(e) => setTypeData({ name: e.target.value })}
+                  placeholder="e.g. 5598-7654-3212"
+                  className="h-8 sm:h-9 text-xs font-mono"
+                  value={formData.documentNumber}
+                  onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
                 />
               </div>
-            )}
 
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Document Number / ID (Optional)</Label>
-              <Input
-                placeholder="e.g. 5598-7654-3212"
-                className="h-9 text-xs font-mono"
-                value={formData.documentNumber}
-                onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
-              />
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Upload Document File (PDF/Image) *</Label>
+                <Input
+                  required
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                  className="h-8 sm:h-9 text-xs"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Upload Document File (PDF/Image) *</Label>
-              <Input
-                required
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
-                className="h-9 text-xs"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="outline" onClick={() => setIsCreating(false)} disabled={isSubmitting}>
+            <DialogFooter className="p-3 sm:p-4 px-4 sm:px-6 border-t bg-muted/20 shrink-0 flex items-center justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsCreating(false)} disabled={isSubmitting} className="h-8 sm:h-9 text-xs">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
-                {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              <Button type="submit" size="sm" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 h-8 sm:h-9 text-xs">
+                {isSubmitting && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                 Upload to Vault
               </Button>
             </DialogFooter>
@@ -948,31 +1057,31 @@ export default function DocumentsPage() {
 
       {/* Add Document Type Modal */}
       <Dialog open={isCreatingTypeModalOpen} onOpenChange={setIsCreatingTypeModalOpen}>
-        <DialogContent className="max-w-md p-6">
+        <DialogContent className="w-[95vw] max-w-md p-4 sm:p-6 rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold flex items-center gap-2 text-primary">
-              <FileCheck className="w-5 h-5" />
-              Add Document Category Type
+            <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-primary">
+              <FileCheck className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span>Add Document Category Type</span>
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleCreateTypeOnly} className="space-y-4 text-xs mt-2">
+          <form onSubmit={handleCreateTypeOnly} className="space-y-3 sm:space-y-4 text-xs mt-2">
             <div className="space-y-1">
               <Label className="text-xs font-semibold">Category Name *</Label>
               <Input
                 required
                 placeholder="e.g. Tax Declaration Form 16"
-                className="h-9 text-xs"
+                className="h-8 sm:h-9 text-xs"
                 value={typeData.name}
                 onChange={(e) => setTypeData({ name: e.target.value })}
               />
             </div>
 
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="outline" onClick={() => setIsCreatingTypeModalOpen(false)}>
+            <DialogFooter className="pt-2 flex items-center justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsCreatingTypeModalOpen(false)} className="h-8 sm:h-9 text-xs">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
+              <Button type="submit" size="sm" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 h-8 sm:h-9 text-xs">
                 Create Category
               </Button>
             </DialogFooter>
@@ -983,32 +1092,32 @@ export default function DocumentsPage() {
       {/* Review KYC Status Modal */}
       {editDocument && (
         <Dialog open={!!editDocument} onOpenChange={() => setEditDocument(null)}>
-          <DialogContent className="max-w-md p-6">
-            <DialogHeader>
-              <DialogTitle className="text-base font-bold flex items-center gap-2 text-emerald-600">
-                <ShieldCheck className="w-5 h-5" />
-                Review & Verify Employee KYC Document
+          <DialogContent className="w-[95vw] max-w-md max-h-[92vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl">
+            <DialogHeader className="p-3.5 sm:p-5 px-4 sm:px-6 border-b shrink-0 bg-background">
+              <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-emerald-600">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <span>Review & Verify Employee KYC Document</span>
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 border rounded-lg bg-muted/20 space-y-1">
+            <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-4 text-xs overflow-y-auto flex-1">
+              <div className="p-2.5 sm:p-3 border rounded-lg bg-muted/20 space-y-1">
                 <div className="font-bold text-foreground">
                   {editDocument.employee ? `${editDocument.employee.firstName} ${editDocument.employee.lastName}` : "Employee"}
                 </div>
                 <div className="text-muted-foreground">{editDocument.documentType} • {editDocument.documentNumber || "No Ref"}</div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Button
                   onClick={() => handleApproveKYC(editDocument.id)}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white h-8 sm:h-9 text-xs"
                 >
-                  <CheckCircle2 className="w-4 h-4 mr-2" /> Approve KYC
+                  <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Approve KYC
                 </Button>
               </div>
 
-              <form onSubmit={handleRejectKYC} className="space-y-3 pt-2 border-t">
+              <form onSubmit={handleRejectKYC} className="space-y-2.5 pt-2 border-t">
                 <Label className="text-xs font-semibold text-rose-600">Reject KYC Document with Remarks</Label>
                 <Textarea
                   rows={2}
@@ -1017,7 +1126,7 @@ export default function DocumentsPage() {
                   value={rejectRemarks}
                   onChange={(e) => setRejectRemarks(e.target.value)}
                 />
-                <Button type="submit" variant="destructive" className="w-full">
+                <Button type="submit" variant="destructive" size="sm" className="w-full h-8 sm:h-9 text-xs">
                   Reject Document
                 </Button>
               </form>
@@ -1029,53 +1138,53 @@ export default function DocumentsPage() {
       {/* View Document Viewer Modal */}
       {viewDocument && (
         <Dialog open={!!viewDocument} onOpenChange={() => setViewDocument(null)}>
-          <DialogContent className="sm:max-w-4xl md:max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden rounded-2xl border shadow-2xl">
+          <DialogContent className="w-[95vw] sm:max-w-4xl md:max-w-5xl max-h-[92vh] sm:max-h-[90vh] flex flex-col p-0 overflow-hidden rounded-2xl border shadow-2xl">
             {/* Modal Header */}
-            <div className="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary-foreground font-bold">
-                  <FolderLock className="w-5 h-5 text-indigo-400" />
+            <div className="p-3.5 sm:p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/20 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary-foreground font-bold shrink-0">
+                  <FolderLock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
                 </div>
-                <div>
-                  <h2 className="text-base font-bold flex items-center gap-2">
+                <div className="min-w-0">
+                  <h2 className="text-sm sm:text-base font-bold truncate">
                     {viewDocument.documentType || "Document Vault Preview"}
                   </h2>
-                  <p className="text-xs text-indigo-200/80">
-                    Uploaded by {viewDocument.employee ? `${viewDocument.employee.firstName} ${viewDocument.employee.lastName}` : "Employee"} • {viewDocument.employee?.email}
+                  <p className="text-[11px] sm:text-xs text-indigo-200/80 truncate">
+                    Uploaded by {viewDocument.employee ? `${viewDocument.employee.firstName} ${viewDocument.employee.lastName}` : "Employee"}
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 mr-6">
+              <div className="flex items-center gap-2 mr-4 sm:mr-6 shrink-0 scale-90 sm:scale-100 origin-right">
                 {getKYCBadge(viewDocument.verificationStatus)}
               </div>
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-slate-50/50 dark:bg-background">
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3.5 sm:space-y-5 bg-slate-50/50 dark:bg-background">
               {/* Employee & Document Details Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 bg-background border rounded-xl shadow-2xs">
-                  <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">Employee</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                <div className="p-2.5 sm:p-3.5 bg-background border rounded-xl shadow-2xs">
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">Employee</span>
                   <p className="font-bold text-xs text-foreground mt-0.5 truncate">
                     {viewDocument.employee ? `${viewDocument.employee.firstName} ${viewDocument.employee.lastName}` : "Staff Member"}
                   </p>
                 </div>
-                <div className="p-3.5 bg-background border rounded-xl shadow-2xs">
-                  <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">Document Ref / No.</span>
+                <div className="p-2.5 sm:p-3.5 bg-background border rounded-xl shadow-2xs">
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">Document Ref / No.</span>
                   <p className="font-bold text-xs text-foreground font-mono mt-0.5 truncate">
                     {viewDocument.documentNumber || viewDocument.encryptedDocumentNumber || "N/A"}
                   </p>
                 </div>
-                <div className="p-3.5 bg-background border rounded-xl shadow-2xs">
-                  <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">Category</span>
-                  <p className="font-bold text-xs text-foreground capitalize mt-0.5">
+                <div className="p-2.5 sm:p-3.5 bg-background border rounded-xl shadow-2xs">
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">Category</span>
+                  <p className="font-bold text-xs text-foreground capitalize mt-0.5 truncate">
                     {viewDocument.category?.toLowerCase() || "Identity"}
                   </p>
                 </div>
-                <div className="p-3.5 bg-background border rounded-xl shadow-2xs">
-                  <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">KYC Status</span>
-                  <p className="font-bold text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                <div className="p-2.5 sm:p-3.5 bg-background border rounded-xl shadow-2xs">
+                  <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">KYC Status</span>
+                  <p className="font-bold text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 truncate">
                     {viewDocument.verificationStatus || "PENDING"}
                   </p>
                 </div>
@@ -1085,18 +1194,18 @@ export default function DocumentsPage() {
               {(viewDocument.fileUrl || (viewDocument.encryptedDocumentPath && viewDocument.encryptedDocumentPath !== 'HIDDEN')) ? (
                 <div className="border rounded-2xl bg-background overflow-hidden shadow-xs space-y-0">
                   {/* Top Viewer Control Toolbar */}
-                  <div className="px-4 py-2.5 bg-muted/40 border-b flex items-center justify-between text-xs">
+                  <div className="px-3 sm:px-4 py-2 sm:py-2.5 bg-muted/40 border-b flex flex-col sm:flex-row gap-2 sm:gap-0 items-start sm:items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-primary" />
+                      <FileText className="w-4 h-4 text-primary shrink-0" />
                       <span className="font-semibold text-foreground">Vault Document Preview</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" asChild className="h-7 text-xs gap-1.5">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <Button size="sm" variant="outline" asChild className="h-7 text-xs gap-1.5 flex-1 sm:flex-initial">
                         <a href={viewDocument.fileUrl || viewDocument.encryptedDocumentPath} target="_blank" rel="noopener noreferrer">
-                          <Eye className="w-3.5 h-3.5" /> Open Full Tab
+                          <Eye className="w-3.5 h-3.5" /> Open Tab
                         </a>
                       </Button>
-                      <Button size="sm" asChild className="h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5">
+                      <Button size="sm" asChild className="h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 flex-1 sm:flex-initial">
                         <a href={viewDocument.fileUrl || viewDocument.encryptedDocumentPath} download target="_blank" rel="noopener noreferrer">
                           <Download className="w-3.5 h-3.5" /> Download
                         </a>
@@ -1105,35 +1214,35 @@ export default function DocumentsPage() {
                   </div>
 
                   {/* Document Content Frame */}
-                  <div className="w-full bg-slate-900/5 dark:bg-black/20 flex items-center justify-center relative min-h-[520px]">
+                  <div className="w-full bg-slate-900/5 dark:bg-black/20 flex items-center justify-center relative min-h-[300px] sm:min-h-[520px]">
                     {((viewDocument.mimeType?.includes('image')) || (viewDocument.fileUrl || viewDocument.encryptedDocumentPath)?.match(/\.(png|jpg|jpeg|svg|webp)/i)) ? (
-                      <div className="p-4 flex items-center justify-center w-full min-h-[520px]">
+                      <div className="p-3 sm:p-4 flex items-center justify-center w-full min-h-[300px] sm:min-h-[520px]">
                         <img
                           src={viewDocument.fileUrl || viewDocument.encryptedDocumentPath}
                           alt={viewDocument.documentType}
-                          className="max-w-full max-h-[600px] object-contain rounded-lg shadow-md border bg-white"
+                          className="max-w-full max-h-[380px] sm:max-h-[600px] object-contain rounded-lg shadow-md border bg-white"
                         />
                       </div>
                     ) : (
                       <iframe
                         src={`${viewDocument.fileUrl || viewDocument.encryptedDocumentPath}#toolbar=1`}
-                        className="w-full h-[600px] border-0 rounded-b-xl"
+                        className="w-full h-[380px] sm:h-[600px] border-0 rounded-b-xl"
                         title="Document Viewer"
                       />
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="p-12 border border-dashed rounded-2xl bg-background text-center text-muted-foreground space-y-2">
-                  <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
-                  <p className="font-semibold text-foreground text-sm">No File Attachment Found</p>
-                  <p className="text-xs text-muted-foreground">This document record has no binary file uploaded.</p>
+                <div className="p-8 sm:p-12 border border-dashed rounded-2xl bg-background text-center text-muted-foreground space-y-2">
+                  <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-amber-500 mx-auto" />
+                  <p className="font-semibold text-foreground text-xs sm:text-sm">No File Attachment Found</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">This document record has no binary file uploaded.</p>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-background border-t flex items-center justify-between">
+            <div className="p-3 sm:p-4 bg-background border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-0 shrink-0">
               <div className="flex items-center gap-2">
                 {viewDocument.verificationStatus === 'PENDING' && (
                   <>
@@ -1144,7 +1253,7 @@ export default function DocumentsPage() {
                         setViewDocument(null);
                         handleApproveKYC(idToApprove);
                       }}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white h-8 text-xs gap-1.5"
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white h-8 text-xs gap-1.5 flex-1 sm:flex-initial"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" /> Approve KYC
                     </Button>
@@ -1156,7 +1265,7 @@ export default function DocumentsPage() {
                         setViewDocument(null);
                         setEditDocument(docToEdit);
                       }}
-                      className="border-rose-300 text-rose-600 hover:bg-rose-50 h-8 text-xs gap-1.5"
+                      className="border-rose-300 text-rose-600 hover:bg-rose-50 h-8 text-xs gap-1.5 flex-1 sm:flex-initial"
                     >
                       <XCircle className="w-3.5 h-3.5" /> Reject KYC
                     </Button>
