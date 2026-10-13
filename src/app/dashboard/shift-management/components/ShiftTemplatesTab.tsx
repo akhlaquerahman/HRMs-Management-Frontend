@@ -272,12 +272,15 @@ export function ShiftTemplatesTab() {
   const totalUnassigned = roster.length - totalAssigned;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       
       {/* Top Controls */}
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-sm font-bold text-foreground">Shift Templates & Timing Profiles</h2>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm sm:text-base font-bold text-foreground">Shift Templates & Timing Profiles</h2>
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Manage fixed shift rules, weekly offs, grace periods, and employee assignments.</p>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <Button 
             variant="outline" 
             size="sm" 
@@ -302,63 +305,63 @@ export function ShiftTemplatesTab() {
               });
               setIsShiftModalOpen(true);
             }}
-            className="h-9 gap-1.5 text-xs font-bold bg-primary text-primary-foreground shadow-sm hover:opacity-90"
+            className="h-8 sm:h-9 gap-1.5 text-xs font-bold bg-primary text-primary-foreground shadow-sm hover:opacity-90"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             Create New Shift
           </Button>
         </div>
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 font-bold shrink-0">
-            <Layers className="w-5 h-5" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <div className="p-2.5 sm:p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-blue-500/10 text-blue-600 font-bold shrink-0">
+            <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <span className="text-xs text-muted-foreground font-medium block">{t("Total Active Shifts")}</span>
-            <span className="text-xl font-extrabold text-foreground font-mono">{totalShifts}</span>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 font-bold shrink-0">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs text-muted-foreground font-medium block">{t("Assigned Employees")}</span>
-            <span className="text-xl font-extrabold text-emerald-600 font-mono">{totalAssigned}</span>
+          <div className="min-w-0">
+            <span className="text-[10px] sm:text-xs text-muted-foreground font-medium block truncate">{t("Total Active Shifts")}</span>
+            <span className="text-lg sm:text-xl font-extrabold text-foreground font-mono">{totalShifts}</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 font-bold shrink-0">
-            <Users className="w-5 h-5" />
+        <div className="p-2.5 sm:p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 font-bold shrink-0">
+            <UserCheck className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <span className="text-xs text-muted-foreground font-medium block">{t("Unassigned Roster")}</span>
-            <span className="text-xl font-extrabold text-amber-600 font-mono">{totalUnassigned}</span>
+          <div className="min-w-0">
+            <span className="text-[10px] sm:text-xs text-muted-foreground font-medium block truncate">{t("Assigned Employees")}</span>
+            <span className="text-lg sm:text-xl font-extrabold text-emerald-600 font-mono">{totalAssigned}</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 font-bold shrink-0">
-            <Clock className="w-5 h-5" />
+        <div className="p-2.5 sm:p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 text-amber-600 font-bold shrink-0">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <span className="text-xs text-muted-foreground font-medium block">{t("Default General Hours")}</span>
-            <span className="text-sm font-extrabold text-foreground font-mono">09:00 - 18:00</span>
+          <div className="min-w-0">
+            <span className="text-[10px] sm:text-xs text-muted-foreground font-medium block truncate">{t("Unassigned Roster")}</span>
+            <span className="text-lg sm:text-xl font-extrabold text-amber-600 font-mono">{totalUnassigned}</span>
+          </div>
+        </div>
+
+        <div className="p-2.5 sm:p-4 rounded-xl border bg-card shadow-2xs flex items-center gap-2 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 font-bold shrink-0">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] sm:text-xs text-muted-foreground font-medium block truncate">{t("Default General Hours")}</span>
+            <span className="text-xs sm:text-sm font-extrabold text-foreground font-mono truncate block">09:00 - 18:00</span>
           </div>
         </div>
       </div>
 
       {/* SHIFT CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {shifts.map(shift => (
           <div 
             key={shift.id} 
-            className="p-5 rounded-2xl border bg-card shadow-2xs hover:shadow-md transition-all flex flex-col justify-between relative group"
+            className="p-3.5 sm:p-5 rounded-2xl border bg-card shadow-2xs hover:shadow-md transition-all flex flex-col justify-between relative group"
           >
             <div>
               <div className="flex items-start justify-between gap-2 mb-3">
@@ -430,90 +433,180 @@ export function ShiftTemplatesTab() {
         ))}
       </div>
 
-      {/* EMPLOYEE ASSIGNMENT TABLE */}
+      {/* EMPLOYEE ASSIGNMENT TABLE & CARDS */}
       <div className="rounded-2xl border bg-card shadow-xs flex flex-col overflow-hidden mt-2">
-        <div className="p-5 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/10">
-          <div>
-            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary" />
-              <span>Employee Shift Assignment</span>
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Assign primary default shift profiles to employees.
-            </p>
+        <div className="p-3 sm:p-5 border-b flex flex-col gap-3 bg-muted/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                <span>Employee Shift Assignment</span>
+              </h3>
+              <p className="text-[11px] sm:text-xs text-muted-foreground">
+                Assign primary default shift profiles to employees.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {selectedEmployeeIds.length > 0 && (
+                <Button 
+                  size="sm" 
+                  onClick={() => {
+                    setTargetShiftId('');
+                    setIsAssignModalOpen(true);
+                  }}
+                  className="h-8 sm:h-9 text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+                >
+                  Assign Shift ({selectedEmployeeIds.length})
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsBulkAssignModalOpen(true)}
+                className="h-8 sm:h-9 text-xs font-semibold border-emerald-500/40 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-emerald-400 dark:border-emerald-500/40 dark:hover:bg-emerald-950/30 shadow-xs flex items-center gap-1.5 transition-all"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Bulk Import</span>
+              </Button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            {selectedEmployeeIds.length > 0 && (
-              <Button 
-                size="sm" 
-                onClick={() => {
-                  setTargetShiftId('');
-                  setIsAssignModalOpen(true);
-                }}
-                className="h-9 text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
-              >
-                Assign Shift to Selected ({selectedEmployeeIds.length})
-              </Button>
-            )}
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsBulkAssignModalOpen(true)}
-              className="h-9 text-xs font-semibold border-emerald-500/40 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-emerald-400 dark:border-emerald-500/40 dark:hover:bg-emerald-950/30 shadow-xs flex items-center gap-1.5 transition-all"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Bulk Shift Import (Excel)</span>
-            </Button>
-
-            <div className="relative min-w-[200px]">
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
+            <div className="relative w-full sm:flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search employee..." 
-                className="pl-8 h-9 text-xs bg-background"
+                className="pl-8 h-8 sm:h-9 text-xs bg-background w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="h-9 px-3 rounded-lg border bg-background text-xs font-medium text-foreground focus:outline-none"
-            >
-              <option value="ALL">All Departments</option>
-              {departments.map(d => (
-                <option key={d.id} value={d.id}>{d.name}</option>
-              ))}
-            </select>
+            <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="h-8 sm:h-9 px-2 rounded-lg border bg-background text-[11px] sm:text-xs font-medium text-foreground focus:outline-none w-full"
+              >
+                <option value="ALL">All Depts</option>
+                {departments.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
 
-            <select
-              value={selectedDesignation}
-              onChange={(e) => setSelectedDesignation(e.target.value)}
-              className="h-9 px-3 rounded-lg border bg-background text-xs font-medium text-foreground focus:outline-none"
-            >
-              <option value="ALL">All Designations</option>
-              {designations.map(d => (
-                <option key={d.id} value={d.id}>{d.name}</option>
-              ))}
-            </select>
+              <select
+                value={selectedDesignation}
+                onChange={(e) => setSelectedDesignation(e.target.value)}
+                className="h-8 sm:h-9 px-2 rounded-lg border bg-background text-[11px] sm:text-xs font-medium text-foreground focus:outline-none w-full"
+              >
+                <option value="ALL">All Roles</option>
+                {designations.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
 
-            <select
-              value={selectedShiftFilter}
-              onChange={(e) => setSelectedShiftFilter(e.target.value)}
-              className="h-9 px-3 rounded-lg border bg-background text-xs font-medium text-foreground focus:outline-none"
-            >
-              <option value="ALL">All Shifts</option>
-              <option value="UNASSIGNED">Unassigned Only</option>
-              {shifts.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
+              <select
+                value={selectedShiftFilter}
+                onChange={(e) => setSelectedShiftFilter(e.target.value)}
+                className="h-8 sm:h-9 px-2 rounded-lg border bg-background text-[11px] sm:text-xs font-medium text-foreground focus:outline-none w-full"
+              >
+                <option value="ALL">All Shifts</option>
+                <option value="UNASSIGNED">Unassigned</option>
+                {shifts.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* MOBILE CARD LIST (Hidden on desktop) */}
+        <div className="block md:hidden divide-y divide-border/60">
+          {loadingRoster ? (
+            <div className="p-8 text-center text-muted-foreground text-xs">
+              <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />
+              Loading employee roster...
+            </div>
+          ) : filteredRoster.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground text-xs">
+              No employees found matching the filters.
+            </div>
+          ) : (
+            filteredRoster.map(emp => {
+              const isSelected = selectedEmployeeIds.includes(emp.id);
+              return (
+                <div key={emp.id} className={`p-3 space-y-2.5 transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-muted/10'}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <input 
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectEmployee(emp.id)}
+                        className="rounded border-slate-300 cursor-pointer shrink-0 mt-0.5"
+                      />
+                      <div className="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 border border-primary/20 text-xs">
+                        {emp.firstName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-bold text-xs text-foreground block truncate">{emp.firstName} {emp.lastName}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono truncate block">{emp.employeeId}</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => {
+                        setSelectedEmployeeIds([emp.id]);
+                        setTargetShiftId(emp.shiftId || '');
+                        setIsAssignModalOpen(true);
+                      }}
+                      className="h-7 text-[11px] font-semibold px-2 shrink-0"
+                    >
+                      Change Shift
+                    </Button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-border/40 text-[11px]">
+                    <span className="text-muted-foreground">{emp.department?.name || 'General'} • {emp.designation?.name || 'Employee'}</span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-1.5">
+                    {emp.shift ? (
+                      <Badge className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 font-semibold px-2 py-0.5 text-[10px] gap-1">
+                        <Clock className="w-2.5 h-2.5 text-blue-500" />
+                        <span>{emp.shift.name} ({emp.shift.startTime} - {emp.shift.endTime})</span>
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-600 border-slate-200 font-medium text-[10px] px-2 py-0.5">
+                        Standard (09:00 - 18:00)
+                      </Badge>
+                    )}
+
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {emp.shift?.weeklyOff?.length ? (
+                        emp.shift.weeklyOff.map(off => (
+                          <span key={off} className="px-1 py-0.2 rounded text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                            {off.slice(0, 3)}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="px-1 py-0.2 rounded text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                          Sat, Sun
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* DESKTOP TABLE (Hidden on mobile) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/30 border-b text-muted-foreground font-bold uppercase tracking-wider text-[11px]">
               <tr>
@@ -632,9 +725,9 @@ export function ShiftTemplatesTab() {
 
       {/* CREATE / EDIT SHIFT MODAL */}
       <Dialog open={isShiftModalOpen} onOpenChange={setIsShiftModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold">
+        <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[92vh] flex flex-col p-0 overflow-hidden rounded-2xl">
+          <DialogHeader className="p-4 sm:p-5 border-b bg-muted/10 shrink-0">
+            <DialogTitle className="text-base sm:text-lg font-bold">
               {editingShift?.id ? "Edit Shift Profile" : "Create New Shift Profile"}
             </DialogTitle>
             <DialogDescription className="text-xs">
@@ -642,7 +735,7 @@ export function ShiftTemplatesTab() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSaveShift} className="space-y-4 py-2">
+          <form onSubmit={handleSaveShift} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             <div>
               <label className="text-xs font-bold text-foreground block mb-1">Shift Name *</label>
               <Input 
@@ -650,6 +743,7 @@ export function ShiftTemplatesTab() {
                 value={editingShift?.name || ''}
                 onChange={(e) => setEditingShift({ ...editingShift, name: e.target.value })}
                 required
+                className="h-9 text-xs"
               />
             </div>
 
@@ -661,6 +755,7 @@ export function ShiftTemplatesTab() {
                   value={editingShift?.startTime || '09:00'}
                   onChange={(e) => setEditingShift({ ...editingShift, startTime: e.target.value })}
                   required
+                  className="h-9 text-xs"
                 />
               </div>
               <div>
@@ -670,6 +765,7 @@ export function ShiftTemplatesTab() {
                   value={editingShift?.endTime || '18:00'}
                   onChange={(e) => setEditingShift({ ...editingShift, endTime: e.target.value })}
                   required
+                  className="h-9 text-xs"
                 />
               </div>
             </div>
@@ -682,6 +778,7 @@ export function ShiftTemplatesTab() {
                   min="0"
                   value={editingShift?.breakDuration || 60}
                   onChange={(e) => setEditingShift({ ...editingShift, breakDuration: Number(e.target.value) })}
+                  className="h-9 text-xs"
                 />
               </div>
               <div>
@@ -691,6 +788,7 @@ export function ShiftTemplatesTab() {
                   min="0"
                   value={editingShift?.graceTime || 15}
                   onChange={(e) => setEditingShift({ ...editingShift, graceTime: Number(e.target.value) })}
+                  className="h-9 text-xs"
                 />
               </div>
             </div>
@@ -718,7 +816,7 @@ export function ShiftTemplatesTab() {
               </div>
             </div>
 
-            <DialogFooter className="mt-4">
+            <DialogFooter className="pt-2 border-t flex flex-row items-center justify-end gap-2">
               <Button type="button" variant="outline" size="sm" onClick={() => setIsShiftModalOpen(false)}>
                 Cancel
               </Button>
@@ -732,9 +830,9 @@ export function ShiftTemplatesTab() {
 
       {/* ASSIGN SHIFT MODAL */}
       <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold">
+        <DialogContent className="w-[95vw] sm:max-w-[450px] max-h-[92vh] flex flex-col p-0 overflow-hidden rounded-2xl">
+          <DialogHeader className="p-4 sm:p-5 border-b bg-muted/10 shrink-0">
+            <DialogTitle className="text-base sm:text-lg font-bold">
               Assign Shift Roster
             </DialogTitle>
             <DialogDescription className="text-xs">
@@ -742,7 +840,7 @@ export function ShiftTemplatesTab() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleAssignShiftSubmit} className="space-y-4 py-2">
+          <form onSubmit={handleAssignShiftSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             <div className="p-3 rounded-xl border bg-muted/20 text-xs">
               <span className="text-muted-foreground block font-semibold mb-1">Selected Employees ({selectedEmployeeIds.length}):</span>
               <div className="max-h-24 overflow-y-auto custom-scrollbar font-mono text-[11px] text-foreground space-y-0.5">
@@ -758,7 +856,7 @@ export function ShiftTemplatesTab() {
               <select
                 value={targetShiftId}
                 onChange={(e) => setTargetShiftId(e.target.value)}
-                className="w-full h-10 px-3 rounded-lg border bg-background text-sm font-medium text-foreground focus:outline-none"
+                className="w-full h-9 sm:h-10 px-3 rounded-lg border bg-background text-xs sm:text-sm font-medium text-foreground focus:outline-none"
                 required
               >
                 <option value="">-- Select Shift Profile --</option>
@@ -771,7 +869,7 @@ export function ShiftTemplatesTab() {
               </select>
             </div>
 
-            <DialogFooter className="mt-4">
+            <DialogFooter className="pt-2 border-t flex flex-row items-center justify-end gap-2">
               <Button type="button" variant="outline" size="sm" onClick={() => setIsAssignModalOpen(false)}>
                 Cancel
               </Button>
