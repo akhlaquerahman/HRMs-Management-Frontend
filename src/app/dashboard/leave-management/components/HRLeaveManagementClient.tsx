@@ -554,7 +554,7 @@ export function HRLeaveManagementClient() {
   }
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto p-6">
+    <div className="space-y-4 sm:space-y-6 max-w-[1600px] mx-auto w-full min-w-0">
       {/* Header */}
       <PageHeader
         title="Leave Management"
@@ -563,117 +563,117 @@ export function HRLeaveManagementClient() {
         showSearch={false}
         actionButton={
           <div className="flex items-center gap-2 flex-wrap">
-            <Button size="sm" onClick={() => setIsAddLeaveTypeOpen(true)} className="h-9 bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Leave Type
+            <Button size="sm" onClick={() => setIsAddLeaveTypeOpen(true)} className="h-8 sm:h-9 text-xs px-2.5 sm:px-3 bg-primary hover:bg-primary/90">
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              <span>Add Leave Type</span>
             </Button>
           </div>
         }
       />
 
       {/* Database KPI Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2.5 sm:pt-3 px-2.5 sm:px-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2 sm:pt-3 px-2 sm:px-3">
             <CardTitle className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
               Total Employees
             </CardTitle>
-            <Users className="h-4 w-4 text-blue-600 shrink-0" />
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
           </CardHeader>
-          <CardContent className="p-2.5 sm:p-3 pt-0">
-            <div className="text-lg sm:text-xl font-bold">{isSummaryLoading ? "..." : kpis.totalEmployees}</div>
-            <span className="text-[10px] text-muted-foreground">Active Staff</span>
+          <CardContent className="p-2 sm:p-3 pt-0">
+            <div className="text-base sm:text-xl font-bold font-mono">{isSummaryLoading ? "..." : kpis.totalEmployees}</div>
+            <span className="text-[9.5px] sm:text-[10px] text-muted-foreground block truncate">Active Staff</span>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2.5 sm:pt-3 px-2.5 sm:px-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2 sm:pt-3 px-2 sm:px-3">
             <CardTitle className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
               Pending Requests
             </CardTitle>
-            <Clock className="h-4 w-4 text-amber-600 shrink-0" />
+            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 shrink-0" />
           </CardHeader>
-          <CardContent className="p-2.5 sm:p-3 pt-0">
-            <div className="text-lg sm:text-xl font-bold text-amber-600">{isSummaryLoading ? "..." : kpis.pendingRequests}</div>
-            <span className="text-[10px] text-muted-foreground">Action Required</span>
+          <CardContent className="p-2 sm:p-3 pt-0">
+            <div className="text-base sm:text-xl font-bold font-mono text-amber-600">{isSummaryLoading ? "..." : kpis.pendingRequests}</div>
+            <span className="text-[9.5px] sm:text-[10px] text-muted-foreground block truncate">Action Required</span>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2.5 sm:pt-3 px-2.5 sm:px-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2 sm:pt-3 px-2 sm:px-3">
             <CardTitle className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
               Approved (Month)
             </CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0" />
           </CardHeader>
-          <CardContent className="p-2.5 sm:p-3 pt-0">
-            <div className="text-lg sm:text-xl font-bold">{isSummaryLoading ? "..." : kpis.approvedThisMonth}</div>
-            <span className="text-[10px] text-muted-foreground">This Month</span>
+          <CardContent className="p-2 sm:p-3 pt-0">
+            <div className="text-base sm:text-xl font-bold font-mono">{isSummaryLoading ? "..." : kpis.approvedThisMonth}</div>
+            <span className="text-[9.5px] sm:text-[10px] text-muted-foreground block truncate">This Month</span>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2.5 sm:pt-3 px-2.5 sm:px-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2 sm:pt-3 px-2 sm:px-3">
             <CardTitle className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
               On Leave Today
             </CardTitle>
-            <UserCheck className="h-4 w-4 text-rose-600 shrink-0" />
+            <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-600 shrink-0" />
           </CardHeader>
-          <CardContent className="p-2.5 sm:p-3 pt-0">
-            <div className="text-lg sm:text-xl font-bold text-rose-600">{isSummaryLoading ? "..." : kpis.onLeaveToday}</div>
-            <span className="text-[10px] text-muted-foreground">Absent Today</span>
+          <CardContent className="p-2 sm:p-3 pt-0">
+            <div className="text-base sm:text-xl font-bold font-mono text-rose-600">{isSummaryLoading ? "..." : kpis.onLeaveToday}</div>
+            <span className="text-[9.5px] sm:text-[10px] text-muted-foreground block truncate">Absent Today</span>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2.5 sm:pt-3 px-2.5 sm:px-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2 sm:pt-3 px-2 sm:px-3">
             <CardTitle className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
               Leave Types
             </CardTitle>
-            <Briefcase className="h-4 w-4 text-purple-600 shrink-0" />
+            <Briefcase className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600 shrink-0" />
           </CardHeader>
-          <CardContent className="p-2.5 sm:p-3 pt-0">
-            <div className="text-lg sm:text-xl font-bold">{isSummaryLoading ? "..." : kpis.availableLeaveTypes}</div>
-            <span className="text-[10px] text-muted-foreground">Configured</span>
+          <CardContent className="p-2 sm:p-3 pt-0">
+            <div className="text-base sm:text-xl font-bold font-mono">{isSummaryLoading ? "..." : kpis.availableLeaveTypes}</div>
+            <span className="text-[9.5px] sm:text-[10px] text-muted-foreground block truncate">Configured</span>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2.5 sm:pt-3 px-2.5 sm:px-3">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-2 sm:pt-3 px-2 sm:px-3">
             <CardTitle className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
               Upcoming Holidays
             </CardTitle>
-            <CalendarDays className="h-4 w-4 text-indigo-600 shrink-0" />
+            <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-600 shrink-0" />
           </CardHeader>
-          <CardContent className="p-2.5 sm:p-3 pt-0">
-            <div className="text-lg sm:text-xl font-bold">{isSummaryLoading ? "..." : kpis.upcomingHolidays}</div>
-            <span className="text-[10px] text-muted-foreground">Calendar Events</span>
+          <CardContent className="p-2 sm:p-3 pt-0">
+            <div className="text-base sm:text-xl font-bold font-mono">{isSummaryLoading ? "..." : kpis.upcomingHolidays}</div>
+            <span className="text-[9.5px] sm:text-[10px] text-muted-foreground block truncate">Calendar Events</span>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-muted/60 p-1 rounded-xl w-full flex-wrap justify-start h-auto gap-1">
-          <TabsTrigger value="overview" className="rounded-lg text-xs font-semibold">
+        <TabsList className="bg-muted/60 p-1 rounded-xl w-full flex overflow-x-auto no-scrollbar scroll-smooth justify-start h-auto gap-1">
+          <TabsTrigger value="overview" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="requests" className="rounded-lg text-xs font-semibold">
+          <TabsTrigger value="requests" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Leave Requests ({allRequests.length})
           </TabsTrigger>
-          <TabsTrigger value="balances" className="rounded-lg text-xs font-semibold">
+          <TabsTrigger value="balances" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Leave Balances ({employeeBalances.length})
           </TabsTrigger>
-          <TabsTrigger value="types" className="rounded-lg text-xs font-semibold">
+          <TabsTrigger value="types" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Leave Types ({leaveTypes.length})
           </TabsTrigger>
-          <TabsTrigger value="policies" className="rounded-lg text-xs font-semibold">
+          <TabsTrigger value="policies" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Policies
           </TabsTrigger>
-          <TabsTrigger value="holidays" className="rounded-lg text-xs font-semibold">
+          <TabsTrigger value="holidays" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Holidays
           </TabsTrigger>
-          <TabsTrigger value="audit" className="rounded-lg text-xs font-semibold">
+          <TabsTrigger value="audit" className="rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
             Audit Log
           </TabsTrigger>
         </TabsList>
@@ -915,18 +915,35 @@ export function HRLeaveManagementClient() {
                           setSelectedDayDetails(metrics);
                           setIsDayDetailModalOpen(true);
                         }}
-                        className={`p-1.5 min-h-[54px] rounded-md border transition-all cursor-pointer hover:scale-[1.02] hover:shadow-xs flex flex-col justify-between ${bgClass} ${
+                        className={`p-1 sm:p-1.5 min-h-[44px] sm:min-h-[54px] rounded-md border transition-all cursor-pointer hover:scale-[1.02] hover:shadow-xs flex flex-col justify-between ${bgClass} ${
                           isToday ? "ring-2 ring-primary ring-offset-1 font-black" : ""
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-extrabold text-[11px] text-foreground font-mono leading-none">{cell.dayNum}</span>
+                          <span className="font-extrabold text-[10px] sm:text-[11px] text-foreground font-mono leading-none">{cell.dayNum}</span>
                           {isToday && (
-                            <span className="text-[7.5px] font-black text-primary bg-primary/15 px-1 rounded leading-tight">TODAY</span>
+                            <span className="text-[6.5px] sm:text-[7.5px] font-black text-primary bg-primary/15 px-0.5 sm:px-1 rounded leading-tight">TODAY</span>
                           )}
                         </div>
 
-                        <div className="flex flex-col gap-0.5 mt-1 font-mono">
+                        {/* Mobile Compact Indicators (< sm) */}
+                        <div className="flex sm:hidden flex-col items-center justify-center mt-0.5 leading-none">
+                          <span className={`text-[8.5px] font-bold font-mono ${
+                            metrics.presentPercent < 60 ? "text-rose-600" : metrics.presentPercent < 80 ? "text-amber-600" : "text-emerald-600"
+                          }`}>
+                            {metrics.presentPercent}%
+                          </span>
+                          {metrics.leaveCount > 0 ? (
+                            <span className="text-[7.5px] text-rose-600 font-extrabold mt-0.5">
+                              {metrics.leaveCount}L
+                            </span>
+                          ) : (
+                            <span className="w-1 h-1 rounded-full bg-emerald-500 mt-0.5"></span>
+                          )}
+                        </div>
+
+                        {/* Desktop & Tablet Indicators (>= sm) */}
+                        <div className="hidden sm:flex flex-col gap-0.5 mt-1 font-mono">
                           {metrics.leaveCount > 0 ? (
                             <span className={`px-1 py-0.2 rounded border text-[9px] font-bold block truncate leading-tight ${badgeClass}`}>
                               🔴 {metrics.leaveCount} Off
@@ -952,103 +969,162 @@ export function HRLeaveManagementClient() {
 
           {/* Pending Approval List in Overview */}
           <Card className="border shadow-xs">
-            <CardHeader className="pb-3 border-b bg-muted/20 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Clock className="h-4 w-4 text-amber-600" />
-                Pending Approvals Requiring Action
+            <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3 border-b bg-muted/20 flex flex-row items-center justify-between">
+              <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2">
+                <Clock className="h-4 w-4 text-amber-600 shrink-0" />
+                <span>Pending Approvals Requiring Action</span>
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab("requests")} className="text-xs">
-                View All Requests
+              <Button variant="ghost" size="sm" onClick={() => setActiveTab("requests")} className="text-xs h-7 px-2">
+                View All
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/10">
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Assigned Shift</TableHead>
-                    <TableHead>Leave Type</TableHead>
-                    <TableHead>Dates</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allRequests.filter((r: any) => r.status === "PENDING").length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
-                        No pending leave requests requiring approval.
-                      </TableCell>
+              {/* Mobile Card List View (< md) */}
+              <div className="block md:hidden divide-y divide-border">
+                {allRequests.filter((r: any) => r.status === "PENDING").length === 0 ? (
+                  <p className="text-center py-6 text-xs text-muted-foreground">
+                    No pending leave requests requiring approval.
+                  </p>
+                ) : (
+                  allRequests
+                    .filter((r: any) => r.status === "PENDING")
+                    .slice(0, 5)
+                    .map((r: any) => (
+                      <div key={r.id} className="p-3 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold text-xs text-foreground">
+                              {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
+                            </p>
+                            <span className="text-[10px] text-muted-foreground font-mono">{r.employee?.employeeId}</span>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 shrink-0">
+                            {r.leaveType}
+                          </Badge>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground flex items-center justify-between">
+                          <span>{format(new Date(r.startDate), "dd MMM")} - {format(new Date(r.endDate), "dd MMM yyyy")}</span>
+                          <span className="font-medium text-foreground truncate max-w-[120px]">{r.description || "No reason"}</span>
+                        </div>
+                        <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-border/40">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs text-emerald-700 hover:bg-emerald-50"
+                            onClick={() => {
+                              setApprovalTarget({ id: r.id, action: "APPROVED" });
+                              setIsApprovalModalOpen(true);
+                            }}
+                          >
+                            <Check className="h-3 w-3 mr-1" /> Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs text-rose-700 hover:bg-rose-50"
+                            onClick={() => {
+                              setApprovalTarget({ id: r.id, action: "REJECTED" });
+                              setIsApprovalModalOpen(true);
+                            }}
+                          >
+                            <X className="h-3 w-3 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              {/* Desktop Table View (>= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/10">
+                      <TableHead>Employee</TableHead>
+                      <TableHead>Assigned Shift</TableHead>
+                      <TableHead>Leave Type</TableHead>
+                      <TableHead>Dates</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ) : (
-                    allRequests
-                      .filter((r: any) => r.status === "PENDING")
-                      .slice(0, 5)
-                      .map((r: any) => (
-                        <TableRow key={r.id}>
-                          <TableCell className="font-semibold text-xs">
-                            {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
-                            <span className="text-[10px] text-muted-foreground block font-mono">{r.employee?.employeeId}</span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-[11px] font-semibold bg-primary/5 text-primary border-primary/20 shrink-0 flex items-center w-fit gap-1">
-                              <Clock className="w-3 h-3 text-primary/70 shrink-0" />
-                              <span>{r.employee?.shift?.name || "General Shift"}</span>
-                              <span className="font-mono text-[10px] text-muted-foreground">
-                                ({r.employee?.shift?.startTime || "09:00"} - {r.employee?.shift?.endTime || "18:00"})
-                              </span>
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200">
-                              {r.leaveType}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {format(new Date(r.startDate), "dd MMM")} - {format(new Date(r.endDate), "dd MMM yyyy")}
-                          </TableCell>
-                          <TableCell className="text-xs truncate max-w-xs">{r.description || "N/A"}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-[11px] text-emerald-700 hover:bg-emerald-50"
-                                onClick={() => {
-                                  setApprovalTarget({ id: r.id, action: "APPROVED" });
-                                  setIsApprovalModalOpen(true);
-                                }}
-                              >
-                                <Check className="h-3 w-3 mr-1" /> Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-[11px] text-rose-700 hover:bg-rose-50"
-                                onClick={() => {
-                                  setApprovalTarget({ id: r.id, action: "REJECTED" });
-                                  setIsApprovalModalOpen(true);
-                                }}
-                              >
-                                <X className="h-3 w-3 mr-1" /> Reject
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {allRequests.filter((r: any) => r.status === "PENDING").length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">
+                          No pending leave requests requiring approval.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      allRequests
+                        .filter((r: any) => r.status === "PENDING")
+                        .slice(0, 5)
+                        .map((r: any) => (
+                          <TableRow key={r.id}>
+                            <TableCell className="font-semibold text-xs">
+                              {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
+                              <span className="text-[10px] text-muted-foreground block font-mono">{r.employee?.employeeId}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-[11px] font-semibold bg-primary/5 text-primary border-primary/20 shrink-0 flex items-center w-fit gap-1">
+                                <Clock className="w-3 h-3 text-primary/70 shrink-0" />
+                                <span>{r.employee?.shift?.name || "General Shift"}</span>
+                                <span className="font-mono text-[10px] text-muted-foreground">
+                                  ({r.employee?.shift?.startTime || "09:00"} - {r.employee?.shift?.endTime || "18:00"})
+                                </span>
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200">
+                                {r.leaveType}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {format(new Date(r.startDate), "dd MMM")} - {format(new Date(r.endDate), "dd MMM yyyy")}
+                            </TableCell>
+                            <TableCell className="text-xs truncate max-w-xs">{r.description || "N/A"}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-[11px] text-emerald-700 hover:bg-emerald-50"
+                                  onClick={() => {
+                                    setApprovalTarget({ id: r.id, action: "APPROVED" });
+                                    setIsApprovalModalOpen(true);
+                                  }}
+                                >
+                                  <Check className="h-3 w-3 mr-1" /> Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-[11px] text-rose-700 hover:bg-rose-50"
+                                  onClick={() => {
+                                    setApprovalTarget({ id: r.id, action: "REJECTED" });
+                                    setIsApprovalModalOpen(true);
+                                  }}
+                                >
+                                  <X className="h-3 w-3 mr-1" /> Reject
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* TAB 2: LEAVE REQUESTS MASTER TABLE */}
         <TabsContent value="requests" className="space-y-4 mt-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <select
-                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background"
+                className="h-8 sm:h-9 px-2 sm:px-3 py-1 border rounded-lg text-xs bg-background"
                 value={requestStatusFilter}
                 onChange={(e) => setRequestStatusFilter(e.target.value)}
               >
@@ -1060,7 +1136,7 @@ export function HRLeaveManagementClient() {
               </select>
 
               <select
-                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium disabled:opacity-80 disabled:cursor-not-allowed"
+                className="h-8 sm:h-9 px-2 sm:px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium disabled:opacity-80 disabled:cursor-not-allowed"
                 value={requestDeptFilter}
                 onChange={(e) => {
                   setRequestDeptFilter(e.target.value);
@@ -1077,7 +1153,7 @@ export function HRLeaveManagementClient() {
               </select>
 
               <select
-                className="h-9 px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium"
+                className="h-8 sm:h-9 px-2 sm:px-3 py-1 border rounded-lg text-xs bg-background cursor-pointer font-medium col-span-2 sm:col-span-1"
                 value={requestDesigFilter}
                 onChange={(e) => setRequestDesigFilter(e.target.value)}
               >
@@ -1091,126 +1167,204 @@ export function HRLeaveManagementClient() {
             </div>
 
             <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-2 sm:top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by employee name, ID or shift..."
-                className="pl-9 h-9 text-xs rounded-lg"
+                placeholder="Search employee, ID or shift..."
+                className="pl-8 sm:pl-9 h-8 sm:h-9 text-xs rounded-lg"
                 value={requestSearch}
                 onChange={(e) => setRequestSearch(e.target.value)}
               />
             </div>
           </div>
 
-          <Card className="border shadow-xs">
+          <Card className="border shadow-xs overflow-hidden">
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30">
-                    <TableHead className="w-28">Request ID</TableHead>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Department &amp; Designation</TableHead>
-                    <TableHead>Assigned Shift</TableHead>
-                    <TableHead>Leave Type</TableHead>
-                    <TableHead>From</TableHead>
-                    <TableHead>To</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Applied On</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isRequestsLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="text-center py-10">
-                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-                      </TableCell>
-                    </TableRow>
-                  ) : filteredRequests.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="text-center py-10 text-xs text-muted-foreground">
-                        No leave requests found matching filters.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredRequests.map((r: any) => (
-                      <TableRow key={r.id} className="hover:bg-muted/10">
-                        <TableCell className="font-mono text-xs font-semibold">
-                          LR-{r.id.slice(0, 8).toUpperCase()}
-                        </TableCell>
-                        <TableCell className="font-semibold text-xs">
-                          {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
-                          <span className="text-[10px] text-muted-foreground block font-mono">
-                            {r.employee?.employeeId}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          <div className="font-medium text-foreground">{r.employee?.department?.name || "Unassigned"}</div>
-                          <div className="text-[10px] text-muted-foreground">{r.employee?.designation?.name || "N/A"}</div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs font-semibold bg-primary/5 text-primary border-primary/20 shrink-0 flex items-center w-fit gap-1">
-                            <Clock className="w-3 h-3 text-primary/70 shrink-0" />
-                            <span>{r.employee?.shift?.name || "General Shift"}</span>
-                            <span className="font-mono text-[10px] text-muted-foreground">
-                              ({r.employee?.shift?.startTime || "09:00"} - {r.employee?.shift?.endTime || "18:00"})
+              {/* Mobile Card List View (< md) */}
+              <div className="block md:hidden divide-y divide-border">
+                {isRequestsLoading ? (
+                  <div className="py-10 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                  </div>
+                ) : filteredRequests.length === 0 ? (
+                  <p className="text-center py-8 text-xs text-muted-foreground">
+                    No leave requests found matching filters.
+                  </p>
+                ) : (
+                  filteredRequests.map((r: any) => (
+                    <div key={r.id} className="p-3 space-y-2 hover:bg-muted/15 transition-colors">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-xs text-foreground">
+                              {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
                             </span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
-                            {r.leaveType}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">{format(new Date(r.startDate), "dd MMM yyyy")}</TableCell>
-                        <TableCell className="text-xs">{format(new Date(r.endDate), "dd MMM yyyy")}</TableCell>
-                        <TableCell>
-                          {r.status === "APPROVED" && (
-                            <Badge className="bg-emerald-500/15 text-emerald-700 border-0 text-xs">Approved</Badge>
-                          )}
-                          {r.status === "PENDING" && (
-                            <Badge className="bg-amber-500/15 text-amber-700 border-0 text-xs">Pending</Badge>
-                          )}
-                          {r.status === "REJECTED" && <Badge variant="destructive" className="text-xs">Rejected</Badge>}
-                          {r.status === "CANCELLED" && <Badge variant="secondary" className="text-xs">Cancelled</Badge>}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {format(new Date(r.createdAt), "dd MMM yyyy")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {r.status === "PENDING" ? (
-                            <div className="flex items-center justify-end gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-                                onClick={() => {
-                                  setApprovalTarget({ id: r.id, action: "APPROVED" });
-                                  setIsApprovalModalOpen(true);
-                                }}
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-xs text-rose-700 border-rose-200 hover:bg-rose-50"
-                                onClick={() => {
-                                  setApprovalTarget({ id: r.id, action: "REJECTED" });
-                                  setIsApprovalModalOpen(true);
-                                }}
-                              >
-                                Reject
-                              </Button>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground italic">Processed</span>
-                          )}
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              LR-{r.id.slice(0, 6).toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">
+                            {r.employee?.department?.name || "Unassigned"} • {r.employee?.designation?.name || "N/A"}
+                          </p>
+                        </div>
+                        <div className="shrink-0 scale-90 origin-right">
+                          {r.status === "APPROVED" && <Badge className="bg-emerald-500/15 text-emerald-700 border-0 text-[10px]">Approved</Badge>}
+                          {r.status === "PENDING" && <Badge className="bg-amber-500/15 text-amber-700 border-0 text-[10px]">Pending</Badge>}
+                          {r.status === "REJECTED" && <Badge variant="destructive" className="text-[10px]">Rejected</Badge>}
+                          {r.status === "CANCELLED" && <Badge variant="secondary" className="text-[10px]">Cancelled</Badge>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs pt-0.5">
+                        <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20">
+                          {r.leaveType}
+                        </Badge>
+                        <span className="text-[11px] text-muted-foreground">
+                          {format(new Date(r.startDate), "dd MMM")} - {format(new Date(r.endDate), "dd MMM yyyy")}
+                        </span>
+                      </div>
+
+                      {r.status === "PENDING" && (
+                        <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-border/40">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs text-emerald-700 hover:bg-emerald-50"
+                            onClick={() => {
+                              setApprovalTarget({ id: r.id, action: "APPROVED" });
+                              setIsApprovalModalOpen(true);
+                            }}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs text-rose-700 hover:bg-rose-50"
+                            onClick={() => {
+                              setApprovalTarget({ id: r.id, action: "REJECTED" });
+                              setIsApprovalModalOpen(true);
+                            }}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View (>= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="w-28">Request ID</TableHead>
+                      <TableHead>Employee</TableHead>
+                      <TableHead>Department &amp; Designation</TableHead>
+                      <TableHead>Assigned Shift</TableHead>
+                      <TableHead>Leave Type</TableHead>
+                      <TableHead>From</TableHead>
+                      <TableHead>To</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Applied On</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isRequestsLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={10} className="text-center py-10">
+                          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : filteredRequests.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={10} className="text-center py-10 text-xs text-muted-foreground">
+                          No leave requests found matching filters.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredRequests.map((r: any) => (
+                        <TableRow key={r.id} className="hover:bg-muted/10">
+                          <TableCell className="font-mono text-xs font-semibold">
+                            LR-{r.id.slice(0, 8).toUpperCase()}
+                          </TableCell>
+                          <TableCell className="font-semibold text-xs">
+                            {r.employee ? `${r.employee.firstName} ${r.employee.lastName}` : "N/A"}
+                            <span className="text-[10px] text-muted-foreground block font-mono">
+                              {r.employee?.employeeId}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            <div className="font-medium text-foreground">{r.employee?.department?.name || "Unassigned"}</div>
+                            <div className="text-[10px] text-muted-foreground">{r.employee?.designation?.name || "N/A"}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs font-semibold bg-primary/5 text-primary border-primary/20 shrink-0 flex items-center w-fit gap-1">
+                              <Clock className="w-3 h-3 text-primary/70 shrink-0" />
+                              <span>{r.employee?.shift?.name || "General Shift"}</span>
+                              <span className="font-mono text-[10px] text-muted-foreground">
+                                ({r.employee?.shift?.startTime || "09:00"} - {r.employee?.shift?.endTime || "18:00"})
+                              </span>
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+                              {r.leaveType}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs">{format(new Date(r.startDate), "dd MMM yyyy")}</TableCell>
+                          <TableCell className="text-xs">{format(new Date(r.endDate), "dd MMM yyyy")}</TableCell>
+                          <TableCell>
+                            {r.status === "APPROVED" && (
+                              <Badge className="bg-emerald-500/15 text-emerald-700 border-0 text-xs">Approved</Badge>
+                            )}
+                            {r.status === "PENDING" && (
+                              <Badge className="bg-amber-500/15 text-amber-700 border-0 text-xs">Pending</Badge>
+                            )}
+                            {r.status === "REJECTED" && <Badge variant="destructive" className="text-xs">Rejected</Badge>}
+                            {r.status === "CANCELLED" && <Badge variant="secondary" className="text-xs">Cancelled</Badge>}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {format(new Date(r.createdAt), "dd MMM yyyy")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {r.status === "PENDING" ? (
+                              <div className="flex items-center justify-end gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                                  onClick={() => {
+                                    setApprovalTarget({ id: r.id, action: "APPROVED" });
+                                    setIsApprovalModalOpen(true);
+                                  }}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-xs text-rose-700 border-rose-200 hover:bg-rose-50"
+                                  onClick={() => {
+                                    setApprovalTarget({ id: r.id, action: "REJECTED" });
+                                    setIsApprovalModalOpen(true);
+                                  }}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground italic">Processed</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

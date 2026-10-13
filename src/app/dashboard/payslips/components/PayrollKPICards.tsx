@@ -47,7 +47,7 @@ export function PayrollKPICards({ metrics, loading }: PayrollKPICardsProps) {
   };
 
   return (
-    <div className="grid gap-6 grid-cols-2 md:grid-cols-6 ">
+    <div className="grid gap-1.5 sm:gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
       {metrics?.map((metric: any, i: number) => {
         const { color, bg, cardBg } = getColorClasses(metric.title);
         return (

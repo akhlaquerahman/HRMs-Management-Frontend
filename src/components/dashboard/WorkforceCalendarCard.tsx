@@ -81,35 +81,31 @@ export function WorkforceCalendarCard({
   const weeklyOffSet = new Set(shiftInfo?.weeklyOff || ['Saturday', 'Sunday']);
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // Bulletproof Multi-Format Date Key Generator (Matches UTC, Local, and Date string splits)
-  const getDateKeys = (val: string | Date | undefined | null): string[] => {
-    if (!val) return [];
-    const keys = new Set<string>();
+  // Bulletproof Single-Date Key Generator (Guarantees 1:1 match without adjacent-day leakage)
+  const getExactDateKey = (val: string | Date | undefined | null): string => {
+    if (!val) return '';
     if (typeof val === 'string') {
       const trimmed = val.split('T')[0];
-      if (trimmed) keys.add(trimmed);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        if (val.includes('T')) {
+          const d = new Date(val);
+          if (!isNaN(d.getTime())) {
+            return format(d, 'yyyy-MM-dd');
+          }
+        }
+        return trimmed;
+      }
     }
     const d = new Date(val);
-    if (!isNaN(d.getTime())) {
-      keys.add(format(d, 'yyyy-MM-dd'));
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      keys.add(`${yyyy}-${mm}-${dd}`);
-
-      const uyyyy = d.getUTCFullYear();
-      const umm = String(d.getUTCMonth() + 1).padStart(2, '0');
-      const udd = String(d.getUTCDate()).padStart(2, '0');
-      keys.add(`${uyyyy}-${umm}-${udd}`);
-    }
-    return Array.from(keys);
+    return !isNaN(d.getTime()) ? format(d, 'yyyy-MM-dd') : '';
   };
 
   // Map attendance records
   const attendanceMap = new Map<string, any>();
   (attendanceRecords || []).forEach(rec => {
     if (rec?.date) {
-      getDateKeys(rec.date).forEach(k => attendanceMap.set(k, rec));
+      const k = getExactDateKey(rec.date);
+      if (k) attendanceMap.set(k, rec);
     }
   });
 
@@ -117,7 +113,8 @@ export function WorkforceCalendarCard({
   const rosterMap = new Map<string, any>();
   (rosterEntries || []).forEach(r => {
     if (r?.date) {
-      getDateKeys(r.date).forEach(k => rosterMap.set(k, r));
+      const k = getExactDateKey(r.date);
+      if (k) rosterMap.set(k, r);
     }
   });
 
@@ -125,7 +122,8 @@ export function WorkforceCalendarCard({
   const holidayMap = new Map<string, any>();
   (holidays || []).forEach(h => {
     if (h?.date) {
-      getDateKeys(h.date).forEach(k => holidayMap.set(k, h));
+      const k = getExactDateKey(h.date);
+      if (k) holidayMap.set(k, h);
     }
   });
 
@@ -136,7 +134,8 @@ export function WorkforceCalendarCard({
       let cur = new Date(l.startDate);
       const end = new Date(l.endDate);
       while (cur <= end) {
-        getDateKeys(cur).forEach(k => leaveMap.set(k, l));
+        const k = format(cur, 'yyyy-MM-dd');
+        leaveMap.set(k, l);
         cur.setDate(cur.getDate() + 1);
       }
     }
@@ -175,31 +174,26 @@ export function WorkforceCalendarCard({
         const dNorm = new Date(d);
         dNorm.setHours(0, 0, 0, 0);
         const isPast = dNorm < todayDate;
+        const isFuture = dNorm > todayDate;
 
-        const dateKeys = getDateKeys(d);
-        let record: any = null;
-        for (const k of dateKeys) {
-          if (attendanceMap.has(k)) { record = attendanceMap.get(k); break; }
-        }
-        let rosterItem: any = null;
-        for (const k of dateKeys) {
-          if (rosterMap.has(k)) { rosterItem = rosterMap.get(k); break; }
-        }
-        let holidayItem: any = null;
-        for (const k of dateKeys) {
-          if (holidayMap.has(k)) { holidayItem = holidayMap.get(k); break; }
-        }
-        let leaveItem: any = null;
-        for (const k of dateKeys) {
-          if (leaveMap.has(k)) { leaveItem = leaveMap.get(k); break; }
-        }
+        const dateKey = format(d, 'yyyy-MM-dd');
+        const record = attendanceMap.get(dateKey) || null;
+        const rosterItem = rosterMap.get(dateKey) || null;
+        const holidayItem = holidayMap.get(dateKey) || null;
+        const leaveItem = leaveMap.get(dateKey) || null;
 
         const isRosterWeekOff = rosterItem?.type === 'WEEK_OFF' || rosterItem?.type === 'OFF';
         const isOff = isRosterWeekOff || (isWeeklyOff && !rosterItem?.shift);
         const isHoliday = !!holidayItem || record?.status === 'HOLIDAY' || rosterItem?.type === 'HOLIDAY';
         const isLeave = !!leaveItem || record?.status === 'APPROVED' || record?.status === 'ON_LEAVE' || record?.status === 'LEAVE';
-        const isPresent = record?.status === 'PRESENT' || (record?.logs && record.logs.length > 0 && record.effectiveHours > 0);
-        const isHalfDay = record?.status === 'HALF_DAY';
+
+        // Strict Enterprise Working Rules:
+        // Future days can NEVER be Present or Half Day.
+        // Present requires >= 8.0 effective hours.
+        // Half Day requires >= 4.0 and < 8.0 effective hours.
+        const effHours = typeof record?.effectiveHours === 'number' ? record.effectiveHours : 0;
+        const isPresent = !isFuture && ((record?.status === 'PRESENT' && effHours >= 8.0) || effHours >= 8.0);
+        const isHalfDay = !isFuture && !isPresent && (record?.status === 'HALF_DAY' || (effHours >= 4.0 && effHours < 8.0));
 
         if (isPresent) {
           presentCount++;
@@ -207,7 +201,7 @@ export function WorkforceCalendarCard({
           presentCount += 0.5;
         } else if (isLeave) {
           leaveCount++;
-        } else if (isPast && !isOff && !isHoliday) {
+        } else if (isPast && !isOff && !isHoliday && !isPresent && !isHalfDay) {
           absentCount++;
         }
       }
@@ -371,23 +365,11 @@ export function WorkforceCalendarCard({
                   dNorm.setHours(0, 0, 0, 0);
                   const isPast = dNorm < todayDate;
 
-                  const dateKeys = getDateKeys(d);
-                  let record: any = null;
-                  for (const k of dateKeys) {
-                    if (attendanceMap.has(k)) { record = attendanceMap.get(k); break; }
-                  }
-                  let rosterItem: any = null;
-                  for (const k of dateKeys) {
-                    if (rosterMap.has(k)) { rosterItem = rosterMap.get(k); break; }
-                  }
-                  let holidayItem: any = null;
-                  for (const k of dateKeys) {
-                    if (holidayMap.has(k)) { holidayItem = holidayMap.get(k); break; }
-                  }
-                  let leaveItem: any = null;
-                  for (const k of dateKeys) {
-                    if (leaveMap.has(k)) { leaveItem = leaveMap.get(k); break; }
-                  }
+                  const dateKey = format(d, 'yyyy-MM-dd');
+                  const record = attendanceMap.get(dateKey) || null;
+                  const rosterItem = rosterMap.get(dateKey) || null;
+                  const holidayItem = holidayMap.get(dateKey) || null;
+                  const leaveItem = leaveMap.get(dateKey) || null;
 
                   const isRosterWeekOff = rosterItem?.type === 'WEEK_OFF' || rosterItem?.type === 'OFF';
                   const isWeekendOrOff = isRosterWeekOff || (isDefaultWeekend && !rosterItem?.shift);
@@ -398,19 +380,38 @@ export function WorkforceCalendarCard({
                     (effectiveShift?.startTime && effectiveShift?.endTime ? `${effectiveShift.startTime} - ${effectiveShift.endTime}` : shiftInfo?.timing || '09:00 - 18:00');
                   const shiftDisplayName = effectiveShift?.name || shiftInfo?.name || 'General Shift';
 
-                  // Attendance status resolution
-                  const isPresent = record?.status === 'PRESENT' || 
-                    (record?.logs && record.logs.length > 0 && (record.effectiveHours > 0 || isCurrentDay)) ||
-                    (record?.status === 'COMPLETED');
+                  const isFuture = dNorm > todayDate;
+                  const effHours = typeof record?.effectiveHours === 'number' ? record.effectiveHours : 0;
+                  const hasOpenLog = record?.logs && record.logs.some((l: any) => !l.punchOut);
 
-                  const isHalfDay = record?.status === 'HALF_DAY';
+                  // Strict Enterprise Rules:
+                  // 1. Future dates can NEVER be Present, Half Day, or Absent
+                  // 2. Present requires >= 8.0 effective hours (0.0h can NEVER be Present!)
+                  // 3. Half Day requires >= 4.0 and < 8.0 effective hours
+                  // 4. Live currently-working session on current day shows Working (In Progress)
+                  const isPresent = !isFuture && ((record?.status === 'PRESENT' && effHours >= 8.0) || effHours >= 8.0);
+                  const isHalfDay = !isFuture && !isPresent && (record?.status === 'HALF_DAY' || (effHours >= 4.0 && effHours < 8.0));
+                  const isWorkingLive = isCurrentDay && hasOpenLog && !isPresent && !isHalfDay;
+
                   const isLeave = !!leaveItem || record?.status === 'APPROVED' || record?.status === 'ON_LEAVE' || record?.status === 'LEAVE' || rosterItem?.type === 'LEAVE';
-                  const isHoliday = !!holidayItem || record?.status === 'HOLIDAY' || rosterItem?.type === 'HOLIDAY';
+                  const isHoliday = !isLeave && (!!holidayItem || record?.status === 'HOLIDAY' || rosterItem?.type === 'HOLIDAY');
                   const isWFH = rosterItem?.type === 'WFH' || leaveItem?.workFromHome;
 
-                  const isExplicitAbsent = record?.status === 'ABSENT';
-                  const isUnmarkedAbsent = isPast && isCurrentMonth && !isPresent && !isHalfDay && !isLeave && !isHoliday && !isWeekendOrOff;
-                  const isAbsent = isExplicitAbsent || isUnmarkedAbsent;
+                  const isExplicitAbsent = !isFuture && record?.status === 'ABSENT';
+                  const isPastAbsent = isPast && isCurrentMonth && !isPresent && !isHalfDay && !isLeave && !isHoliday && !isWeekendOrOff;
+                  
+                  // For current day, if employee missed initial punch window (> 1h after shift start and 0 logs)
+                  const isCurrentDayMissed = isCurrentDay && !isPresent && !isHalfDay && !isWorkingLive && !isLeave && !isHoliday && !isWeekendOrOff && (() => {
+                    const shiftStartStr = effectiveShift?.startTime || '09:00';
+                    const [sH, sM] = shiftStartStr.split(':').map(Number);
+                    const now = new Date();
+                    const shiftStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), sH, sM, 0);
+                    const cutoff = new Date(shiftStart.getTime() + 60 * 60 * 1000);
+                    const hasLogs = record?.logs && record.logs.length > 0;
+                    return now > cutoff && !hasLogs;
+                  })();
+
+                  const isAbsent = !isFuture && (isExplicitAbsent || isPastAbsent || isCurrentDayMissed);
 
                   let bgClass = "bg-card border-slate-200 dark:border-slate-800 hover:border-blue-400";
                   let statusBadge = null;
@@ -438,13 +439,39 @@ export function WorkforceCalendarCard({
                           {shiftDisplayTiming}
                         </span>
                         <span className="text-[9px] text-emerald-700/90 dark:text-emerald-400 font-semibold flex items-center justify-between">
-                          <span>{record?.effectiveHours ? `${Number(record.effectiveHours).toFixed(1)}h worked` : 'Punched In'}</span>
+                          <span>{record?.effectiveHours ? `${Number(record.effectiveHours).toFixed(1)}h worked` : '8.0h worked'}</span>
                         </span>
                       </div>
                     );
                     mobileIndicator = (
                       <span className="text-[6.5px] font-black text-emerald-800 dark:text-emerald-300 block text-center truncate leading-none min-w-0">
-                        {record?.effectiveHours ? `${Number(record.effectiveHours).toFixed(1)}h` : 'In'}
+                        {record?.effectiveHours ? `${Number(record.effectiveHours).toFixed(1)}h` : '8.0h'}
+                      </span>
+                    );
+                  } else if (isWorkingLive) {
+                    dayStatusForModal = 'PRESENT';
+                    dayStatusLabel = 'Working (In Progress)';
+                    bgClass = "bg-blue-50/90 dark:bg-blue-950/40 border-blue-400 dark:border-blue-600 hover:bg-blue-100/70 shadow-2xs";
+                    statusBadge = (
+                      <span className="w-3.5 h-3.5 sm:w-auto sm:px-1.5 sm:py-0.5 rounded text-[7.5px] sm:text-[10px] font-black bg-blue-600 text-white flex items-center justify-center sm:gap-1 shrink-0 shadow-2xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        <span>IN</span>
+                        <span className="hidden sm:inline font-semibold">Working</span>
+                      </span>
+                    );
+                    timeDetails = (
+                      <div className="flex flex-col gap-0.5 mt-1 text-[9.5px]">
+                        <span className="font-semibold text-blue-800 dark:text-blue-300 truncate font-mono">
+                          {shiftDisplayTiming}
+                        </span>
+                        <span className="text-[9px] text-blue-700/90 dark:text-blue-400 font-semibold flex items-center justify-between">
+                          <span>{effHours > 0 ? `${Number(effHours).toFixed(1)}h logged` : 'In Progress'}</span>
+                        </span>
+                      </div>
+                    );
+                    mobileIndicator = (
+                      <span className="text-[6.5px] font-black text-blue-800 dark:text-blue-300 block text-center truncate leading-none min-w-0">
+                        Work
                       </span>
                     );
                   } else if (isHalfDay) {

@@ -113,7 +113,7 @@ export default function MyAttendancePage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1600px] mx-auto pt-2 sm:pt-4 pb-10">
+    <div className="flex flex-col gap-3 sm:gap-6 max-w-[1600px] mx-auto w-full min-w-0 pb-6">
       <PageHeader
         title={t("My Attendance")}
         description={t("Track your working hours, daily timeline, and attendance metrics.")}
@@ -124,7 +124,7 @@ export default function MyAttendancePage() {
       <KPICards summaryData={summaryData} summaryLoading={summaryLoading} />
 
       {/* Filter Toolbar */}
-      <div className="bg-card rounded-xl border shadow-sm p-4 sticky top-0 z-20">
+      <div className="bg-card rounded-xl border shadow-2xs sm:shadow-sm p-2.5 sm:p-4 sticky top-0 z-20">
         <div className="flex flex-col md:flex-row items-center gap-3">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

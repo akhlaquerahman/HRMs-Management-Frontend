@@ -15,7 +15,7 @@ export default function ShiftManagementPage() {
   const [activeTab, setActiveTab] = useState<string>('weekly-roster');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full min-w-0">
       {/* STANDARD ENTERPRISE PAGE HEADER */}
       <PageHeader 
         title="Shift Management" 
@@ -28,31 +28,31 @@ export default function ShiftManagementPage() {
       />
 
       {/* NAVIGATION TABS */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-        <TabsList className="bg-muted/40 p-1 rounded-xl border w-full sm:w-auto inline-flex gap-1">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4 sm:space-y-6">
+        <TabsList className="bg-muted/40 p-1 rounded-xl border w-full sm:w-auto flex overflow-x-auto no-scrollbar scroll-smooth gap-1 justify-start">
           
           <TabsTrigger 
             value="weekly-roster" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs"
           >
             <CalendarDays className="w-3.5 h-3.5 text-primary" />
-            <span>Weekly Roster Planner</span>
+            <span>Roster Planner</span>
           </TabsTrigger>
 
           <TabsTrigger 
             value="shift-templates" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs"
           >
             <Layers className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Shift Templates & Profiles</span>
+            <span>Shift Templates</span>
           </TabsTrigger>
 
           <TabsTrigger 
             value="roster-history" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs"
           >
             <History className="w-3.5 h-3.5 text-amber-600" />
-            <span>Roster History & Audit</span>
+            <span>Roster History</span>
           </TabsTrigger>
 
         </TabsList>

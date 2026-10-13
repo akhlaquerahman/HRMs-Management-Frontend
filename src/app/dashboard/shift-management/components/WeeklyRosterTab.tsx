@@ -905,38 +905,38 @@ export function WeeklyRosterTab() {
       </div>
 
       {/* 2. KPI SUMMARY CARDS */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-3 rounded-xl border bg-card shadow-2xs">
-          <span className="text-[11px] text-muted-foreground font-medium block">Total Employees</span>
-          <span className="text-lg font-bold text-foreground font-mono mt-0.5 block">{stats.totalEmployees}</span>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
+        <div className="p-2 sm:p-3 rounded-xl border bg-card shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block truncate">Total Employees</span>
+          <span className="text-base sm:text-lg font-bold text-foreground font-mono mt-0.5 block">{stats.totalEmployees}</span>
         </div>
 
-        <div className="p-3 rounded-xl border bg-card shadow-2xs">
-          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block">Scheduled Shifts</span>
-          <span className="text-lg font-bold text-emerald-600 font-mono mt-0.5 block">{stats.scheduled}</span>
+        <div className="p-2 sm:p-3 rounded-xl border bg-card shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block truncate">Scheduled Shifts</span>
+          <span className="text-base sm:text-lg font-bold text-emerald-600 font-mono mt-0.5 block">{stats.scheduled}</span>
         </div>
 
-        <div className="p-3 rounded-xl border bg-card shadow-2xs">
-          <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium block">Configured Week Offs</span>
-          <span className="text-lg font-bold text-amber-600 font-mono mt-0.5 block">{stats.weekOff}</span>
+        <div className="p-2 sm:p-3 rounded-xl border bg-card shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] text-amber-600 dark:text-amber-400 font-medium block truncate">Configured Offs</span>
+          <span className="text-base sm:text-lg font-bold text-amber-600 font-mono mt-0.5 block">{stats.weekOff}</span>
         </div>
 
-        <div className="p-3 rounded-xl border bg-card shadow-2xs">
-          <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium block">Approved Leave</span>
-          <span className="text-lg font-bold text-rose-600 font-mono mt-0.5 block">{stats.onLeave}</span>
+        <div className="p-2 sm:p-3 rounded-xl border bg-card shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] text-rose-600 dark:text-rose-400 font-medium block truncate">Approved Leave</span>
+          <span className="text-base sm:text-lg font-bold text-rose-600 font-mono mt-0.5 block">{stats.onLeave}</span>
         </div>
 
-        <div className="p-3 rounded-xl border bg-card shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-medium block">Unassigned Cells</span>
-          <span className="text-lg font-bold text-slate-600 dark:text-slate-300 font-mono mt-0.5 block">{stats.unassigned}</span>
+        <div className="p-2 sm:p-3 rounded-xl border bg-card shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium block truncate">Unassigned Cells</span>
+          <span className="text-base sm:text-lg font-bold text-slate-600 dark:text-slate-300 font-mono mt-0.5 block">{stats.unassigned}</span>
         </div>
 
-        <div className={`p-3 rounded-xl border shadow-2xs flex flex-col justify-between ${
+        <div className={`p-2 sm:p-3 rounded-xl border shadow-2xs flex flex-col justify-between ${
           stats.conflicts > 0 ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200' : 'bg-card'
         }`}>
-          <span className="text-[11px] text-rose-700 dark:text-rose-400 font-medium block">Schedule Conflicts</span>
+          <span className="text-[10px] sm:text-[11px] text-rose-700 dark:text-rose-400 font-medium block truncate">Conflicts</span>
           <div className="flex items-center justify-between mt-0.5">
-            <span className="text-lg font-bold text-rose-600 font-mono">{stats.conflicts}</span>
+            <span className="text-base sm:text-lg font-bold text-rose-600 font-mono">{stats.conflicts}</span>
             {stats.conflicts > 0 && (
               <span className="text-[10px] font-semibold text-rose-600 underline cursor-pointer" onClick={() => setIsReviewModalOpen(true)}>
                 Review

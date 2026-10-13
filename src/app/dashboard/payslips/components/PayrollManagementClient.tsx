@@ -103,7 +103,7 @@ export function PayrollManagementClient() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6 w-full min-w-0">
       <PageHeader 
         title={t("Payslips & Payroll")} 
         description={t("View, download and manage your salary history, payroll summaries and tax information.")}

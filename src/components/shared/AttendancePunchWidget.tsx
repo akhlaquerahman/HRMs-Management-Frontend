@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   LogIn, LogOut, MapPin, Loader2, Coffee, 
-  ChevronDown, Play, Sparkles, Clock, CheckCircle2
+  ChevronDown, Play, Sparkles, Clock, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -80,8 +80,10 @@ export function AttendancePunchWidget({ compact = false }: AttendancePunchWidget
   const handlePunchIn = async () => {
     try {
       setIsSubmitting(true);
-      await api.post('/attendance/punch-in', {});
-      toast.success("Checked in successfully!");
+      const isResume = currentState === "PUNCHED_OUT";
+      const res = await api.post('/attendance/punch-in', {});
+      const msg = res.data?.message || (isResume ? "Resumed work session successfully!" : "Checked in successfully!");
+      toast.success(msg);
       invalidateAllQueries();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Error punching in");
@@ -138,14 +140,24 @@ export function AttendancePunchWidget({ compact = false }: AttendancePunchWidget
     queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
   };
 
-  if (statusLoading) {
-    return (
-      <div className="h-10 w-36 bg-slate-200/60 dark:bg-slate-800/60 animate-pulse rounded-xl border border-slate-200/50" />
-    );
+  if (statusLoading || !statusData) {
+    return null;
   }
 
-  // STATE 1: NOT PUNCHED IN
-  if (currentState === "NOT_PUNCHED_IN") {
+  // Punch window validity check: Allowed ONLY within [shiftStart - 60 min, shiftStart + 60 min]
+  const isWithinPunchWindow = Boolean(
+    statusData?.canPunchIn === true || 
+    (statusData?.windowStatus?.isOpen === true && !statusData?.windowStatus?.isBeforeWindow && !statusData?.windowStatus?.isAfterWindow)
+  );
+
+  // STATE 1: NOT PUNCHED IN YET
+  if (currentState === "NOT_PUNCHED_IN" || currentState === "WINDOW_CLOSED") {
+    // If not yet 1 hour before shift start, or window has closed -> DO NOT SHOW BUTTON!
+    if (!isWithinPunchWindow) {
+      return null;
+    }
+
+    // Within window [shiftStart - 1 hr, shiftStart + 1 hr] -> Show Punch In button!
     return (
       <div className="flex items-center gap-1 sm:gap-3 shrink-0">
         <Button
@@ -323,39 +335,44 @@ export function AttendancePunchWidget({ compact = false }: AttendancePunchWidget
     );
   }
 
-  // STATE 4: PUNCHED OUT (SESSION ENDED)
+  // STATE 4: PUNCHED OUT (SESSION PAUSED / RESUME OPTION)
   if (currentState === "PUNCHED_OUT" && (statusData?.canResume ?? true)) {
     return (
       <div className="flex items-center gap-1.5 sm:gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 pl-2 sm:pl-3.5 shadow-sm shrink-0">
         <div className="flex flex-col text-left pr-0.5 sm:pr-1">
-          <span className="hidden sm:inline text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Session Ended</span>
+          <span className="hidden sm:inline text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">Session Paused</span>
           <span className="text-[10px] sm:text-[11px] font-mono font-semibold text-slate-500 leading-tight">
             {statusData?.dailyWorkingHours ? `${statusData.dailyWorkingHours} worked` : 'Done'}
           </span>
         </div>
         <Button
           size="sm"
-          className="font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 gap-1 rounded-lg sm:rounded-xl px-2 sm:px-3 h-7 sm:h-9"
+          className="font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 gap-1.5 rounded-lg sm:rounded-xl px-2.5 sm:px-3.5 h-7 sm:h-9"
           onClick={handlePunchIn}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
             <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
           ) : (
-            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
+            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white text-white" />
           )}
-          <span className="hidden sm:inline">Resume Shift</span>
+          <span className="hidden sm:inline">Resume Session</span>
           <span className="sm:hidden text-xs">Resume</span>
         </Button>
       </div>
     );
   }
 
-  return (
-    <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
-      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400" />
-      <span className="hidden sm:inline">Shift Completed</span>
-      <span className="sm:hidden text-xs">Completed</span>
-    </div>
-  );
+  if (statusData?.attendanceStatus === 'PRESENT' || (statusData?.dailyWorkingMinutes && statusData.dailyWorkingMinutes >= 480)) {
+    return (
+      <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
+        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400" />
+        <span className="hidden sm:inline">Shift Completed</span>
+        <span className="sm:hidden text-xs">Completed</span>
+      </div>
+    );
+  }
+
+  return null;
 }
+

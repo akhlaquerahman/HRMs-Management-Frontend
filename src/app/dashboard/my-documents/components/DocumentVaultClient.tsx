@@ -46,26 +46,24 @@ export function DocumentVaultClient() {
   const handleReset = () => setFilters({ search: '', category: 'ALL', status: 'ALL', documentType: 'ALL' });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6 w-full min-w-0">
       <PageHeader 
         title={t("My Documents")} 
         description={t("Securely manage, upload and access all your personal and employment documents.")}
         showCreate={false}
         showSearch={false}
         actionButton={
-          <div className="flex gap-2">
-            <Button onClick={() => setIsUploadModalOpen(true)}>
-              <UploadCloud className="w-4 h-4 mr-2" />
-              {t("Upload Document")}
-            </Button>
-          </div>
+          <Button onClick={() => setIsUploadModalOpen(true)} className="h-8 sm:h-9 text-xs sm:text-sm">
+            <UploadCloud className="w-3.5 h-3.5 mr-1.5" />
+            {t("Upload Document")}
+          </Button>
         }
       />
 
       <DocumentKPICards metrics={summaryData?.metrics} loading={isLoadingSummary} />
 
-      <div className="grid gap-6">
-        <div className="xl:col-span-2 space-y-6">
+      <div className="grid gap-3 sm:gap-6">
+        <div className="xl:col-span-2 space-y-3 sm:space-y-6">
           <DocumentFilterToolbar 
             onSearch={(v) => handleFilterChange('search', v)}
             onFilterChange={handleFilterChange}

@@ -159,7 +159,7 @@ export function EmployeeLeaveRequestClient() {
   const balances = summaryData?.balances || { annual: 18, casual: 8, medical: 10, earned: 5, compOff: 0 };
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto p-6">
+    <div className="space-y-3 sm:space-y-5 w-full min-w-0">
       {/* Header */}
       <PageHeader
         title="My Leave Requests"
@@ -167,165 +167,165 @@ export function EmployeeLeaveRequestClient() {
         showCreate={false}
         showSearch={false}
         actionButton={
-          <Button onClick={() => setIsRequestModalOpen(true)} className="bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={() => setIsRequestModalOpen(true)} className="h-8 sm:h-9 text-xs sm:text-sm bg-primary hover:bg-primary/90">
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
             Request Leave
           </Button>
         }
       />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[9.5px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
               Total Quota
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
-              <Calendar className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{isSummaryLoading ? "..." : summaryData?.metrics?.[0]?.value || 41} Days</div>
-            <p className="text-xs text-muted-foreground mt-1">{summaryData?.metrics?.[0]?.trend || "Total Allocated"}</p>
+          <CardContent className="p-2.5 sm:p-4 pt-0">
+            <div className="text-base sm:text-2xl font-bold truncate">{isSummaryLoading ? "..." : summaryData?.metrics?.[0]?.value || 41} Days</div>
+            <p className="text-[9.5px] sm:text-xs text-muted-foreground mt-0.5 truncate">{summaryData?.metrics?.[0]?.trend || "Total Allocated"}</p>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Pending Requests
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[9.5px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Pending
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <Clock className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:h-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{isSummaryLoading ? "..." : summaryData?.metrics?.[1]?.value || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Under Manager / HR Review</p>
+          <CardContent className="p-2.5 sm:p-4 pt-0">
+            <div className="text-base sm:text-2xl font-bold truncate">{isSummaryLoading ? "..." : summaryData?.metrics?.[1]?.value || 0}</div>
+            <p className="text-[9.5px] sm:text-xs text-muted-foreground mt-0.5 truncate">Under Review</p>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Approved Leaves
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[9.5px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Approved
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:h-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{isSummaryLoading ? "..." : summaryData?.metrics?.[2]?.value || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Processed This Year</p>
+          <CardContent className="p-2.5 sm:p-4 pt-0">
+            <div className="text-base sm:text-2xl font-bold truncate">{isSummaryLoading ? "..." : summaryData?.metrics?.[2]?.value || 0}</div>
+            <p className="text-[9.5px] sm:text-xs text-muted-foreground mt-0.5 truncate">This Year</p>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Upcoming Leaves
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-4 pb-1 sm:pb-2">
+            <CardTitle className="text-[9.5px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Upcoming
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center">
-              <CalendarDays className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
+              <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:h-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{isSummaryLoading ? "..." : summaryData?.metrics?.[3]?.value || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Scheduled Next 30 Days</p>
+          <CardContent className="p-2.5 sm:p-4 pt-0">
+            <div className="text-base sm:text-2xl font-bold truncate">{isSummaryLoading ? "..." : summaryData?.metrics?.[3]?.value || 0}</div>
+            <p className="text-[9.5px] sm:text-xs text-muted-foreground mt-0.5 truncate">Next 30 Days</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Leave Entitlements & Balances Cards */}
       <Card className="border shadow-xs">
-        <CardHeader className="pb-3 border-b bg-muted/20 flex flex-row items-center justify-between">
+        <CardHeader className="p-2.5 sm:p-4 pb-2 border-b bg-muted/20 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-primary" />
-              My Leave Entitlements & Balances
+            <CardTitle className="text-xs sm:text-base font-semibold flex items-center gap-1.5 sm:gap-2">
+              <Briefcase className="h-3.5 w-3.5 sm:h-4 sm:h-4 text-primary" />
+              My Leave Balances
             </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">
               Configured company leave balance allocations and remaining days.
             </p>
           </div>
         </CardHeader>
-        <CardContent className="p-3 sm:p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-            <div className="p-2.5 sm:p-3.5 rounded-xl border bg-blue-50/50 border-blue-100 flex flex-col justify-between">
+        <CardContent className="p-2 sm:p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-3">
+            <div className="p-2 sm:p-3.5 rounded-lg sm:rounded-xl border bg-blue-50/50 border-blue-100 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] sm:text-xs font-bold uppercase text-blue-700 tracking-wider truncate">Annual Leave</span>
-                <Badge variant="outline" className="bg-white text-blue-700 border-blue-200 font-mono text-[9px] sm:text-[10px] shrink-0">
+                <span className="text-[9px] sm:text-xs font-bold uppercase text-blue-700 tracking-wider truncate">Annual</span>
+                <Badge variant="outline" className="bg-white text-blue-700 border-blue-200 font-mono text-[8px] sm:text-[10px] px-1 py-0 shrink-0">
                   Paid
                 </Badge>
               </div>
-              <div className="mt-2 sm:mt-3">
-                <div className="text-xl sm:text-2xl font-extrabold text-blue-900">{balances.annual} Days</div>
-                <span className="text-[10px] sm:text-xs text-blue-600 font-medium leading-tight block">Remaining</span>
+              <div className="mt-1.5 sm:mt-3">
+                <div className="text-sm sm:text-2xl font-extrabold text-blue-900 truncate">{balances.annual} Days</div>
+                <span className="text-[8.5px] sm:text-xs text-blue-600 font-medium leading-none block mt-0.5">Remaining</span>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-3.5 rounded-xl border bg-emerald-50/50 border-emerald-100 flex flex-col justify-between">
+            <div className="p-2 sm:p-3.5 rounded-lg sm:rounded-xl border bg-emerald-50/50 border-emerald-100 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] sm:text-xs font-bold uppercase text-emerald-700 tracking-wider truncate">Casual Leave</span>
-                <Badge variant="outline" className="bg-white text-emerald-700 border-emerald-200 font-mono text-[9px] sm:text-[10px] shrink-0">
+                <span className="text-[9px] sm:text-xs font-bold uppercase text-emerald-700 tracking-wider truncate">Casual</span>
+                <Badge variant="outline" className="bg-white text-emerald-700 border-emerald-200 font-mono text-[8px] sm:text-[10px] px-1 py-0 shrink-0">
                   Paid
                 </Badge>
               </div>
-              <div className="mt-2 sm:mt-3">
-                <div className="text-xl sm:text-2xl font-extrabold text-emerald-900">{balances.casual} Days</div>
-                <span className="text-[10px] sm:text-xs text-emerald-600 font-medium leading-tight block">Remaining</span>
+              <div className="mt-1.5 sm:mt-3">
+                <div className="text-sm sm:text-2xl font-extrabold text-emerald-900 truncate">{balances.casual} Days</div>
+                <span className="text-[8.5px] sm:text-xs text-emerald-600 font-medium leading-none block mt-0.5">Remaining</span>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-3.5 rounded-xl border bg-rose-50/50 border-rose-100 flex flex-col justify-between">
+            <div className="p-2 sm:p-3.5 rounded-lg sm:rounded-xl border bg-rose-50/50 border-rose-100 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] sm:text-xs font-bold uppercase text-rose-700 tracking-wider truncate">Medical Leave</span>
-                <Badge variant="outline" className="bg-white text-rose-700 border-rose-200 font-mono text-[9px] sm:text-[10px] shrink-0">
+                <span className="text-[9px] sm:text-xs font-bold uppercase text-rose-700 tracking-wider truncate">Medical</span>
+                <Badge variant="outline" className="bg-white text-rose-700 border-rose-200 font-mono text-[8px] sm:text-[10px] px-1 py-0 shrink-0">
                   Paid
                 </Badge>
               </div>
-              <div className="mt-2 sm:mt-3">
-                <div className="text-xl sm:text-2xl font-extrabold text-rose-900">{balances.medical} Days</div>
-                <span className="text-[10px] sm:text-xs text-rose-600 font-medium leading-tight block">Remaining</span>
+              <div className="mt-1.5 sm:mt-3">
+                <div className="text-sm sm:text-2xl font-extrabold text-rose-900 truncate">{balances.medical} Days</div>
+                <span className="text-[8.5px] sm:text-xs text-rose-600 font-medium leading-none block mt-0.5">Remaining</span>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-3.5 rounded-xl border bg-purple-50/50 border-purple-100 flex flex-col justify-between">
+            <div className="p-2 sm:p-3.5 rounded-lg sm:rounded-xl border bg-purple-50/50 border-purple-100 flex flex-col justify-between">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] sm:text-xs font-bold uppercase text-purple-700 tracking-wider truncate">Earned Leave</span>
-                <Badge variant="outline" className="bg-white text-purple-700 border-purple-200 font-mono text-[9px] sm:text-[10px] shrink-0">
+                <span className="text-[9px] sm:text-xs font-bold uppercase text-purple-700 tracking-wider truncate">Earned</span>
+                <Badge variant="outline" className="bg-white text-purple-700 border-purple-200 font-mono text-[8px] sm:text-[10px] px-1 py-0 shrink-0">
                   Accrued
                 </Badge>
               </div>
-              <div className="mt-2 sm:mt-3">
-                <div className="text-xl sm:text-2xl font-extrabold text-purple-900">{balances.earned} Days</div>
-                <span className="text-[10px] sm:text-xs text-purple-600 font-medium leading-tight block">Remaining</span>
+              <div className="mt-1.5 sm:mt-3">
+                <div className="text-sm sm:text-2xl font-extrabold text-purple-900 truncate">{balances.earned} Days</div>
+                <span className="text-[8.5px] sm:text-xs text-purple-600 font-medium leading-none block mt-0.5">Remaining</span>
               </div>
             </div>
 
-            <div className="p-2.5 sm:p-3.5 rounded-xl border bg-amber-50/50 border-amber-100 flex flex-col justify-between col-span-2 sm:col-span-1">
+            <div className="p-2 sm:p-3.5 rounded-lg sm:rounded-xl border bg-amber-50/50 border-amber-100 flex flex-col justify-between col-span-2 sm:col-span-1">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] sm:text-xs font-bold uppercase text-amber-700 tracking-wider truncate">Comp Off</span>
-                <Badge variant="outline" className="bg-white text-amber-700 border-amber-200 font-mono text-[9px] sm:text-[10px] shrink-0">
+                <span className="text-[9px] sm:text-xs font-bold uppercase text-amber-700 tracking-wider truncate">Comp Off</span>
+                <Badge variant="outline" className="bg-white text-amber-700 border-amber-200 font-mono text-[8px] sm:text-[10px] px-1 py-0 shrink-0">
                   Extra
                 </Badge>
               </div>
-              <div className="mt-2 sm:mt-3">
-                <div className="text-xl sm:text-2xl font-extrabold text-amber-900">{balances.compOff} Days</div>
-                <span className="text-[10px] sm:text-xs text-amber-600 font-medium leading-tight block">Remaining</span>
+              <div className="mt-1.5 sm:mt-3">
+                <div className="text-sm sm:text-2xl font-extrabold text-amber-900 truncate">{balances.compOff} Days</div>
+                <span className="text-[8.5px] sm:text-xs text-amber-600 font-medium leading-none block mt-0.5">Remaining</span>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Filter Toolbar & Requests Table */}
-      <div className="space-y-4">
+      {/* Filter Toolbar & Requests List */}
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-          <div className="flex items-center gap-2">
+          <div className="w-full sm:w-auto">
             <select
-              className="h-9 px-3 py-1 border rounded-lg text-xs bg-background focus:ring-1 focus:ring-primary w-full sm:w-auto"
+              className="h-8 sm:h-9 px-2.5 py-1 border rounded-lg text-xs bg-background focus:ring-1 focus:ring-primary w-full sm:w-auto"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -338,17 +338,113 @@ export function EmployeeLeaveRequestClient() {
           </div>
 
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Search by leave type or description..."
-              className="pl-9 h-9 text-xs rounded-lg"
+              className="pl-8 h-8 sm:h-9 text-xs rounded-lg"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
-        <Card className="border shadow-xs overflow-hidden">
+        {/* Mobile View: Clean Card List */}
+        <div className="block md:hidden space-y-2">
+          {isLeavesLoading ? (
+            <div className="text-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+            </div>
+          ) : filteredRequests.length === 0 ? (
+            <Card className="p-6 text-center text-muted-foreground text-xs border border-dashed">
+              No leave requests found. Click &quot;Request Leave&quot; above to submit an application.
+            </Card>
+          ) : (
+            filteredRequests.map((r: any) => {
+              const start = new Date(r.startDate);
+              const end = new Date(r.endDate);
+              const days = r.halfDay
+                ? 0.5
+                : Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+
+              return (
+                <Card key={r.id} className="p-3 border shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono text-[10px] font-bold text-muted-foreground">
+                        LR-{r.id.slice(0, 8).toUpperCase()}
+                      </span>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/5 text-primary border-primary/20 shrink-0">
+                        {r.leaveType}
+                      </Badge>
+                    </div>
+                    {r.status === "APPROVED" && (
+                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-0 text-[10px] px-1.5 py-0 shrink-0">
+                        Approved
+                      </Badge>
+                    )}
+                    {r.status === "PENDING" && (
+                      <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-0 text-[10px] px-1.5 py-0 shrink-0">
+                        Pending
+                      </Badge>
+                    )}
+                    {r.status === "REJECTED" && (
+                      <Badge variant="destructive" className="text-[10px] px-1.5 py-0 shrink-0">
+                        Rejected
+                      </Badge>
+                    )}
+                    {r.status === "CANCELLED" && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                        Cancelled
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-foreground font-semibold">
+                    <span>{format(start, "dd MMM")} - {format(end, "dd MMM yyyy")}</span>
+                    <span className="text-primary font-bold">{days} {days === 1 || days === 0.5 ? "Day" : "Days"}</span>
+                  </div>
+
+                  {r.description && (
+                    <p className="text-[11px] text-muted-foreground line-clamp-1">{r.description}</p>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1 border-t text-[10px] text-muted-foreground">
+                    <span>Applied: {format(new Date(r.createdAt), "dd MMM yyyy")}</span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => {
+                          setSelectedRequest(r);
+                          setIsViewModalOpen(true);
+                        }}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      {r.status === "PENDING" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] text-destructive hover:bg-destructive/10"
+                          onClick={() => cancelMutation.mutate(r.id)}
+                          disabled={cancelMutation.isPending}
+                        >
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <Card className="border shadow-xs overflow-hidden hidden md:block">
           <CardContent className="p-0 overflow-x-auto custom-scrollbar">
             <Table>
               <TableHeader>

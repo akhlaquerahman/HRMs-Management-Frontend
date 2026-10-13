@@ -72,24 +72,24 @@ export function KPICards({ summaryData, summaryLoading }: { summaryData: any, su
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1.5 sm:gap-3 md:gap-4">
       {kpis.map((kpi, idx) => (
         <div 
           key={idx} 
           className={cn(
-            "rounded-xl border shadow-sm p-4 flex flex-col justify-between hover:border-primary/40 hover:shadow-md transition-all cursor-default overflow-hidden", 
+            "rounded-xl border shadow-2xs sm:shadow-sm p-2.5 sm:p-4 flex flex-col justify-between hover:border-primary/40 hover:shadow-md transition-all cursor-default overflow-hidden min-h-[75px] sm:min-h-[100px]", 
             kpi.cardBg
           )}
         >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">{kpi.title}</span>
-            <div className={cn("p-2 rounded-lg shrink-0", kpi.bg, kpi.color)}>
-              <kpi.icon className="w-4 h-4" />
+          <div className="flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[9.5px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">{kpi.title}</span>
+            <div className={cn("p-1 sm:p-2 rounded-md sm:rounded-lg shrink-0", kpi.bg, kpi.color)}>
+              <kpi.icon className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground truncate">{kpi.value}</h3>
-            <p className="text-xs font-medium text-muted-foreground mt-0.5 truncate">{kpi.trend}</p>
+          <div className="mt-1.5 sm:mt-3">
+            <h3 className="text-base sm:text-2xl font-bold tracking-tight text-foreground truncate">{kpi.value}</h3>
+            <p className="text-[9px] sm:text-xs font-medium text-muted-foreground mt-0.5 truncate">{kpi.trend}</p>
           </div>
         </div>
       ))}

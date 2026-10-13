@@ -298,29 +298,29 @@ export default function OrganizationPage() {
   });
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="space-y-4 sm:space-y-6 max-w-[1600px] mx-auto w-full min-w-0">
       {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-primary" />
-            Organization Structure
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <span>Organization Structure</span>
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm">
             Centralized hierarchy management for departments, designations, and department managers.
           </p>
         </div>
 
         {/* Top Action Bar */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Button variant="outline" onClick={() => handleOpenCreateDesig()} size="sm" className="h-9">
-            <Briefcase className="h-4 w-4 mr-2" />
-            Add Designation
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+          <Button variant="outline" onClick={() => handleOpenCreateDesig()} size="sm" className="h-8 sm:h-9 text-xs px-2.5">
+            <Briefcase className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+            <span>Add Designation</span>
           </Button>
 
-          <Button onClick={handleOpenCreateDept} size="sm" className="h-9 bg-primary hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Department
+          <Button onClick={handleOpenCreateDept} size="sm" className="h-8 sm:h-9 text-xs px-2.5 bg-primary hover:bg-primary/90">
+            <Plus className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+            <span>Add Department</span>
           </Button>
         </div>
       </div>
@@ -328,113 +328,113 @@ export default function OrganizationPage() {
       {/* Alert banner */}
       {message && (
         <div
-          className={`p-4 rounded-xl flex items-center justify-between gap-3 text-sm font-medium ${
+          className={`p-3 sm:p-4 rounded-xl flex items-center justify-between gap-3 text-xs sm:text-sm font-medium ${
             message.type === "success"
               ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
               : "bg-destructive/15 text-destructive border border-destructive/30"
           }`}
         >
           <div className="flex items-center gap-2">
-            {message.type === "success" ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
-            <span>{message.text}</span>
+            {message.type === "success" ? <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" /> : <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />}
+            <span className="truncate">{message.text}</span>
           </div>
-          <button onClick={() => setMessage(null)} className="text-xs opacity-70 hover:opacity-100">
+          <button onClick={() => setMessage(null)} className="text-xs opacity-70 hover:opacity-100 shrink-0">
             Dismiss
           </button>
         </div>
       )}
 
       {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Departments
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-5 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Departments
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <Building2 className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center h-8">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.departments}
+          <CardContent className="p-2.5 sm:p-5 pt-0 sm:pt-0">
+            <div className="text-base sm:text-2xl font-bold flex items-center h-6 sm:h-8 font-mono">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : summary.departments}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Active organizational units</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">Active units</p>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Designations
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-5 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Designations
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
-              <Briefcase className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+              <Briefcase className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center h-8">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.designations}
+          <CardContent className="p-2.5 sm:p-5 pt-0 sm:pt-0">
+            <div className="text-base sm:text-2xl font-bold flex items-center h-6 sm:h-8 font-mono">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : summary.designations}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Across all departments</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">All departments</p>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Assigned Employees
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-5 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Employees
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-              <Users className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center h-8">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.employees}
+          <CardContent className="p-2.5 sm:p-5 pt-0 sm:pt-0">
+            <div className="text-base sm:text-2xl font-bold flex items-center h-6 sm:h-8 font-mono">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : summary.employees}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Assigned with company role</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">Assigned staff</p>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Department Managers
+          <CardHeader className="flex flex-row items-center justify-between p-2.5 sm:p-5 pb-1 sm:pb-2">
+            <CardTitle className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
+              Managers
             </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <UserCheck className="h-4 w-4" />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+              <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center h-8">
-              {loading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : summary.managers}
+          <CardContent className="p-2.5 sm:p-5 pt-0 sm:pt-0">
+            <div className="text-base sm:text-2xl font-bold flex items-center h-6 sm:h-8 font-mono">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : summary.managers}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Assigned department heads</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">Department heads</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Segmented Navigation & Search */}
       <Tabs defaultValue="hierarchy" className="space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <TabsList className="bg-muted/60 p-1 rounded-xl w-full md:w-auto">
-            <TabsTrigger value="hierarchy" className="flex items-center gap-2 rounded-lg text-xs font-semibold">
-              <Network className="h-4 w-4" />
-              Organization Hierarchy
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <TabsList className="bg-muted/60 p-1 rounded-xl w-full md:w-auto flex overflow-x-auto no-scrollbar scroll-smooth gap-1 justify-start">
+            <TabsTrigger value="hierarchy" className="flex items-center gap-1.5 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
+              <Network className="h-3.5 w-3.5" />
+              <span>Hierarchy</span>
             </TabsTrigger>
-            <TabsTrigger value="departments" className="flex items-center gap-2 rounded-lg text-xs font-semibold">
-              <Building2 className="h-4 w-4" />
-              Departments ({departments.length})
+            <TabsTrigger value="departments" className="flex items-center gap-1.5 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
+              <Building2 className="h-3.5 w-3.5" />
+              <span>Departments ({departments.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="designations" className="flex items-center gap-2 rounded-lg text-xs font-semibold">
-              <Briefcase className="h-4 w-4" />
-              Designations ({allDesignations.length})
+            <TabsTrigger value="designations" className="flex items-center gap-1.5 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap px-3 py-1.5">
+              <Briefcase className="h-3.5 w-3.5" />
+              <span>Designations ({allDesignations.length})</span>
             </TabsTrigger>
             {(user?.role === "SUPER_ADMIN" || user?.role === "HR_ADMIN" || !user?.role) && (
-              <TabsTrigger value="google-sheets" className="flex items-center gap-2 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-                Google Sheets Integration
+              <TabsTrigger value="google-sheets" className="flex items-center gap-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 shrink-0 whitespace-nowrap px-3 py-1.5">
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Google Sheets</span>
               </TabsTrigger>
             )}
           </TabsList>

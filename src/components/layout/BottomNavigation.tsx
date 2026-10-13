@@ -50,7 +50,7 @@ export default function BottomNavigation({ onOpenMore }: BottomNavigationProps) 
   const primaryTabs = isHR ? hrTabs : employeeTabs;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border shadow-lg lg:hidden h-16 px-1 flex items-center justify-around pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border shadow-lg lg:hidden h-14 sm:h-16 px-0.5 sm:px-1 flex items-center justify-around pb-[env(safe-area-inset-bottom)]">
       {primaryTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = pathname === tab.href;
@@ -60,16 +60,16 @@ export default function BottomNavigation({ onOpenMore }: BottomNavigationProps) 
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center py-1 px-1 transition-all rounded-xl text-center active:scale-95",
+              "flex flex-1 flex-col items-center justify-center py-0.5 px-0.5 transition-all rounded-lg text-center active:scale-95 min-w-0",
               isActive 
                 ? "text-primary font-bold" 
                 : "text-muted-foreground hover:text-foreground font-medium"
             )}
           >
-            <div className={cn("p-1 rounded-lg transition-colors", isActive && "bg-primary/10 text-primary")}>
-              <Icon className="h-5 w-5" />
+            <div className={cn("p-1 rounded-md transition-colors", isActive && "bg-primary/10 text-primary")}>
+              <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <span className="text-[10px] tracking-tight truncate w-full mt-0.5">
+            <span className="text-[9px] sm:text-[10px] tracking-tight truncate w-full mt-0.5 select-none">
               {t(tab.label)}
             </span>
             {isActive && <span className="w-1 h-1 rounded-full bg-primary mt-0.5" />}

@@ -133,72 +133,72 @@ export function OrgChartTree({
   return (
     <div className="space-y-4">
       {/* Top Controls & View Mode Bar */}
-      <div className="bg-card border rounded-xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-            <Network className="h-5 w-5" />
+      <div className="bg-card border rounded-xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0 w-full sm:w-auto">
+          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+            <Network className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
-          <div>
-            <h3 className="text-base font-bold tracking-tight text-foreground">{activeCompanyName} - Visual Org Hierarchy</h3>
-            <p className="text-xs text-muted-foreground">
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate">{activeCompanyName} - Visual Org Hierarchy</h3>
+            <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
               {safeDepartments.length} Departments • {totalEmployees} Total Employees
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-start sm:justify-end w-full sm:w-auto">
           {/* View Mode Switcher */}
-          <div className="flex items-center bg-muted p-1 rounded-lg border">
+          <div className="flex items-center bg-muted p-0.5 sm:p-1 rounded-lg border">
             <button
               onClick={() => setViewMode("chart")}
-              className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-md text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
                 viewMode === "chart"
                   ? "bg-background text-primary shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Network className="h-3.5 w-3.5" />
-              Visual Tree Chart
+              <Network className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span>Chart</span>
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              className={`px-2 sm:px-3 py-1 rounded-md text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
                 viewMode === "list"
                   ? "bg-background text-primary shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <List className="h-3.5 w-3.5" />
-              List View
+              <List className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span>List</span>
             </button>
           </div>
 
           {/* Zoom Controls for Visual Tree */}
           {viewMode === "chart" && (
-            <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-md border text-xs">
+            <div className="flex items-center gap-0.5 sm:gap-1 bg-muted/50 p-0.5 sm:p-1 rounded-md border text-xs">
               <button
                 onClick={() => handleZoom(-0.1)}
-                className="p-1.5 hover:bg-background rounded text-muted-foreground hover:text-foreground"
+                className="p-1 sm:p-1.5 hover:bg-background rounded text-muted-foreground hover:text-foreground"
                 title="Zoom Out"
               >
-                <ZoomOut className="h-3.5 w-3.5" />
+                <ZoomOut className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </button>
-              <span className="px-2 font-mono text-[11px] font-semibold text-muted-foreground">
+              <span className="px-1 sm:px-2 font-mono text-[10px] sm:text-[11px] font-semibold text-muted-foreground">
                 {Math.round(zoomLevel * 100)}%
               </span>
               <button
                 onClick={() => handleZoom(0.1)}
-                className="p-1.5 hover:bg-background rounded text-muted-foreground hover:text-foreground"
+                className="p-1 sm:p-1.5 hover:bg-background rounded text-muted-foreground hover:text-foreground"
                 title="Zoom In"
               >
-                <ZoomIn className="h-3.5 w-3.5" />
+                <ZoomIn className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </button>
               <button
                 onClick={() => setZoomLevel(1)}
-                className="p-1.5 hover:bg-background rounded text-muted-foreground hover:text-foreground ml-1"
+                className="p-1 sm:p-1.5 hover:bg-background rounded text-muted-foreground hover:text-foreground"
                 title="Reset Zoom"
               >
-                <Maximize2 className="h-3.5 w-3.5" />
+                <Maximize2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </button>
             </div>
           )}
@@ -206,11 +206,11 @@ export function OrgChartTree({
           <Button
             variant="outline"
             size="sm"
-            className="text-xs gap-1.5 font-semibold h-9"
+            className="text-xs gap-1 font-semibold h-7 sm:h-8 px-2 sm:px-2.5 ml-auto sm:ml-0"
             onClick={() => handleOpenDirectoryView(null, null)}
           >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Full Canvas View
+            <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            <span>Canvas</span>
           </Button>
         </div>
       </div>

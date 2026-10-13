@@ -163,7 +163,59 @@ export function PayrollTable({ data, loading, isHR, onView }: PayrollTableProps)
         </div>
       )}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
-      <div className="overflow-x-auto">
+      {/* Mobile Card List View (Visible on < md) */}
+      <div className="block md:hidden divide-y divide-border">
+        {paginatedData.map((record) => (
+          <div key={record.id} className="p-3 space-y-2.5 hover:bg-muted/20 transition-colors">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-sm text-foreground">
+                    {getMonthName(record.month)} {record.year}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    #{record.id.slice(0, 6).toUpperCase()}
+                  </span>
+                </div>
+                {isHR && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {record.employee?.firstName} {record.employee?.lastName}
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0 scale-90 origin-right">
+                {getStatusBadge(record.status)}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 bg-muted/30 p-2 rounded-lg text-xs">
+              <div>
+                <span className="text-[10px] text-muted-foreground block">Net Pay</span>
+                <span className="font-extrabold text-emerald-600 text-sm">₹{record.netSalary?.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-muted-foreground block">Days Paid</span>
+                <span className="font-semibold text-foreground text-xs">{record.workingDays} / {record.paidDays} d</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+              <span>Gross: ₹{record.grossSalary?.toLocaleString()}</span>
+              <div className="flex items-center gap-1">
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-primary" onClick={() => onView(record)}>
+                  <Eye className="w-3.5 h-3.5 mr-1" /> View
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => onView(record)}>
+                  <Download className="w-3.5 h-3.5 mr-1" /> PDF
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View (Visible on >= md) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm text-left whitespace-nowrap">
           <thead className="bg-muted/30 text-muted-foreground text-xs uppercase font-semibold sticky top-0">
             <tr>

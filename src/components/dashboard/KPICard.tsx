@@ -38,30 +38,30 @@ export function KPICard({ title, value, icon: Icon, colorClass, bgClass, cardBgC
       onClick={onClick}
       onKeyDown={onClick ? handleKeyDown : undefined}
       className={cn(
-        "relative rounded-xl sm:rounded-2xl border p-2.5 sm:p-4 flex flex-col justify-between shadow-2xs sm:shadow-xs transition-all duration-200 group overflow-hidden min-w-0 min-h-[86px] sm:min-h-[122px]",
+        "relative rounded-xl sm:rounded-2xl border p-2 sm:p-3.5 flex flex-col justify-between shadow-2xs sm:shadow-xs transition-all duration-200 group overflow-hidden min-w-0 min-h-[72px] sm:min-h-[105px]",
         onClick ? "cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" : "cursor-default",
         cardBgClass
       )}
     >
       {/* Top Section */}
-      <div className="flex items-center justify-between gap-1.5 sm:gap-2 min-w-0">
+      <div className="flex items-center justify-between gap-1 sm:gap-2 min-w-0">
         <span 
-          className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wide leading-tight truncate group-hover:text-foreground transition-colors min-w-0"
+          className="text-[9px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wide leading-tight truncate group-hover:text-foreground transition-colors min-w-0"
           title={title}
         >
           {title}
         </span>
-        <div className={cn("p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl shrink-0 transition-transform group-hover:scale-105 shadow-2xs", bgClass, colorClass)}>
-          <Icon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
+        <div className={cn("p-1 sm:p-2 rounded-md sm:rounded-xl shrink-0 transition-transform group-hover:scale-105 shadow-2xs", bgClass, colorClass)}>
+          <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
         </div>
       </div>
 
       {/* Main Metric Value */}
-      <div className="mt-1 sm:mt-2">
-        <div className="flex items-center justify-between gap-1 sm:gap-1.5 flex-wrap min-w-0">
+      <div className="mt-0.5 sm:mt-1.5 min-w-0">
+        <div className="flex items-baseline justify-between gap-1 flex-wrap min-w-0">
           {isStatusBadge ? (
             <span className={cn(
-              "text-[9px] sm:text-xs font-extrabold tracking-tight px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg border leading-tight uppercase shadow-2xs truncate max-w-full my-0.5",
+              "text-[8.5px] sm:text-xs font-extrabold tracking-tight px-1.5 sm:px-2.5 py-0.5 rounded-md border leading-tight uppercase shadow-2xs truncate max-w-full my-0.5",
               stringVal.includes("NOT") || stringVal.includes("ABSENT") 
                 ? "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200/80"
                 : stringVal.includes("PUNCHED") || stringVal.includes("PRESENT")
@@ -73,14 +73,14 @@ export function KPICard({ title, value, icon: Icon, colorClass, bgClass, cardBgC
               {displayStatus}
             </span>
           ) : (
-            <h3 className="text-base sm:text-2xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors font-mono truncate">
+            <h3 className="text-sm sm:text-xl md:text-2xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors font-mono truncate">
               {value}
             </h3>
           )}
 
           {trend && (
             <span className={cn(
-              "inline-flex items-center gap-1 text-[8.5px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full shrink-0",
+              "inline-flex items-center gap-0.5 text-[8px] sm:text-[9.5px] font-bold px-1 sm:px-1.5 py-0.2 rounded-full shrink-0",
               isPositiveTrend ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/50" : "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/50"
             )}>
               {trend}
@@ -88,7 +88,7 @@ export function KPICard({ title, value, icon: Icon, colorClass, bgClass, cardBgC
           )}
         </div>
         {subtitle && (
-          <p className="text-[11px] font-medium text-muted-foreground mt-1 truncate">
+          <p className="text-[9.5px] sm:text-[11px] font-medium text-muted-foreground mt-0.5 truncate">
             {subtitle}
           </p>
         )}

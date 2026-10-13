@@ -31,21 +31,21 @@ export function PayrollFilterToolbar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-3 p-3 sm:p-4 bg-card border rounded-xl shadow-sm md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-2 sm:gap-3 p-2 sm:p-3.5 bg-card border rounded-xl shadow-2xs md:flex-row md:items-center md:justify-between">
       
-      <div className="grid grid-cols-2 sm:flex sm:flex-1 sm:items-center gap-2 sm:gap-3">
-        <div className="relative col-span-2 sm:col-span-1 w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 sm:flex sm:flex-1 sm:items-center gap-1.5 sm:gap-2">
+        <div className="relative col-span-2 sm:col-span-1 w-full sm:w-56">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input 
             placeholder={t("Search by ID or Name...")} 
-            className="pl-9 h-9 sm:h-10 text-xs sm:text-sm"
+            className="pl-8 h-8 sm:h-9 text-xs"
             onChange={(e) => onSearch(e.target.value)}
           />
         </div>
 
         <Select onValueChange={(val) => onFilterChange('year', val)} defaultValue="ALL">
-          <SelectTrigger className="w-full sm:w-[120px] h-9 sm:h-10 text-xs sm:text-sm">
-            <Filter className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+          <SelectTrigger className="w-full sm:w-[110px] h-8 sm:h-9 text-xs">
+            <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
             <SelectValue placeholder={t("Year")} />
           </SelectTrigger>
           <SelectContent>
@@ -56,7 +56,7 @@ export function PayrollFilterToolbar({
         </Select>
 
         <Select onValueChange={(val) => onFilterChange('month', val)} defaultValue="ALL">
-          <SelectTrigger className="w-full sm:w-[120px] h-9 sm:h-10 text-xs sm:text-sm">
+          <SelectTrigger className="w-full sm:w-[110px] h-8 sm:h-9 text-xs">
             <SelectValue placeholder={t("Month")} />
           </SelectTrigger>
           <SelectContent>
@@ -68,7 +68,7 @@ export function PayrollFilterToolbar({
         </Select>
 
         <Select onValueChange={(val) => onFilterChange('status', val)} defaultValue="ALL">
-          <SelectTrigger className="w-full col-span-2 sm:col-span-1 sm:w-[140px] h-9 sm:h-10 text-xs sm:text-sm">
+          <SelectTrigger className="w-full col-span-2 sm:col-span-1 sm:w-[120px] h-8 sm:h-9 text-xs">
             <SelectValue placeholder={t("Status")} />
           </SelectTrigger>
           <SelectContent>
@@ -80,13 +80,13 @@ export function PayrollFilterToolbar({
         </Select>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-        <Button variant="outline" size="sm" className="flex-1 sm:flex-none h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm" onClick={onReset}>
-          <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto">
+        <Button variant="outline" size="sm" className="flex-1 sm:flex-none h-8 sm:h-9 px-2.5 sm:px-3 text-xs" onClick={onReset}>
+          <RefreshCw className="w-3 h-3 mr-1" />
           {t("Reset")}
         </Button>
-        <Button variant="outline" size="sm" className="flex-1 sm:flex-none h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm" onClick={onExportCSV}>
-          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+        <Button variant="outline" size="sm" className="flex-1 sm:flex-none h-8 sm:h-9 px-2.5 sm:px-3 text-xs" onClick={onExportCSV}>
+          <Download className="w-3 h-3 mr-1" />
           CSV
         </Button>
         {onBulkPayClick && (
