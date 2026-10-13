@@ -396,7 +396,7 @@ function HRPayrollDashboard() {
   const netVal = Math.max(0, grossVal - dedVal);
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto p-6">
+    <div className="space-y-4 sm:space-y-6 max-w-[1600px] mx-auto w-full min-w-0">
       {/* Page Header */}
       <PageHeader
         title="Payroll & Compensation Suite"
@@ -405,113 +405,113 @@ function HRPayrollDashboard() {
         showSearch={false}
         actionButton={
           <div className="flex items-center gap-2 flex-wrap">
-            <Button size="sm" onClick={() => setIsCreateModalOpen(true)} className="h-9 bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Payroll
+            <Button size="sm" onClick={() => setIsCreateModalOpen(true)} className="h-8 sm:h-9 text-xs px-2.5 sm:px-3 bg-primary hover:bg-primary/90">
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              <span>Create Payroll</span>
             </Button>
           </div>
         }
       />
 
       {/* KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
         <Card className="border shadow-xs">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Net Disbursement</p>
-              <h3 className="text-xl font-bold mt-1 text-emerald-600">₹{totalDisbursement.toLocaleString('en-IN')}</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Total Take-Home</p>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Net Disbursement</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-emerald-600 font-mono truncate">₹{totalDisbursement.toLocaleString('en-IN')}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Total Take-Home</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-              <Wallet className="w-5 h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+              <Wallet className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gross Payroll</p>
-              <h3 className="text-xl font-bold mt-1 text-foreground">₹{totalGross.toLocaleString('en-IN')}</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Total Expenditure</p>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Gross Payroll</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-foreground font-mono truncate">₹{totalGross.toLocaleString('en-IN')}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Total Expenditure</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
-              <Banknote className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border shadow-xs">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Deductions</p>
-              <h3 className="text-xl font-bold mt-1 text-rose-600">₹{totalDeductions.toLocaleString('en-IN')}</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Tax, PF & Statutory</p>
-            </div>
-            <div className="h-10 w-10 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
-              <TrendingDown className="w-5 h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+              <Banknote className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Staff Paid</p>
-              <h3 className="text-xl font-bold mt-1 text-foreground">{totalPaidCount}</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Successful Disbursals</p>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Total Deductions</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-rose-600 font-mono truncate">₹{totalDeductions.toLocaleString('en-IN')}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Tax, PF & Statutory</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border shadow-xs">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Average Monthly</p>
-              <h3 className="text-xl font-bold mt-1 text-foreground">₹{Math.round(avgSalary).toLocaleString('en-IN')}</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Per Employee</p>
-            </div>
-            <div className="h-10 w-10 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
-              <BarChart3 className="w-5 h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+              <TrendingDown className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border shadow-xs">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pending Action</p>
-              <h3 className="text-xl font-bold mt-1 text-amber-600">{pendingCount}</h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Requires Approval</p>
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Staff Paid</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-foreground font-mono truncate">{totalPaidCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Successful Disbursals</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5" />
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border shadow-xs">
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Avg Monthly</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-foreground font-mono truncate">₹{Math.round(avgSalary).toLocaleString('en-IN')}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Per Employee</p>
+            </div>
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
+              <BarChart3 className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border shadow-xs">
+          <CardContent className="p-2.5 sm:p-4 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Pending Action</p>
+              <h3 className="text-sm sm:text-xl font-bold mt-0.5 sm:mt-1 text-amber-600 font-mono truncate">{pendingCount}</h3>
+              <p className="text-[9.5px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">Requires Approval</p>
+            </div>
+            <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-md sm:rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+              <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Enterprise Tabs Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-5">
-        <TabsList className="bg-muted/60 p-1 rounded-xl flex flex-wrap gap-1 w-fit">
-          <TabsTrigger value="records" className="rounded-lg px-4 py-2 text-xs font-semibold gap-2">
-            <FileText className="w-4 h-4" />
-            Payroll Disbursals ({filteredPayrolls.length})
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4 sm:space-y-5">
+        <TabsList className="bg-muted/60 p-1 rounded-xl flex overflow-x-auto no-scrollbar scroll-smooth gap-1 w-full sm:w-fit justify-start">
+          <TabsTrigger value="records" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <FileText className="w-3.5 h-3.5" />
+            <span>Payroll Disbursals ({filteredPayrolls.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-lg px-4 py-2 text-xs font-semibold gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Analytics & Trends
+          <TabsTrigger value="analytics" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Analytics & Trends</span>
           </TabsTrigger>
-          <TabsTrigger value="structure" className="rounded-lg px-4 py-2 text-xs font-semibold gap-2">
-            <Layers className="w-4 h-4" />
-            Salary Components & Tax Rules
+          <TabsTrigger value="structure" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <Layers className="w-3.5 h-3.5" />
+            <span>Salary Components</span>
           </TabsTrigger>
-          <TabsTrigger value="audit" className="rounded-lg px-4 py-2 text-xs font-semibold gap-2">
-            <ShieldCheck className="w-4 h-4" />
-            Disbursal Audit Log
+          <TabsTrigger value="audit" className="rounded-lg px-3 py-1.5 text-xs font-semibold gap-1.5 shrink-0 whitespace-nowrap">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Audit Log</span>
           </TabsTrigger>
         </TabsList>
 
@@ -519,13 +519,13 @@ function HRPayrollDashboard() {
         <TabsContent value="records" className="space-y-4">
           {/* Filters Bar */}
           <Card className="border shadow-xs">
-            <CardContent className="p-4 flex flex-wrap items-center gap-3 justify-between">
-              <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[300px]">
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <CardContent className="p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 w-full">
+                <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by Employee Name, ID, or Email..."
-                    className="pl-8 h-9 text-xs"
+                    className="pl-8 h-8 sm:h-9 text-xs"
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -534,48 +534,50 @@ function HRPayrollDashboard() {
                   />
                 </div>
 
-                <select
-                  className="h-9 px-3 text-xs rounded-md border bg-background"
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="ALL">All Statuses</option>
-                  <option value="PAID">PAID</option>
-                  <option value="PROCESSED">PROCESSED</option>
-                  <option value="PENDING">PENDING</option>
-                  <option value="FAILED">FAILED</option>
-                </select>
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                  <select
+                    className="h-8 sm:h-9 px-2.5 text-xs rounded-md border bg-background"
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="ALL">All Statuses</option>
+                    <option value="PAID">PAID</option>
+                    <option value="PROCESSED">PROCESSED</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="FAILED">FAILED</option>
+                  </select>
 
-                <select
-                  className="h-9 px-3 text-xs rounded-md border bg-background"
-                  value={monthFilter}
-                  onChange={(e) => {
-                    setMonthFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="ALL">All Months</option>
-                  {monthNames.map((m, idx) => (
-                    <option key={idx} value={idx + 1}>{m}</option>
-                  ))}
-                </select>
+                  <select
+                    className="h-8 sm:h-9 px-2.5 text-xs rounded-md border bg-background"
+                    value={monthFilter}
+                    onChange={(e) => {
+                      setMonthFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="ALL">All Months</option>
+                    {monthNames.map((m, idx) => (
+                      <option key={idx} value={idx + 1}>{m}</option>
+                    ))}
+                  </select>
 
-                <select
-                  className="h-9 px-3 text-xs rounded-md border bg-background"
-                  value={yearFilter}
-                  onChange={(e) => {
-                    setYearFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value="ALL">All Years</option>
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                </select>
+                  <select
+                    className="h-8 sm:h-9 px-2.5 text-xs rounded-md border bg-background col-span-2 sm:col-span-1"
+                    value={yearFilter}
+                    onChange={(e) => {
+                      setYearFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="ALL">All Years</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </div>
               </div>
 
               {(searchTerm || statusFilter !== "ALL" || monthFilter !== "ALL" || yearFilter !== "ALL") && (
@@ -589,7 +591,7 @@ function HRPayrollDashboard() {
                     setYearFilter("ALL");
                     setCurrentPage(1);
                   }}
-                  className="h-9 text-xs text-muted-foreground"
+                  className="h-8 sm:h-9 text-xs text-muted-foreground self-end sm:self-auto"
                 >
                   Reset Filters
                 </Button>
@@ -597,132 +599,205 @@ function HRPayrollDashboard() {
             </CardContent>
           </Card>
 
-          {/* Table */}
+          {/* Records View: Mobile Card List (< md) and Desktop Table (>= md) */}
           <div className="border rounded-xl bg-card overflow-hidden shadow-xs">
-            <Table className="text-xs">
-              <TableHeader className="bg-muted/60">
-                <TableRow>
-                  <TableHead className="font-semibold">Payroll Ref</TableHead>
-                  <TableHead className="font-semibold">Employee</TableHead>
-                  <TableHead className="font-semibold">Department & Title</TableHead>
-                  <TableHead className="font-semibold">Period</TableHead>
-                  <TableHead className="font-semibold">Working / Paid Days</TableHead>
-                  <TableHead className="font-semibold">Gross Salary</TableHead>
-                  <TableHead className="font-semibold text-rose-600">Deductions</TableHead>
-                  <TableHead className="font-semibold text-emerald-600">Net Salary</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="text-right font-semibold">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoadingPayroll ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
-                      <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                        Loading payroll records...
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedPayrolls.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
-                      No payroll records match the selected criteria.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedPayrolls.map((p: any) => (
-                    <TableRow key={p.id} className="hover:bg-muted/20">
-                      <TableCell className="font-mono text-muted-foreground text-[11px]">
-                        PAY-{p.id.slice(0, 8).toUpperCase()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-bold text-foreground">
+            {/* Mobile Card List View */}
+            <div className="block md:hidden divide-y divide-border">
+              {isLoadingPayroll ? (
+                <div className="h-24 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  Loading payroll records...
+                </div>
+              ) : paginatedPayrolls.length === 0 ? (
+                <div className="h-24 flex items-center justify-center text-xs text-muted-foreground">
+                  No payroll records match the selected criteria.
+                </div>
+              ) : (
+                paginatedPayrolls.map((p: any) => (
+                  <div key={p.id} className="p-3 space-y-2 hover:bg-muted/15 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-foreground truncate">
                           {p.employee ? `${p.employee.firstName} ${p.employee.lastName}` : "N/A"}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">{p.employee?.email || "—"}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-foreground">{p.employee?.department?.name || "General"}</span>
-                          <span className="text-[11px] text-muted-foreground">{p.employee?.designation?.name || "Staff"}</span>
+                        <div className="text-[10px] text-muted-foreground font-mono">
+                          PAY-{p.id.slice(0, 6).toUpperCase()} • {monthNames[p.month - 1]} {p.year}
                         </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {monthNames[p.month - 1]} {p.year}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {p.workingDays} / {p.paidDays || p.workingDays} Days
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        ₹{(p.grossSalary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell className="text-rose-600 font-medium">
-                        -₹{(p.deductions || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell className="font-bold text-emerald-600 text-sm">
-                        ₹{(p.netSalary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell>{statusBadge(p.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-xs gap-1"
-                            onClick={() => setViewPayslipRecord(p)}
-                          >
-                            <Receipt className="w-3.5 h-3.5 text-primary" />
-                            Payslip
-                          </Button>
+                      </div>
+                      <div className="shrink-0 scale-90 origin-right">
+                        {statusBadge(p.status)}
+                      </div>
+                    </div>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setViewPayslipRecord(p)}>
-                                <Eye className="w-4 h-4 mr-2" /> View Printable Payslip
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-rose-600 focus:text-rose-600"
-                                onClick={() => handleDelete(p.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" /> Delete Record
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                    <div className="grid grid-cols-2 gap-2 bg-muted/30 p-2 rounded-lg text-xs">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Net Salary</span>
+                        <span className="font-extrabold text-emerald-600 text-sm font-mono">
+                          ₹{(p.netSalary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Gross / Ded</span>
+                        <span className="text-[11px] text-foreground font-mono block">
+                          ₹{Math.round(p.grossSalary || 0)} / <span className="text-rose-600">-₹{Math.round(p.deductions || 0)}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                      <span>{p.workingDays} / {p.paidDays || p.workingDays} Days</span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs text-primary"
+                          onClick={() => setViewPayslipRecord(p)}
+                        >
+                          <Receipt className="w-3.5 h-3.5 mr-1" />
+                          Payslip
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-rose-600 hover:text-rose-700"
+                          onClick={() => handleDelete(p.id)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table className="text-xs">
+                <TableHeader className="bg-muted/60">
+                  <TableRow>
+                    <TableHead className="font-semibold">Payroll Ref</TableHead>
+                    <TableHead className="font-semibold">Employee</TableHead>
+                    <TableHead className="font-semibold">Department & Title</TableHead>
+                    <TableHead className="font-semibold">Period</TableHead>
+                    <TableHead className="font-semibold">Working / Paid Days</TableHead>
+                    <TableHead className="font-semibold">Gross Salary</TableHead>
+                    <TableHead className="font-semibold text-rose-600">Deductions</TableHead>
+                    <TableHead className="font-semibold text-emerald-600">Net Salary</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="text-right font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingPayroll ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                          Loading payroll records...
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : paginatedPayrolls.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                        No payroll records match the selected criteria.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedPayrolls.map((p: any) => (
+                      <TableRow key={p.id} className="hover:bg-muted/20">
+                        <TableCell className="font-mono text-muted-foreground text-[11px]">
+                          PAY-{p.id.slice(0, 8).toUpperCase()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-bold text-foreground">
+                            {p.employee ? `${p.employee.firstName} ${p.employee.lastName}` : "N/A"}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">{p.employee?.email || "—"}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-medium text-foreground">{p.employee?.department?.name || "General"}</span>
+                            <span className="text-[11px] text-muted-foreground">{p.employee?.designation?.name || "Staff"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {monthNames[p.month - 1]} {p.year}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {p.workingDays} / {p.paidDays || p.workingDays} Days
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          ₹{(p.grossSalary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-rose-600 font-medium">
+                          -₹{(p.deductions || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="font-bold text-emerald-600 text-sm">
+                          ₹{(p.netSalary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell>{statusBadge(p.status)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-xs gap-1"
+                              onClick={() => setViewPayslipRecord(p)}
+                            >
+                              <Receipt className="w-3.5 h-3.5 text-primary" />
+                              Payslip
+                            </Button>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setViewPayslipRecord(p)}>
+                                  <Eye className="w-4 h-4 mr-2" /> View Printable Payslip
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-rose-600 focus:text-rose-600"
+                                  onClick={() => handleDelete(p.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" /> Delete Record
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {/* Pagination */}
           {filteredPayrolls.length > 0 && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-              <span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-muted-foreground pt-2">
+              <span className="text-[11px] sm:text-xs">
                 Showing <strong>{(currentPage - 1) * itemsPerPage + 1}</strong> to{" "}
                 <strong>{Math.min(currentPage * itemsPerPage, filteredPayrolls.length)}</strong> of{" "}
                 <strong>{filteredPayrolls.length}</strong> payroll records
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-center sm:self-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="h-8 px-3"
+                  className="h-7 sm:h-8 px-2.5 sm:px-3 text-xs"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                  <ChevronLeft className="w-3.5 h-3.5 mr-1" /> Previous
                 </Button>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-foreground text-xs">
                   Page {currentPage} of {totalPages}
                 </span>
                 <Button
@@ -730,9 +805,9 @@ function HRPayrollDashboard() {
                   size="sm"
                   disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="h-8 px-3"
+                  className="h-7 sm:h-8 px-2.5 sm:px-3 text-xs"
                 >
-                  Next <ChevronRight className="w-4 h-4 ml-1" />
+                  Next <ChevronRight className="w-3.5 h-3.5 ml-1" />
                 </Button>
               </div>
             </div>
@@ -901,31 +976,31 @@ function HRPayrollDashboard() {
 
       {/* Create Master Payroll Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="p-5 px-6 border-b shrink-0 bg-background">
-            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-primary">
-              <Plus className="w-5 h-5" />
-              Create & Issue Employee Payroll
+        <DialogContent className="w-[95vw] max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl">
+          <DialogHeader className="p-3.5 sm:p-5 px-4 sm:px-6 border-b shrink-0 bg-background">
+            <DialogTitle className="text-sm sm:text-lg font-bold flex items-center gap-2 text-primary">
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span>Create & Issue Employee Payroll</span>
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleCreateSubmit} className="flex flex-col flex-1 overflow-hidden">
-            <div className="p-6 space-y-4 text-xs overflow-y-auto flex-1">
+            <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-4 text-xs overflow-y-auto flex-1">
               {createError && (
-                <div className="p-3 rounded-md bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+                <div className="p-2.5 sm:p-3 rounded-md bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
-                  {createError}
+                  <span>{createError}</span>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 <div className="md:col-span-2 space-y-1 relative">
                   <Label className="text-xs font-semibold">Search / Select Employee *</Label>
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                     <Input
                       placeholder="Type Name, Email, or Employee ID to search..."
-                      className="pl-8 pr-8 h-9 text-xs"
+                      className="pl-8 pr-8 h-8 sm:h-9 text-xs"
                       value={empSearchQuery}
                       onFocus={() => setIsEmpDropdownOpen(true)}
                       onChange={(e) => {
@@ -1006,18 +1081,18 @@ function HRPayrollDashboard() {
 
                 {/* Auto Calculation Banner */}
                 {isAutoCalculating ? (
-                  <div className="md:col-span-2 p-3 rounded-lg bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs flex items-center gap-2 animate-pulse">
+                  <div className="md:col-span-2 p-2.5 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs flex items-center gap-2 animate-pulse">
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600 shrink-0" />
-                    <span>Analyzing employee shift weekly offs, holidays & profile base salary...</span>
+                    <span>Analyzing employee shift weekly offs, holidays & base salary...</span>
                   </div>
                 ) : autoCalculationNote ? (
-                  <div className="md:col-span-2 p-3 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between gap-2">
+                  <div className="md:col-span-2 p-2.5 sm:p-3 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span className="font-medium">{autoCalculationNote}</span>
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="font-medium text-[11px] sm:text-xs">{autoCalculationNote}</span>
                     </div>
-                    <Badge variant="outline" className="text-[10px] bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 shrink-0">
-                      Auto-Populated (Editable)
+                    <Badge variant="outline" className="text-[9.5px] sm:text-[10px] bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 shrink-0 w-fit">
+                      Auto-Populated
                     </Badge>
                   </div>
                 ) : null}
@@ -1026,7 +1101,7 @@ function HRPayrollDashboard() {
                   <Label className="text-xs font-semibold">Pay Month *</Label>
                   <select
                     required
-                    className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
+                    className="flex h-8 sm:h-9 w-full rounded-md border bg-background px-2.5 sm:px-3 text-xs"
                     value={formData.month}
                     onChange={(e) => {
                       const newMonth = parseInt(e.target.value);
@@ -1064,7 +1139,7 @@ function HRPayrollDashboard() {
                   <Label className="text-xs font-semibold">Pay Year *</Label>
                   <select
                     required
-                    className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
+                    className="flex h-8 sm:h-9 w-full rounded-md border bg-background px-2.5 sm:px-3 text-xs"
                     value={formData.year}
                     onChange={(e) => {
                       const newYear = parseInt(e.target.value);
@@ -1096,7 +1171,7 @@ function HRPayrollDashboard() {
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold">Basic Salary (₹) *</Label>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> Auto-filled (Editable)
+                      <Sparkles className="w-3 h-3" /> Auto-filled
                     </span>
                   </div>
                   <Input
@@ -1106,49 +1181,49 @@ function HRPayrollDashboard() {
                     placeholder="e.g. 25000"
                     value={formData.basicSalary}
                     onChange={(e) => setFormData({ ...formData, basicSalary: e.target.value })}
-                    className="h-9 text-xs font-semibold"
+                    className="h-8 sm:h-9 text-xs font-semibold font-mono"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold">Bonus & Allowances (₹)</Label>
-                    <span className="text-[10px] text-muted-foreground">Discretionary (Editable)</span>
+                    <span className="text-[10px] text-muted-foreground">Discretionary</span>
                   </div>
                   <Input
                     type="number"
                     step="0.01"
                     value={formData.bonus}
                     onChange={(e) => setFormData({ ...formData, bonus: e.target.value })}
-                    className="h-9 text-xs"
+                    className="h-8 sm:h-9 text-xs font-mono"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold">Total Deductions / TDS (₹)</Label>
-                    <span className="text-[10px] text-rose-500 font-medium">TDS / PF (Editable)</span>
+                    <span className="text-[10px] text-rose-500 font-medium">TDS / PF</span>
                   </div>
                   <Input
                     type="number"
                     step="0.01"
                     value={formData.deductions}
                     onChange={(e) => setFormData({ ...formData, deductions: e.target.value })}
-                    className="h-9 text-xs text-rose-600"
+                    className="h-8 sm:h-9 text-xs text-rose-600 font-mono"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold">Working Days</Label>
-                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Shift Counted (Editable)</span>
+                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Shift Counted</span>
                   </div>
                   <Input
                     required
                     type="number"
                     value={formData.workingDays}
                     onChange={(e) => setFormData({ ...formData, workingDays: e.target.value, paidDays: e.target.value })}
-                    className="h-9 text-xs"
+                    className="h-8 sm:h-9 text-xs font-mono"
                   />
                 </div>
 
@@ -1159,14 +1234,14 @@ function HRPayrollDashboard() {
                     type="date"
                     value={formData.paymentDate}
                     onChange={(e) => setFormData({ ...formData, paymentDate: e.target.value })}
-                    className="h-9 text-xs"
+                    className="h-8 sm:h-9 text-xs"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold">Disbursal Status</Label>
                   <select
-                    className="flex h-9 w-full rounded-md border bg-background px-3 text-xs"
+                    className="flex h-8 sm:h-9 w-full rounded-md border bg-background px-2.5 sm:px-3 text-xs"
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   >
@@ -1182,7 +1257,7 @@ function HRPayrollDashboard() {
                     placeholder="e.g. State Bank of India"
                     value={formData.bankName}
                     onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                    className="h-9 text-xs"
+                    className="h-8 sm:h-9 text-xs"
                   />
                 </div>
 
@@ -1192,7 +1267,7 @@ function HRPayrollDashboard() {
                     placeholder="Account / IFSC Ref"
                     value={formData.accountNumber}
                     onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
-                    className="h-9 text-xs"
+                    className="h-8 sm:h-9 text-xs font-mono"
                   />
                 </div>
 
@@ -1202,41 +1277,41 @@ function HRPayrollDashboard() {
                     placeholder="Bank Reference Number (TXN-...)"
                     value={formData.transactionId}
                     onChange={(e) => setFormData({ ...formData, transactionId: e.target.value })}
-                    className="h-9 text-xs font-mono"
+                    className="h-8 sm:h-9 text-xs font-mono"
                   />
                 </div>
               </div>
 
               {/* Instant Calculation Preview */}
-              <div className="p-3 border rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
+              <div className="p-2.5 sm:p-3 border rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase">Estimated Take-Home (Net Salary)</span>
-                  <p className="text-xs text-muted-foreground">Gross: ₹{grossVal.toLocaleString()} - Ded: ₹{dedVal.toLocaleString()}</p>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground uppercase">Estimated Net Salary</span>
+                  <p className="text-[11px] text-muted-foreground">Gross: ₹{grossVal.toLocaleString()} - Ded: ₹{dedVal.toLocaleString()}</p>
                 </div>
-                <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                <span className="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
                   ₹{netVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
 
-            <DialogFooter className="p-4 px-6 border-t bg-muted/20 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <DialogFooter className="p-3 sm:p-4 px-4 sm:px-6 border-t bg-muted/20 shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-muted-foreground">
                 <Mail className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                <span>PDF payslip will be generated & emailed immediately with attachment.</span>
+                <span>PDF payslip will be generated & emailed with attachment.</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={createPayrollMutation.isPending}>
+                <Button type="button" variant="outline" size="sm" onClick={() => setIsCreateModalOpen(false)} disabled={createPayrollMutation.isPending} className="flex-1 sm:flex-initial text-xs h-8 sm:h-9">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createPayrollMutation.isPending || isAutoCalculating} className="bg-primary hover:bg-primary/90 font-medium">
+                <Button type="submit" size="sm" disabled={createPayrollMutation.isPending || isAutoCalculating} className="bg-primary hover:bg-primary/90 font-medium flex-1 sm:flex-initial text-xs h-8 sm:h-9">
                   {createPayrollMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Issuing & Emailing PDF...
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      Issuing...
                     </>
                   ) : (
                     <>
-                      <Send className="mr-2 h-4 w-4" />
+                      <Send className="mr-1.5 h-3.5 w-3.5" />
                       Issue Payroll
                     </>
                   )}
