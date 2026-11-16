@@ -14,6 +14,7 @@ import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { LiveAttendanceMapSection } from '@/components/dashboard/LiveAttendanceMapSection';
 
 export function ManagerDashboard({ stats }: { stats: any }) {
   const { t } = useTranslation();
@@ -102,6 +103,9 @@ export function ManagerDashboard({ stats }: { stats: any }) {
           );
         })}
       </div>
+
+      {/* Team Live Attendance & GPS Punch-In Locations */}
+      <LiveAttendanceMapSection />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Column - Enterprise My Team Members Card (8 Columns) */}

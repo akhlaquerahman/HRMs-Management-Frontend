@@ -7,9 +7,8 @@ import { Users, UserCheck, CalendarDays, AlertCircle, Briefcase, Percent } from 
 import { KPICard } from '@/components/dashboard/KPICard';
 import { CelebrationsCard } from '@/components/dashboard/CelebrationsCard';
 import { PendingTasks } from '@/components/dashboard/PendingTasks';
-import { DashboardDataTable } from '@/components/dashboard/DashboardDataTable';
 import { RecruitmentPipelineCard } from '@/components/dashboard/RecruitmentPipelineCard';
-import { CompanyAnnouncements } from '@/components/dashboard/CompanyAnnouncements';
+import { LiveAttendanceMapSection } from '@/components/dashboard/LiveAttendanceMapSection';
 
 export function HRManagerDashboard({ stats }: { stats: any, trendFilter?: string, setTrendFilter?: (val: string) => void }) {
   const { t } = useTranslation();
@@ -25,33 +24,6 @@ export function HRManagerDashboard({ stats }: { stats: any, trendFilter?: string
     if (lower.includes('recruitment') || lower.includes('job')) return '/dashboard/recruitment';
     return '/dashboard/employee-management';
   };
-
-  const deptColumns = [
-    { 
-      header: t("Department"), 
-      accessor: (row: any) => (
-        <span className="font-semibold text-foreground text-xs">{row.department}</span>
-      )
-    },
-    { 
-      header: t("Present"), 
-      accessor: (row: any) => (
-        <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">{row.present}</span>
-      )
-    },
-    { 
-      header: t("Absent"), 
-      accessor: (row: any) => (
-        <span className="text-rose-600 dark:text-rose-400 font-bold text-xs">{row.absent}</span>
-      )
-    },
-    { 
-      header: t("On Leave"), 
-      accessor: (row: any) => (
-        <span className="text-amber-600 dark:text-amber-400 font-bold text-xs">{row.onLeave}</span>
-      )
-    },
-  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,39 +59,17 @@ export function HRManagerDashboard({ stats }: { stats: any, trendFilter?: string
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Main Left Column (Takes up 8 columns out of 12) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+      {/* Live Attendance & Punch-In Location Map Section (with Integrated Department Attendance Summary) */}
+      <LiveAttendanceMapSection deptAttendance={stats?.deptAttendance || []} />
 
-          {/* Full-Width Department Attendance Summary Table */}
-          <div className="w-full">
-            <DashboardDataTable 
-              title={t("Department Attendance Summary")} 
-              data={stats?.deptAttendance || []} 
-              columns={deptColumns}
-            />
-          </div>
-          
-          {/* Middle Row: Pending Tasks & Recruitment Pipeline */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <PendingTasks tasks={stats?.pendingTasks || []} />
-            <RecruitmentPipelineCard pipeline={stats?.pipeline} />
-          </div>  
-
-        </div>
-
-        {/* Right Sidebar Column (Takes up 4 columns out of 12) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          
-          {/* Celebrations Widget */}
-          <CelebrationsCard
-            upcomingBirthdays={stats?.upcomingBirthdays || []}
-            workAnniversaries={stats?.workAnniversaries || []}
-          />
-
-          {/* Enterprise Company Announcements (In place of Recent Activities) */}
-          <CompanyAnnouncements announcements={stats?.announcements || []} />
-        </div>
+      {/* 3-Column Equal Enterprise Grid: Pending Approvals, Recruitment Pipeline & Upcoming Celebrations */}
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <PendingTasks tasks={stats?.pendingTasks || []} />
+        <RecruitmentPipelineCard pipeline={stats?.pipeline} />
+        <CelebrationsCard
+          upcomingBirthdays={stats?.upcomingBirthdays || []}
+          workAnniversaries={stats?.workAnniversaries || []}
+        />
       </div>
     </div>
   );

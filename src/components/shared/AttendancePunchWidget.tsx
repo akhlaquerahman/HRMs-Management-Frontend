@@ -21,6 +21,7 @@ import {
 
 import { useAuthStore } from '@/store/authStore';
 import { BREAK_TYPES, getBreakTypeConfig } from '@/lib/breakTypes';
+import { captureCurrentGPSLocation } from '@/hooks/useLiveLocationTracking';
 
 interface AttendancePunchWidgetProps {
   compact?: boolean;
@@ -81,7 +82,27 @@ export function AttendancePunchWidget({ compact = false }: AttendancePunchWidget
     try {
       setIsSubmitting(true);
       const isResume = currentState === "PUNCHED_OUT";
-      const res = await api.post('/attendance/punch-in', {});
+
+      // 1. Capture browser GPS coordinates
+      toast.loading("Acquiring GPS location...", { id: "gps-punch" });
+      const geo = await captureCurrentGPSLocation();
+      toast.dismiss("gps-punch");
+
+      const payload: any = {};
+      if (geo.latitude && geo.longitude) {
+        payload.latitude = geo.latitude;
+        payload.longitude = geo.longitude;
+        payload.accuracyMeters = geo.accuracyMeters;
+        payload.source = "BROWSER_GPS";
+      } else {
+        payload.source = "MANUAL_FALLBACK";
+        payload.locationUnavailableReason = geo.error || "Location unavailable";
+        if (geo.error) {
+          toast.info(`Punching in: ${geo.error}`);
+        }
+      }
+
+      const res = await api.post('/attendance/punch-in', payload);
       const msg = res.data?.message || (isResume ? "Resumed work session successfully!" : "Checked in successfully!");
       toast.success(msg);
       invalidateAllQueries();
@@ -95,7 +116,19 @@ export function AttendancePunchWidget({ compact = false }: AttendancePunchWidget
   const handlePunchOut = async () => {
     try {
       setIsSubmitting(true);
-      await api.post('/attendance/punch-out');
+
+      // 1. Capture browser GPS coordinates on punch-out
+      const geo = await captureCurrentGPSLocation();
+      const payload: any = {};
+      if (geo.latitude && geo.longitude) {
+        payload.latitude = geo.latitude;
+        payload.longitude = geo.longitude;
+        payload.accuracyMeters = geo.accuracyMeters;
+      } else if (geo.error) {
+        payload.locationUnavailableReason = geo.error;
+      }
+
+      await api.post('/attendance/punch-out', payload);
       toast.success("Checked out successfully!");
       invalidateAllQueries();
     } catch (error: any) {

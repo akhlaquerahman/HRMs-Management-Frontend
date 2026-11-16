@@ -58,7 +58,11 @@ export function getRolePagePermissions(roleInput: any): string[] {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          const cleaned = parsed.filter((p: string) => p !== '/dashboard/workforce-map');
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(`page_permissions_${normalizedRole}`, JSON.stringify(cleaned));
+          }
+          return cleaned;
         }
       } catch (e) {}
     }
@@ -161,9 +165,11 @@ export async function fetchAndSyncRolePagePermissions(force: boolean = false) {
       if (data && typeof data === 'object') {
         let updated = false;
         Object.keys(data).forEach((roleKey) => {
-          const hrefs = data[roleKey];
+          let hrefs = data[roleKey];
           if (Array.isArray(hrefs) && typeof window !== 'undefined') {
-            const key = `page_permissions_${roleKey.toUpperCase()}`;
+            const normalizedKey = roleKey.toUpperCase().trim().replace(/[\s\_]+/g, '_');
+            hrefs = hrefs.filter((h: string) => h !== '/dashboard/workforce-map');
+            const key = `page_permissions_${normalizedKey}`;
             const current = localStorage.getItem(key);
             const nextVal = JSON.stringify(hrefs);
             if (current !== nextVal) {

@@ -9,6 +9,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   companyName?: string;
+  companyId?: string;
 }
 
 interface AuthState {

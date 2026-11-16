@@ -64,7 +64,7 @@ export function RecruitmentPipelineCard({ pipeline, isLoading = false }: Recruit
   };
 
   return (
-    <div className="rounded-xl border bg-card shadow-sm p-6 flex flex-col justify-between h-full hover:shadow-md transition-shadow">
+    <div className="rounded-2xl border bg-card shadow-xs p-4 sm:p-5 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md">
       
       {/* Header Section */}
       <div className="flex items-start justify-between mb-5 border-b pb-3">

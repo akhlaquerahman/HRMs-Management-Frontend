@@ -37,6 +37,7 @@ import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import Sidebar from './Sidebar';
 
 import { AttendancePunchWidget } from '../shared/AttendancePunchWidget';
+import { LiveTrackingIndicator } from './LiveTrackingIndicator';
 
 interface NavbarProps {
   onOpenMobileSidebar?: () => void;
@@ -106,8 +107,13 @@ export default function Navbar({ onOpenMobileSidebar }: NavbarProps) {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
-        {!isSuperAdmin && <AttendancePunchWidget />}
+      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+        {!isSuperAdmin && (
+          <>
+            <LiveTrackingIndicator />
+            <AttendancePunchWidget />
+          </>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

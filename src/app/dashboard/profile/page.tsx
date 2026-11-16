@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useAuthStore } from '@/store/authStore';
 import { useTranslation } from "react-i18next";
+import { OfficeLocationPickerModal } from "@/components/profile/OfficeLocationPickerModal";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -75,6 +76,16 @@ export default function ProfilePage() {
     try {
       const savedCover = localStorage.getItem('user_cover_pic');
       if (savedCover) setCoverPic(savedCover);
+      const savedLat = localStorage.getItem('hrms_company_lat');
+      const savedLng = localStorage.getItem('hrms_company_lng');
+      const savedRadius = localStorage.getItem('hrms_company_radius');
+      const savedAddress = localStorage.getItem('hrms_company_address');
+      if (savedLat && savedLng) {
+        setCompanyLat(Number(savedLat));
+        setCompanyLng(Number(savedLng));
+      }
+      if (savedRadius) setCompanyRadius(Number(savedRadius));
+      if (savedAddress) setCompanyAddress(savedAddress);
     } catch (e) {}
   }, []);
 
@@ -83,6 +94,10 @@ export default function ProfilePage() {
   const [companyWebsite, setCompanyWebsite] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
+  const [companyLat, setCompanyLat] = useState<number | null>(null);
+  const [companyLng, setCompanyLng] = useState<number | null>(null);
+  const [companyRadius, setCompanyRadius] = useState<number>(150);
+  const [showMapPicker, setShowMapPicker] = useState<boolean>(false);
   const [isSavingCompany, setIsSavingCompany] = useState(false);
   const [companyMsg, setCompanyMsg] = useState({ text: "", type: "" });
   const [personalMsg, setPersonalMsg] = useState({ text: "", type: "" });
@@ -174,33 +189,48 @@ export default function ProfilePage() {
     setCompanyWebsite(cData?.companyWebsite || pData?.companyWebsite || "");
     setCompanyAddress(cData?.companyAddress || pData?.companyAddress || "");
     setCompanyPhone(cData?.companyPhone || pData?.companyPhone || "");
+    if (cData?.latitude !== undefined && cData?.latitude !== null) {
+      setCompanyLat(Number(cData.latitude));
+    }
+    if (cData?.longitude !== undefined && cData?.longitude !== null) {
+      setCompanyLng(Number(cData.longitude));
+    }
+    if (cData?.radiusMeters) {
+      setCompanyRadius(Number(cData.radiusMeters));
+    }
   }, [profileRes, companyRes]);
 
   // Handlers
+  const cleanField = (val?: string | null) => {
+    if (!val) return null;
+    const trimmed = val.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+
   const handlePersonalUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setPersonalMsg({ text: "", type: "" });
     try {
       await api.put("/profile/personal", {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
         gender: formData.gender,
-        dob: formData.dob,
+        dob: cleanField(formData.dob),
         bloodGroup: formData.bloodGroup,
         maritalStatus: formData.maritalStatus,
         nationality: formData.nationality
       });
 
       await api.put("/profile/contact", {
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        postalCode: formData.postalCode,
-        emergencyContactName: formData.emergencyContactName,
-        emergencyContactRelation: formData.emergencyContactRelation,
-        emergencyContactPhone: formData.emergencyContactPhone
+        phone: cleanField(formData.phone),
+        address: cleanField(formData.address),
+        city: cleanField(formData.city),
+        state: cleanField(formData.state),
+        country: cleanField(formData.country),
+        postalCode: cleanField(formData.postalCode),
+        emergencyContactName: cleanField(formData.emergencyContactName),
+        emergencyContactRelation: cleanField(formData.emergencyContactRelation),
+        emergencyContactPhone: cleanField(formData.emergencyContactPhone)
       });
 
       if (canEditCompany) {
@@ -208,13 +238,17 @@ export default function ProfilePage() {
           companyName, 
           companyWebsite, 
           companyAddress, 
-          companyPhone 
+          companyPhone,
+          latitude: companyLat,
+          longitude: companyLng,
+          radiusMeters: companyRadius
         });
       }
 
       updateUser({ firstName: formData.firstName, lastName: formData.lastName, companyName });
       queryClient.invalidateQueries({ queryKey: ["auth_profile_full"] });
       queryClient.invalidateQueries({ queryKey: ["company"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard_workforce_map"] });
       setPersonalMsg({ text: "Profile and company details updated successfully!", type: "success" });
     } catch (err: any) { 
       const fieldErrors = err?.response?.data?.data;
@@ -230,7 +264,12 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsSavingBank(true);
     try {
-      await api.put("/profile/bank", bankData);
+      await api.put("/profile/bank", {
+        bankName: cleanField(bankData.bankName),
+        accountNumber: cleanField(bankData.accountNumber),
+        ifsc: cleanField(bankData.ifsc),
+        upiId: cleanField(bankData.upiId),
+      });
       queryClient.invalidateQueries({ queryKey: ["auth_profile_full"] });
       alert("Bank details updated successfully!");
     } catch (err: any) {
@@ -311,10 +350,19 @@ export default function ProfilePage() {
     setIsSavingCompany(true);
     setCompanyMsg({ text: "", type: "" });
     try {
-      await api.put("/company", { companyName, companyWebsite, companyAddress, companyPhone });
+      await api.put("/company", { 
+        companyName, 
+        companyWebsite, 
+        companyAddress, 
+        companyPhone,
+        latitude: companyLat,
+        longitude: companyLng,
+        radiusMeters: companyRadius
+      });
       updateUser({ companyName });
       queryClient.invalidateQueries({ queryKey: ["company"] });
       queryClient.invalidateQueries({ queryKey: ["auth_profile_full"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard_workforce_map"] });
       setCompanyMsg({ text: "Company details updated successfully!", type: "success" });
     } catch (err: any) {
       const fieldErrors = err?.response?.data?.data;
@@ -325,6 +373,66 @@ export default function ProfilePage() {
       setCompanyMsg({ text: errMsg, type: "error" });
     } finally {
       setIsSavingCompany(false);
+    }
+  };
+
+  const handleLocationPicked = async (location: {
+    address: string;
+    latitude: number;
+    longitude: number;
+    radiusMeters: number;
+  }) => {
+    setCompanyAddress(location.address);
+    setCompanyLat(location.latitude);
+    setCompanyLng(location.longitude);
+    setCompanyRadius(location.radiusMeters);
+    setShowMapPicker(false);
+
+    // Save to localStorage immediately so user never loses their choice
+    try {
+      localStorage.setItem('hrms_company_lat', String(location.latitude));
+      localStorage.setItem('hrms_company_lng', String(location.longitude));
+      localStorage.setItem('hrms_company_radius', String(location.radiusMeters));
+      localStorage.setItem('hrms_company_address', location.address);
+    } catch (e) {}
+
+    // Synchronize directly into this application's database
+    if (canEditCompany) {
+      try {
+        await api.put("/company", {
+          companyName,
+          companyWebsite,
+          companyAddress: location.address,
+          companyPhone,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          radiusMeters: location.radiusMeters,
+        });
+
+        // Optimistically update React Query cache so nothing reverts
+        queryClient.setQueryData(["company"], (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: {
+              ...(old.data || {}),
+              companyAddress: location.address,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              radiusMeters: location.radiusMeters,
+            }
+          };
+        });
+
+        await queryClient.invalidateQueries({ queryKey: ["company"] });
+        await queryClient.invalidateQueries({ queryKey: ["dashboard_workforce_map"] });
+        setPersonalMsg({ 
+          text: `Office headquarters location & geofence radius (${location.radiusMeters}m) updated in application database!`, 
+          type: "success" 
+        });
+      } catch (err: any) {
+        console.error("Auto-sync company office location failed", err);
+      }
     }
   };
 
@@ -635,14 +743,53 @@ export default function ProfilePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold">Headquarters Address</label>
-                      <Input 
-                        disabled={!canEditCompany}
-                        placeholder="Corporate Address"
-                        className="h-9 text-xs" 
-                        value={companyAddress} 
-                        onChange={e => setCompanyAddress(e.target.value)} 
-                      />
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold">Headquarters Address</label>
+                        {canEditCompany && (
+                          <button
+                            type="button"
+                            onClick={() => setShowMapPicker(true)}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                          >
+                            <span className="text-muted-foreground font-normal">or</span>
+                            <MapPin className="w-3 h-3 text-primary" />
+                            <span>Choose on Map</span>
+                          </button>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <Input 
+                          disabled={!canEditCompany}
+                          placeholder="Corporate Address (or pick on map)"
+                          className="h-9 text-xs pr-24" 
+                          value={companyAddress} 
+                          onChange={e => setCompanyAddress(e.target.value)} 
+                        />
+                        {canEditCompany && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowMapPicker(true)}
+                            className="absolute right-1 top-1 h-7 px-2 text-[11px] text-primary hover:bg-primary/10 font-medium flex items-center gap-1"
+                            title="Interactive map location picker"
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-primary" />
+                            Pick on Map
+                          </Button>
+                        )}
+                      </div>
+                      {companyLat !== null && companyLng !== null && (
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-0.5">
+                          <span className="inline-flex items-center gap-1 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            GPS: {companyLat.toFixed(4)}°, {companyLng.toFixed(4)}° ({companyRadius}m Geofence)
+                          </span>
+                          <span className="text-[10px] text-muted-foreground italic">
+                            (Local App Only)
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold">Support Contact Phone</label>
@@ -1001,6 +1148,17 @@ export default function ProfilePage() {
         </TabsContent>
 
       </Tabs>
+
+      {/* Interactive Office Location Picker Map Modal (Local App Only) */}
+      <OfficeLocationPickerModal
+        isOpen={showMapPicker}
+        onClose={() => setShowMapPicker(false)}
+        initialAddress={companyAddress}
+        initialLat={companyLat}
+        initialLng={companyLng}
+        initialRadius={companyRadius}
+        onSelectLocation={handleLocationPicked}
+      />
     </div>
   );
 }

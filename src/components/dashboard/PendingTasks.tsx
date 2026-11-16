@@ -24,7 +24,7 @@ export function PendingTasks({ tasks, loading }: PendingTasksProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-2xl border bg-card shadow-xs p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-md">
+    <div className="rounded-2xl border bg-card shadow-xs p-4 sm:p-5 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md">
       <div className="flex items-center justify-between pb-3 border-b mb-3">
         <h3 className="text-sm font-bold flex items-center gap-2 text-foreground tracking-tight">
           <ClipboardList className="w-4 h-4 text-primary" />

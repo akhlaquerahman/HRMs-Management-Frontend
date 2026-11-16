@@ -58,7 +58,7 @@ export function CelebrationsCard({ upcomingBirthdays = [], workAnniversaries = [
   };
 
   return (
-    <div className="rounded-xl border bg-card shadow-sm p-5 flex flex-col">
+    <div className="rounded-2xl border bg-card shadow-xs p-4 sm:p-5 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md">
       <div className="flex items-center justify-between mb-4 pb-2 border-b">
         <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
           <Gift className="w-5 h-5 text-pink-500" />
@@ -70,10 +70,10 @@ export function CelebrationsCard({ upcomingBirthdays = [], workAnniversaries = [
       </div>
 
       {!hasAny ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-          <PartyPopper className="w-8 h-8 mb-2 text-muted-foreground/30" />
-          <p className="text-sm font-medium">{t('No upcoming celebrations.')}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Birthdays and work anniversaries will automatically appear here.</p>
+        <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground flex-1">
+          <PartyPopper className="w-8 h-8 mb-1.5 text-pink-500/60" />
+          <p className="text-xs font-medium text-foreground">{t('No upcoming celebrations.')}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Birthdays and work anniversaries will automatically appear here.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
