@@ -171,6 +171,8 @@ export function AttendancePunchWidget({ compact = false }: AttendancePunchWidget
     queryClient.invalidateQueries({ queryKey: ['attendance_summary'] });
     queryClient.invalidateQueries({ queryKey: ['attendance_charts'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard_workforce_map'] });
+    queryClient.invalidateQueries({ queryKey: ['workforce_map'] });
   };
 
   if (statusLoading || !statusData) {

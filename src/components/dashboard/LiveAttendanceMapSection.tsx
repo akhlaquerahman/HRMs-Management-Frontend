@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { getSocket } from '@/lib/socket';
 import { 
   MapPin, 
   Users, 
@@ -76,8 +77,26 @@ export function LiveAttendanceMapSection({ deptAttendance = [] }: LiveAttendance
       const res = await api.get('/workforce/map');
       return res.data?.data;
     },
-    refetchInterval: 30000, // Poll every 30s to keep punch-in locations live
+    refetchInterval: 30000, // Poll every 30s as fallback
   });
+
+  // Real-time Socket sync for instantaneous punch-in / punch-out reflection
+  useEffect(() => {
+    const s = getSocket();
+    const handleUpdate = () => {
+      refetch();
+    };
+
+    s.on('attendance:punch-in', handleUpdate);
+    s.on('attendance:punch-out', handleUpdate);
+    s.on('employee:location-updated', handleUpdate);
+
+    return () => {
+      s.off('attendance:punch-in', handleUpdate);
+      s.off('attendance:punch-out', handleUpdate);
+      s.off('employee:location-updated', handleUpdate);
+    };
+  }, [refetch]);
 
   // Fetch company details to ensure profile-selected office headquarters is always synced
   const { data: companyRes } = useQuery({
@@ -134,22 +153,28 @@ export function LiveAttendanceMapSection({ deptAttendance = [] }: LiveAttendance
 
   const rawEmployees: any[] = workforceRes?.workforce || workforceRes?.employees || [];
 
-  // Filter only employees who are present or have punched in today
+  // Filter only employees who are currently punched in (active working session, NOT punched out)
   const presentEmployees: PresentEmployeeLocation[] = useMemo(() => {
     const primaryHQ = offices[0] || null;
 
     return rawEmployees
       .filter((emp: any) => {
-        return (
-          emp.isCurrentlyPunchedIn ||
-          emp.attendanceStatus === 'PRESENT' ||
-          emp.attendanceStatus === 'ON_BREAK' ||
+        // Exclude anyone who has punched out or whose session is not actively open
+        if (!emp.isCurrentlyPunchedIn) return false;
+        if (emp.punchOutTime) return false;
+        if (
+          emp.attendanceStatus === 'PUNCHED_OUT' ||
           emp.attendanceStatus === 'COMPLETED' ||
-          emp.attendanceStatus === 'CURRENTLY_WORKING' ||
-          Boolean(emp.punchInTime) ||
-          Boolean(emp.punchInCoordinates?.latitude) ||
-          Boolean(emp.activeLocation?.latitude)
-        );
+          emp.attendanceStatus === 'ABSENT' ||
+          emp.attendanceStatus === 'NOT_PUNCHED_IN'
+        ) {
+          return false;
+        }
+
+        // Must have an active punch-in timestamp
+        if (!emp.punchInTime) return false;
+
+        return true;
       })
       .map((emp: any) => {
         const empLat = emp.activeLocation?.latitude || emp.punchInCoordinates?.latitude;
@@ -181,9 +206,9 @@ export function LiveAttendanceMapSection({ deptAttendance = [] }: LiveAttendance
           department: emp.department || 'General',
           designation: emp.designation || 'Employee',
           attendanceStatus: emp.attendanceStatus || 'PRESENT',
-          isCurrentlyPunchedIn: Boolean(emp.isCurrentlyPunchedIn),
+          isCurrentlyPunchedIn: true,
           punchInTime: emp.punchInTime,
-          punchOutTime: emp.punchOutTime,
+          punchOutTime: null,
           punchInCoordinates: emp.punchInCoordinates,
           activeLocation: emp.activeLocation,
           geofenceStatus,
@@ -196,12 +221,18 @@ export function LiveAttendanceMapSection({ deptAttendance = [] }: LiveAttendance
       });
   }, [rawEmployees, offices]);
 
-  // Compute live counts
-  const backendKpis = workforceRes?.kpis;
-  const totalPresent = backendKpis?.totalPresentToday ?? presentEmployees.length;
-  const insideOfficeCount = backendKpis?.insideOfficeCount ?? presentEmployees.filter(e => e.geofenceStatus === 'INSIDE_OFFICE').length;
-  const outsideOfficeCount = backendKpis?.outsideOfficeCount ?? presentEmployees.filter(e => e.geofenceStatus === 'OUTSIDE_OFFICE' || e.geofenceStatus === 'UNCERTAIN').length;
-  const liveTrackingCount = backendKpis?.liveTrackingCount ?? presentEmployees.filter(e => e.isLiveTracking).length;
+  // If the previously selected employee punches out and disappears, reset selected state
+  useEffect(() => {
+    if (selectedEmployee && !presentEmployees.some((e) => e.id === selectedEmployee.id)) {
+      setSelectedEmployee(null);
+    }
+  }, [presentEmployees, selectedEmployee]);
+
+  // Compute live counts strictly from currently active present workforce
+  const totalPresent = presentEmployees.length;
+  const insideOfficeCount = presentEmployees.filter(e => e.geofenceStatus === 'INSIDE_OFFICE').length;
+  const outsideOfficeCount = presentEmployees.filter(e => e.geofenceStatus === 'OUTSIDE_OFFICE' || e.geofenceStatus === 'UNCERTAIN').length;
+  const liveTrackingCount = presentEmployees.filter(e => e.isLiveTracking).length;
   const gpsVerifiedCount = presentEmployees.filter(
     e => Boolean(e.punchInCoordinates?.latitude || e.activeLocation?.latitude)
   ).length;
@@ -658,12 +689,12 @@ export function LiveAttendanceMapSection({ deptAttendance = [] }: LiveAttendance
                 <MapPin className="w-8 h-8 text-muted-foreground/40" />
                 <p className="text-xs font-semibold text-foreground">
                   {presentEmployees.length === 0
-                    ? 'No employees have punched in today yet.'
+                    ? 'No employees currently punched in.'
                     : 'No matching employees found.'}
                 </p>
-                <p className="text-[11px] text-muted-foreground max-w-[220px]">
+                <p className="text-[11px] text-muted-foreground max-w-[240px]">
                   {presentEmployees.length === 0
-                    ? 'As soon as employees punch in with GPS, their exact location and coordinates will appear here.'
+                    ? 'Employees appear here on the map while actively punched in, and disappear when they punch out.'
                     : 'Try adjusting your search or status filter.'}
                 </p>
                 {presentEmployees.length === 0 && (
