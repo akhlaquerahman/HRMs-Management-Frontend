@@ -159,22 +159,36 @@ export function LiveAttendanceMapSection({ deptAttendance = [] }: LiveAttendance
 
     return rawEmployees
       .filter((emp: any) => {
-        // Exclude anyone who has punched out or whose session is not actively open
+        // 1. Must be marked as currently punched in
         if (!emp.isCurrentlyPunchedIn) return false;
-        if (emp.punchOutTime) return false;
+
+        // 2. If status is explicitly punched out, completed, or absent, exclude
+        const status = String(emp.attendanceStatus || '').toUpperCase();
         if (
-          emp.attendanceStatus === 'PUNCHED_OUT' ||
-          emp.attendanceStatus === 'COMPLETED' ||
-          emp.attendanceStatus === 'ABSENT' ||
-          emp.attendanceStatus === 'NOT_PUNCHED_IN'
+          status === 'PUNCHED_OUT' ||
+          status === 'COMPLETED' ||
+          status === 'ABSENT' ||
+          status === 'NOT_PUNCHED_IN'
         ) {
           return false;
         }
 
-        // Must have an active punch-in timestamp
-        if (!emp.punchInTime) return false;
+        // 3. If punchOutTime exists, it only counts as punched out if it is NEWER than punchInTime
+        if (emp.punchOutTime && emp.punchInTime) {
+          const outMs = new Date(emp.punchOutTime).getTime();
+          const inMs = new Date(emp.punchInTime).getTime();
+          if (!isNaN(outMs) && !isNaN(inMs) && outMs >= inMs) {
+            return false;
+          }
+        }
 
-        return true;
+        // 4. Must have either a punch-in timestamp or GPS coordinates
+        const hasCoords = Boolean(
+          (emp.activeLocation?.latitude && emp.activeLocation?.longitude) ||
+          (emp.punchInCoordinates?.latitude && emp.punchInCoordinates?.longitude)
+        );
+
+        return Boolean(emp.punchInTime || hasCoords);
       })
       .map((emp: any) => {
         const empLat = emp.activeLocation?.latitude || emp.punchInCoordinates?.latitude;
